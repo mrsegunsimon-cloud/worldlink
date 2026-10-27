@@ -142,9 +142,9 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
       case 'app-not-authorized':
         return 'This app build is not approved for phone login yet.';
       case 'operation-not-allowed':
-        return 'Email login is not switched on in Firebase yet.';
+        return 'This sign-in method is blocked in Firebase (${e.message ?? ''}).';
       default:
-        return 'Could not complete that (${e.code}).';
+        return 'Could not complete that (${e.code}): ${e.message ?? ''}';
     }
   }
 
