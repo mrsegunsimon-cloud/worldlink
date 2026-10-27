@@ -1,0 +1,600 @@
+{
+ "regions": [
+  {
+   "id": "all",
+   "name": "All"
+  },
+  {
+   "id": "af",
+   "name": "Africa"
+  },
+  {
+   "id": "eu",
+   "name": "Europe"
+  },
+  {
+   "id": "as",
+   "name": "Asia & Middle East"
+  },
+  {
+   "id": "am",
+   "name": "Americas"
+  },
+  {
+   "id": "oc",
+   "name": "Oceania"
+  }
+ ],
+ "places": [
+  {
+   "key": "lagos",
+   "name": "Lagos",
+   "country": "Nigeria",
+   "region": "af",
+   "blurb": "Nigeria's biggest city: music, markets, beaches and nightlife.",
+   "guide": "https://en.wikivoyage.org/wiki/Lagos",
+   "credit": "FrankvEck",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "accra",
+   "name": "Accra",
+   "country": "Ghana",
+   "region": "af",
+   "blurb": "Ghana's coastal capital with beaches, history and street food.",
+   "guide": "https://en.wikivoyage.org/wiki/Accra",
+   "credit": "Rjruiziii",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "capetown",
+   "name": "Cape Town",
+   "country": "South Africa",
+   "region": "af",
+   "blurb": "Table Mountain, beaches and wine country.",
+   "guide": "https://en.wikivoyage.org/wiki/Cape_Town",
+   "credit": "Der Berzerker from Washington, DC, USA",
+   "license": "CC BY-SA 2.0"
+  },
+  {
+   "key": "zanzibar",
+   "name": "Zanzibar",
+   "country": "Tanzania",
+   "region": "af",
+   "blurb": "Island off Tanzania with white beaches and historic Stone Town.",
+   "guide": "https://en.wikivoyage.org/wiki/Zanzibar",
+   "credit": "Mbz1",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "marrakech",
+   "name": "Marrakech",
+   "country": "Morocco",
+   "region": "af",
+   "blurb": "Old city of souks, gardens and palaces.",
+   "guide": "https://en.wikivoyage.org/wiki/Marrakech",
+   "credit": "YoTuT from United States",
+   "license": "CC BY 2.0"
+  },
+  {
+   "key": "nairobi",
+   "name": "Nairobi",
+   "country": "Kenya",
+   "region": "af",
+   "blurb": "Kenya's capital and the gateway to safari parks.",
+   "guide": "https://en.wikivoyage.org/wiki/Nairobi",
+   "credit": "Daniel Case",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "cairo",
+   "name": "Cairo",
+   "country": "Egypt",
+   "region": "af",
+   "blurb": "Egypt's capital, close to the Pyramids of Giza.",
+   "guide": "https://en.wikivoyage.org/wiki/Cairo",
+   "credit": "Wael El Sisi",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "pyramids",
+   "name": "Pyramids of Giza",
+   "country": "Egypt",
+   "region": "af",
+   "blurb": "The last surviving wonder of the ancient world.",
+   "guide": "https://en.wikivoyage.org/wiki/Giza",
+   "credit": "KennyOMG",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "victoriafalls",
+   "name": "Victoria Falls",
+   "country": "Zambia / Zimbabwe",
+   "region": "af",
+   "blurb": "One of the largest waterfalls on Earth, locally called the Smoke that Thunders.",
+   "guide": "https://en.wikivoyage.org/wiki/Victoria_Falls",
+   "credit": "Diego Delso",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "serengeti",
+   "name": "Serengeti",
+   "country": "Tanzania",
+   "region": "af",
+   "blurb": "Endless plains and the yearly wildebeest migration.",
+   "guide": "https://en.wikivoyage.org/wiki/Serengeti_National_Park",
+   "credit": "Bjørn Christian Tørrissen",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "kilimanjaro",
+   "name": "Mount Kilimanjaro",
+   "country": "Tanzania",
+   "region": "af",
+   "blurb": "Africa's highest mountain, rising above the savanna.",
+   "guide": "https://en.wikivoyage.org/wiki/Kilimanjaro_National_Park",
+   "credit": "Sergey Pesterev",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "maasaimara",
+   "name": "Maasai Mara",
+   "country": "Kenya",
+   "region": "af",
+   "blurb": "Famous safari reserve for lions, elephants and big herds.",
+   "guide": "https://en.wikivoyage.org/wiki/Maasai_Mara_National_Reserve",
+   "credit": "Danijel Mihajlovic",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "lalibela",
+   "name": "Lalibela",
+   "country": "Ethiopia",
+   "region": "af",
+   "blurb": "Churches carved down into solid rock, still used for worship.",
+   "guide": "https://en.wikivoyage.org/wiki/Lalibela",
+   "credit": "Sailko",
+   "license": "CC BY 3.0"
+  },
+  {
+   "key": "sahara",
+   "name": "Sahara Desert",
+   "country": "North Africa",
+   "region": "af",
+   "blurb": "The world's largest hot desert, with golden dunes and camel treks.",
+   "guide": "https://en.wikivoyage.org/wiki/Sahara",
+   "credit": "Bjørn Christian Tørrissen",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "seychelles",
+   "name": "Seychelles",
+   "country": "Seychelles",
+   "region": "af",
+   "blurb": "Granite boulders, white sand and clear water in the Indian Ocean.",
+   "guide": "https://en.wikivoyage.org/wiki/Seychelles",
+   "credit": "A.Savin",
+   "license": "FAL"
+  },
+  {
+   "key": "london",
+   "name": "London",
+   "country": "United Kingdom",
+   "region": "eu",
+   "blurb": "Museums, markets and royal landmarks in England.",
+   "guide": "https://en.wikivoyage.org/wiki/London",
+   "credit": "Ilya Grigorik",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "paris",
+   "name": "Paris",
+   "country": "France",
+   "region": "eu",
+   "blurb": "Art, cafes and river walks.",
+   "guide": "https://en.wikivoyage.org/wiki/Paris",
+   "credit": "Yann Caradec from Paris, France",
+   "license": "CC BY-SA 2.0"
+  },
+  {
+   "key": "eiffel",
+   "name": "Eiffel Tower",
+   "country": "France",
+   "region": "eu",
+   "blurb": "The iron tower on the Champ de Mars, a symbol of Paris.",
+   "guide": "https://en.wikivoyage.org/wiki/Paris/7th_arrondissement",
+   "credit": "Benh LIEU SONG",
+   "license": "Public domain"
+  },
+  {
+   "key": "colosseum",
+   "name": "Colosseum",
+   "country": "Italy",
+   "region": "eu",
+   "blurb": "Rome's ancient arena, nearly 2,000 years old.",
+   "guide": "https://en.wikivoyage.org/wiki/Rome",
+   "credit": "FeaturedPics",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "venice",
+   "name": "Venice",
+   "country": "Italy",
+   "region": "eu",
+   "blurb": "A city of canals, bridges and islands.",
+   "guide": "https://en.wikivoyage.org/wiki/Venice",
+   "credit": "kallerna",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "santorini",
+   "name": "Santorini",
+   "country": "Greece",
+   "region": "eu",
+   "blurb": "White villages on volcanic cliffs above the Aegean Sea.",
+   "guide": "https://en.wikivoyage.org/wiki/Santorini",
+   "credit": "TomasEE",
+   "license": "CC BY 3.0"
+  },
+  {
+   "key": "barcelona",
+   "name": "Sagrada Família",
+   "country": "Spain",
+   "region": "eu",
+   "blurb": "Gaudí's unfinished basilica in Barcelona.",
+   "guide": "https://en.wikivoyage.org/wiki/Barcelona",
+   "credit": "Canaan",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "swissalps",
+   "name": "Matterhorn",
+   "country": "Switzerland",
+   "region": "eu",
+   "blurb": "The pyramid-shaped peak above Zermatt in the Swiss Alps.",
+   "guide": "https://en.wikivoyage.org/wiki/Zermatt",
+   "credit": "Photo: chil, on Camptocamp.org Derivative work:Zacharie Gros",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "istanbul",
+   "name": "Hagia Sophia",
+   "country": "Turkey",
+   "region": "eu",
+   "blurb": "Istanbul's great domed landmark from the sixth century.",
+   "guide": "https://en.wikivoyage.org/wiki/Istanbul",
+   "credit": "Adli Wahid",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "prague",
+   "name": "Prague",
+   "country": "Czechia",
+   "region": "eu",
+   "blurb": "Castle, old bridges and red rooftops by the river.",
+   "guide": "https://en.wikivoyage.org/wiki/Prague",
+   "credit": "Moyan Brenn from Italy",
+   "license": "CC BY 2.0"
+  },
+  {
+   "key": "amsterdam",
+   "name": "Amsterdam",
+   "country": "Netherlands",
+   "region": "eu",
+   "blurb": "Canals, bikes and world-class museums.",
+   "guide": "https://en.wikivoyage.org/wiki/Amsterdam",
+   "credit": "Andrés Barrios",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "lisbon",
+   "name": "Lisbon",
+   "country": "Portugal",
+   "region": "eu",
+   "blurb": "Hilltop neighbourhoods, trams and views of the Tagus.",
+   "guide": "https://en.wikivoyage.org/wiki/Lisbon",
+   "credit": "Vitor Oliveira from Torres Vedras, PORTUGAL",
+   "license": "CC BY-SA 2.0"
+  },
+  {
+   "key": "dubai",
+   "name": "Dubai",
+   "country": "United Arab Emirates",
+   "region": "as",
+   "blurb": "Skyscrapers, desert trips and shopping.",
+   "guide": "https://en.wikivoyage.org/wiki/Dubai",
+   "credit": "Francisco Anzola",
+   "license": "CC-BY-2.0"
+  },
+  {
+   "key": "burj",
+   "name": "Burj Khalifa",
+   "country": "United Arab Emirates",
+   "region": "as",
+   "blurb": "The world's tallest building, in Dubai.",
+   "guide": "https://en.wikivoyage.org/wiki/Dubai",
+   "credit": "imran shahabuddin",
+   "license": "CC BY 2.0"
+  },
+  {
+   "key": "petra",
+   "name": "Petra",
+   "country": "Jordan",
+   "region": "as",
+   "blurb": "A city carved into rose-coloured rock by the Nabataeans.",
+   "guide": "https://en.wikivoyage.org/wiki/Petra",
+   "credit": "Azurfrog",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "taj",
+   "name": "Taj Mahal",
+   "country": "India",
+   "region": "as",
+   "blurb": "The white marble tomb in Agra, built in the 1600s.",
+   "guide": "https://en.wikivoyage.org/wiki/Agra",
+   "credit": "Yann; edited by Jim Carter",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "greatwall",
+   "name": "Great Wall of China",
+   "country": "China",
+   "region": "as",
+   "blurb": "Ancient walls that follow ridges for thousands of kilometres.",
+   "guide": "https://en.wikivoyage.org/wiki/Great_Wall_of_China",
+   "credit": "Severin.stalder",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "angkor",
+   "name": "Angkor Wat",
+   "country": "Cambodia",
+   "region": "as",
+   "blurb": "The largest religious monument in the world.",
+   "guide": "https://en.wikivoyage.org/wiki/Angkor",
+   "credit": "Bjørn Christian Tørrissen",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "bali",
+   "name": "Bali",
+   "country": "Indonesia",
+   "region": "as",
+   "blurb": "Temples, rice terraces and surf beaches. Tanah Lot is shown.",
+   "guide": "https://en.wikivoyage.org/wiki/Bali",
+   "credit": "Grayswoodsurrey",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "maldives",
+   "name": "Maldives",
+   "country": "Maldives",
+   "region": "as",
+   "blurb": "Low coral islands in the Indian Ocean, famous for resorts and reefs. Malé is shown.",
+   "guide": "https://en.wikivoyage.org/wiki/Maldives",
+   "credit": "Shahee Ilyas",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "fuji",
+   "name": "Mount Fuji",
+   "country": "Japan",
+   "region": "as",
+   "blurb": "Japan's highest and most famous mountain.",
+   "guide": "https://en.wikivoyage.org/wiki/Mount_Fuji",
+   "credit": "Suicasmo",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "tokyo",
+   "name": "Tokyo",
+   "country": "Japan",
+   "region": "as",
+   "blurb": "Food, technology and old temples.",
+   "guide": "https://en.wikivoyage.org/wiki/Tokyo",
+   "credit": "Morio",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "halong",
+   "name": "Ha Long Bay",
+   "country": "Vietnam",
+   "region": "as",
+   "blurb": "Green limestone islands rising from calm water.",
+   "guide": "https://en.wikivoyage.org/wiki/Ha_Long_Bay",
+   "credit": "Taewangkorea",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "singapore",
+   "name": "Singapore",
+   "country": "Singapore",
+   "region": "as",
+   "blurb": "A garden city-state with a modern skyline. Marina Bay is shown.",
+   "guide": "https://en.wikivoyage.org/wiki/Singapore",
+   "credit": "Supanut Arunoprayote",
+   "license": "CC BY 4.0"
+  },
+  {
+   "key": "seoul",
+   "name": "Seoul",
+   "country": "South Korea",
+   "region": "as",
+   "blurb": "Palaces, markets and mountains in the middle of a big city.",
+   "guide": "https://en.wikivoyage.org/wiki/Seoul",
+   "credit": "서울관광 아카이브",
+   "license": "KOGL Type 1"
+  },
+  {
+   "key": "nyc",
+   "name": "New York City",
+   "country": "United States",
+   "region": "am",
+   "blurb": "Broadway, Central Park and a world-famous skyline.",
+   "guide": "https://en.wikivoyage.org/wiki/New_York_City",
+   "credit": "Dllu",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "grandcanyon",
+   "name": "Grand Canyon",
+   "country": "United States",
+   "region": "am",
+   "blurb": "A vast canyon cut by the Colorado River in Arizona.",
+   "guide": "https://en.wikivoyage.org/wiki/Grand_Canyon_National_Park",
+   "credit": "Lennart Sikkema",
+   "license": "CC BY 3.0"
+  },
+  {
+   "key": "niagara",
+   "name": "Niagara Falls",
+   "country": "Canada / United States",
+   "region": "am",
+   "blurb": "Huge waterfalls on the border between Canada and the US.",
+   "guide": "https://en.wikivoyage.org/wiki/Niagara_Falls",
+   "credit": "Saffron Blaze",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "goldengate",
+   "name": "Golden Gate Bridge",
+   "country": "United States",
+   "region": "am",
+   "blurb": "San Francisco's red suspension bridge.",
+   "guide": "https://en.wikivoyage.org/wiki/San_Francisco",
+   "credit": "Frank Schulenburg",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "banff",
+   "name": "Banff National Park",
+   "country": "Canada",
+   "region": "am",
+   "blurb": "Turquoise lakes and snowy peaks in the Rocky Mountains.",
+   "guide": "https://en.wikivoyage.org/wiki/Banff_National_Park",
+   "credit": "Gorgo",
+   "license": "Public domain"
+  },
+  {
+   "key": "chichen",
+   "name": "Chichén Itzá",
+   "country": "Mexico",
+   "region": "am",
+   "blurb": "A great Maya pyramid in the Yucatán.",
+   "guide": "https://en.wikivoyage.org/wiki/Chichen_Itza",
+   "credit": "Daniel Schwen",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "havana",
+   "name": "Havana",
+   "country": "Cuba",
+   "region": "am",
+   "blurb": "Old colonial streets, classic cars and the Malecón seafront.",
+   "guide": "https://en.wikivoyage.org/wiki/Havana",
+   "credit": "RenaatPeeters",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "machupicchu",
+   "name": "Machu Picchu",
+   "country": "Peru",
+   "region": "am",
+   "blurb": "An Inca city high in the Andes.",
+   "guide": "https://en.wikivoyage.org/wiki/Machu_Picchu",
+   "credit": "Draceane",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "rio",
+   "name": "Rio de Janeiro",
+   "country": "Brazil",
+   "region": "am",
+   "blurb": "Christ the Redeemer above beaches, hills and the sea.",
+   "guide": "https://en.wikivoyage.org/wiki/Rio_de_Janeiro",
+   "credit": "Arne Müseler",
+   "license": "CC BY-SA 3.0 de"
+  },
+  {
+   "key": "iguazu",
+   "name": "Iguazú Falls",
+   "country": "Argentina / Brazil",
+   "region": "am",
+   "blurb": "A wall of waterfalls in the rainforest.",
+   "guide": "https://en.wikivoyage.org/wiki/Iguazu_Falls",
+   "credit": "Mariordo (Mario Roberto Durán Ortiz)",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "patagonia",
+   "name": "Patagonia",
+   "country": "Chile",
+   "region": "am",
+   "blurb": "Granite towers and glaciers in Torres del Paine.",
+   "guide": "https://en.wikivoyage.org/wiki/Torres_del_Paine_National_Park",
+   "credit": "Natalia Reyes Escobar",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "galapagos",
+   "name": "Galápagos Islands",
+   "country": "Ecuador",
+   "region": "am",
+   "blurb": "Islands with wildlife found nowhere else. Sea lions are everywhere.",
+   "guide": "https://en.wikivoyage.org/wiki/Galápagos_Islands",
+   "credit": "Diego Delso",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "sydney",
+   "name": "Sydney",
+   "country": "Australia",
+   "region": "oc",
+   "blurb": "The Opera House and harbour.",
+   "guide": "https://en.wikivoyage.org/wiki/Sydney",
+   "credit": "BAVhah",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "greatbarrier",
+   "name": "Whitsundays",
+   "country": "Australia",
+   "region": "oc",
+   "blurb": "White sand and clear water beside the Great Barrier Reef. Whitehaven Beach is shown.",
+   "guide": "https://en.wikivoyage.org/wiki/Whitsunday_Islands",
+   "credit": "Slug69",
+   "license": "CC BY-SA 2.0"
+  },
+  {
+   "key": "uluru",
+   "name": "Uluru",
+   "country": "Australia",
+   "region": "oc",
+   "blurb": "The great red rock of central Australia, sacred to its Aboriginal owners.",
+   "guide": "https://en.wikivoyage.org/wiki/Uluru-Kata_Tjuta_National_Park",
+   "credit": "Ek2030372672",
+   "license": "CC BY-SA 4.0"
+  },
+  {
+   "key": "milford",
+   "name": "Milford Sound",
+   "country": "New Zealand",
+   "region": "oc",
+   "blurb": "A fjord of tall cliffs and waterfalls in Fiordland.",
+   "guide": "https://en.wikivoyage.org/wiki/Milford_Sound",
+   "credit": "Maros M r a z (Maros)",
+   "license": "CC BY-SA 3.0"
+  },
+  {
+   "key": "bora",
+   "name": "Bora Bora",
+   "country": "French Polynesia",
+   "region": "oc",
+   "blurb": "A lagoon island with an old volcano and overwater bungalows.",
+   "guide": "https://en.wikivoyage.org/wiki/Bora_Bora",
+   "credit": "Taka-0905, Alvaro qc",
+   "license": "CC BY-SA 3.0"
+  }
+ ]
+}

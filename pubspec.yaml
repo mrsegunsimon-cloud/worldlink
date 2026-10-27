@@ -1,0 +1,26 @@
+name: worldlink
+description: WorldLink - videos, music, travel, sports and daily life in one app.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  video_player: ^2.9.2
+  just_audio: ^0.9.40
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/photos/
+    - assets/media/
+    - assets/data/
