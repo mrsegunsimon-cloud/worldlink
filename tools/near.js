@@ -7,16 +7,18 @@ const NP={
  airport:["Airports","✈️",'["aeroway"="aerodrome"]',100000],
  train:["Train stations","🚆",'["railway"="station"]',40000],
  bus:["Bus terminals","🚌",'["amenity"="bus_station"]',25000],
- atm:["ATMs","🏧",'["amenity"="atm"]',3000]};
-const NPS=[["restaurant","Restaurants","Where to eat near you"],["park","Parks","Green spaces to relax in"],["attraction","Attractions","Things to see and do"],["hotel","Hotels","Places to stay"],["airport","Airports","Flights and transfers"],["train","Train stations","Rail travel"],["bus","Bus terminals","Buses and coaches"],["atm","ATMs","Cash machines nearby"]];
+ atm:["ATMs","🏧",'["amenity"="atm"]',3000],
+ beach:["Beaches","🏖️",'["natural"="beach"]',40000]};
+const NPH={beach:"greatbarrier"};
+const NPS=[["restaurant","Restaurants","Where to eat near you"],["park","Parks","Green spaces to relax in"],["attraction","Attractions","Things to see and do"],["hotel","Hotels","Places to stay"],["airport","Airports","Flights and transfers"],["train","Train stations","Rail travel"],["bus","Bus terminals","Buses and coaches"],["atm","ATMs","Cash machines nearby"],["beach","Beaches","Sand, sea and sunsets"]];
 function nearGrid(){
- return `<p class="note" style="margin:10px 0 0">Tap a place type to list places near you. Tap one to open it in Maps.</p><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${NPS.map(it=>{const g=GRAD[hsh(it[1])%GRAD.length];return `<a href="#" data-np="${it[0]}" style="display:block;color:inherit;text-decoration:none">${PH[it[0]]?`<img src="${PH[it[0]]}" alt="${esc(it[1])}" loading="lazy" style="display:block;width:100%;height:104px;object-fit:cover;border-radius:14px">`:`<div style="height:104px;border-radius:14px;background:linear-gradient(160deg,${g[0]},${g[1]});display:grid;place-items:center;font-size:48px">${NP[it[0]][1]}</div>`}<div style="font-weight:700;margin-top:6px">${esc(it[1])}</div><div class="mute" style="font-size:13px;line-height:1.3">${esc(it[2])}</div></a>`}).join("")}</div>`;
+ return `<p class="note" style="margin:10px 0 0">Tap a place type to list places near you. Tap one to open it in Maps.</p><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${NPS.map(it=>{const g=GRAD[hsh(it[1])%GRAD.length];const pk=PH[it[0]]?it[0]:NPH[it[0]];return `<a href="#" data-np="${it[0]}" style="display:block;color:inherit;text-decoration:none${NPS.length%2&&it===NPS[NPS.length-1]?";grid-column:span 2":""}">${PH[pk]?`<img src="${PH[pk]}" alt="${esc(it[1])}" loading="lazy" style="display:block;width:100%;height:104px;object-fit:cover;border-radius:14px">`:`<div style="height:104px;border-radius:14px;background:linear-gradient(160deg,${g[0]},${g[1]});display:grid;place-items:center;font-size:48px">${NP[it[0]][1]}</div>`}<div style="font-weight:700;margin-top:6px">${esc(it[1])}</div><div class="mute" style="font-size:13px;line-height:1.3">${esc(it[2])}</div></a>`}).join("")}</div>`;
 }
 async function netGet(url,sec){
  sec=sec||25;
  const job=window.WLAuth?WLN("get",{url:url,timeout:sec}).then(r=>{if(r.error)throw new Error(r.error);return r.body}):fetch(url).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.text()});
  return Promise.race([job,new Promise((_,no)=>setTimeout(()=>no(new Error("The places service is slow right now.")),(sec+3)*1000))])}
-const NQ={restaurant:"restaurant",park:"park",attraction:"tourist attraction",hotel:"hotel",airport:"airport",train:"train station",bus:"bus station",atm:"atm"};
+const NQ={restaurant:"restaurant",park:"park",attraction:"tourist attraction",hotel:"hotel",airport:"airport",train:"train station",bus:"bus station",atm:"atm",beach:"beach"};
 async function overpassRows(key,C,loc,rad){
  const q=`[out:json][timeout:15];nwr${C[2]}(around:${rad},${loc.lat},${loc.lng});out center 60;`;
  const hosts=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
@@ -54,7 +56,7 @@ async function nearList(key,loc){
    rows.push({name,la,lo,d:npDist(loc.lat,loc.lng,la,lo),adr,ph:t.phone||t["contact:phone"]||"",oh:t.opening_hours||""})});
   rows.sort((a,b)=>a.d-b.d);const top=rows.slice(0,40);
   const li=top.map((r,i)=>`<div style="display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)"><button data-nr="${i}" style="flex:1;min-width:0;text-align:left;color:inherit;padding:0"><b>${C[1]} ${esc(r.name)}</b><div class="mute" style="font-size:13px">${npFmt(r.d)} away${r.adr?" · "+esc(r.adr):""}</div>${r.oh?`<div class="mute" style="font-size:12px">Hours: ${esc(r.oh.slice(0,60))}</div>`:""}</button><button class="btn ghost" data-nd="${i}" style="width:auto;margin:0;padding:8px 12px">Directions</button></div>`).join("");
-  open(head(top.length+" found within "+npFmt(rad/1000)+" of "+esc(loc.label))+(top.length?li:'<p class="mute" style="padding:20px 0">Nothing found nearby. Try another city.</p>')+`<button class="btn ghost" id="npc">Search another city</button><p class="note">Places come from OpenStreetMap contributors. Tap a place to open it in Maps.</p><button class="btn ghost" id="x">Close</button>`);
+  open(head(top.length+" found, up to "+npFmt(top.length?Math.max(...top.map(r=>r.d)):0)+" from "+esc(loc.label))+(top.length?li:'<p class="mute" style="padding:20px 0">Nothing found nearby. Try another city.</p>')+`<button class="btn ghost" id="npc">Search another city</button><p class="note">Places come from OpenStreetMap contributors. Tap a place to open it in Maps.</p><button class="btn ghost" id="x">Close</button>`);
   $("#npb").onclick=back;
   $("#panel").querySelectorAll("[data-nr]").forEach(b=>b.onclick=()=>{const r=top[+b.dataset.nr];openUrl("https://www.google.com/maps/search/?api=1&query="+r.la+","+r.lo)});
   $("#panel").querySelectorAll("[data-nd]").forEach(b=>b.onclick=()=>{const r=top[+b.dataset.nd];openUrl("https://www.google.com/maps/dir/?api=1&destination="+r.la+","+r.lo)});
