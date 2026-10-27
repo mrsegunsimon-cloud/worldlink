@@ -9,3 +9,4 @@ android/
 ios/
 test/
 pubspec.lock
+web/
