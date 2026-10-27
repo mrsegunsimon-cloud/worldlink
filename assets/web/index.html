@@ -476,33 +476,44 @@ function inbox(){
  const seen=new Set(DMS.map(d=>dmOther(d).n));
  const story=(att,inner,l)=>`<button ${att} style="flex:none;width:76px;text-align:center;color:inherit">${inner}<span style="display:block;font-size:13px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l)}</span></button>`;
  const ring=n=>`<div style="width:68px;height:68px;border-radius:50%;padding:3px;margin:0 auto;background:linear-gradient(45deg,#1E6FFF,#FF2D55)"><div class="av" style="width:100%;height:100%;border:3px solid var(--card);font-size:22px;background:${COL[n.charCodeAt(0)%4]}">${esc(n[0].toUpperCase())}</div></div>`;
- openFull(`<div class="hd"><button id="qf" aria-label="Find friends">👥</button><b style="font-size:20px">Inbox</b><button id="qs" aria-label="Search">🔍</button></div><div class="pgx"><div style="display:flex;gap:6px;overflow-x:auto;padding:6px 12px 14px">${story('id="sa"','<div style="width:68px;height:68px;border-radius:50%;margin:0 auto;border:1px solid var(--line);display:grid;place-items:center;font-size:30px;color:var(--acc)">+</div>',"Create")}${PEOPLE.slice(0,5).map(p=>story('data-st="1"',ring(p[0]),p[0])).join("")}</div><div style="border-top:8px solid var(--bg)"></div>${row('id="qa"',circ("#FF2D55","⚡"),"Activity & new followers","Likes, comments and new followers",nf?`<span class="bdg">${nf}</span>`:"",true)}${row('id="gc"',circ("#7C5CFF","💬"),"Group chats","Chat with several people at once","")}${row('id="qw"',circ("#0B1646","🌍"),"WorldLink","Welcome to WorldLink","")}${DMS.map(d=>{const o=dmOther(d);return row(`data-dm="${esc(d.id)}"`,av(o.n||"?"),o.n||"user",d.m.length?d.m[d.m.length-1].t.slice(0,50):"Say hi to "+(o.n||"them"),"")}).join("")}${PEOPLE.filter(p=>!seen.has(p[0])).map(p=>row(`data-c="${p[0]}"`,av(p[0]),p[0],"Say hi to "+p[0],"")).join("")}</div>`);
+ openFull(`<div class="hd"><button id="qf" aria-label="Find friends">👥</button><b style="font-size:20px">Inbox</b><button id="qs" aria-label="Search">🔍</button></div><div class="pgx"><div style="display:flex;gap:6px;overflow-x:auto;padding:6px 12px 14px">${story('id="sa"','<div style="width:68px;height:68px;border-radius:50%;margin:0 auto;border:1px solid var(--line);display:grid;place-items:center;font-size:30px;color:var(--acc)">+</div>',"Create")}${PEOPLE.slice(0,5).map(p=>story('data-st="1"',ring(p[0]),p[0])).join("")}</div><div style="border-top:8px solid var(--bg)"></div>${row('id="qa"',circ("#FF2D55","⚡"),"Activity & new followers","Likes, comments and new followers",nf?`<span class="bdg">${nf}</span>`:"",true)}${row('id="gc"',circ("#7C5CFF","💬"),"Group chats","Chat with several people at once","")}${row('id="qw"',circ("#0B1646","🌍"),"WorldLink","Welcome to WorldLink","")}${DMS.map(d=>{const o=dmOther(d);return row(`data-dm="${esc(d.id)}"`,av(o.n||"?"),o.n||"user",d.m.length?(x=>x.t?x.t.slice(0,50):x.img?"📷 Photo":"🎥 Video")(d.m[d.m.length-1]):"Say hi to "+(o.n||"them"),"")}).join("")}${PEOPLE.filter(p=>!seen.has(p[0])).map(p=>row(`data-c="${p[0]}"`,av(p[0]),p[0],"Say hi to "+p[0],"")).join("")}</div>`);
  $("#gc").onclick=groupsScreen;$("#qa").onclick=()=>notifs();$("#qf").onclick=()=>friends();$("#qs").onclick=searchAll;$("#sa").onclick=stories;
  $("#panel").querySelectorAll("[data-st]").forEach(b=>b.onclick=stories);
  $("#qw").onclick=()=>{open(`<h2>WorldLink</h2><p>Welcome to WorldLink. Share videos, follow friends, chat, follow sports and find help nearby, all in one app.</p><button class="btn" id="bk">Back to Inbox</button>`);$("#bk").onclick=inbox};
  $("#panel").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>chat(b.dataset.c));
  $("#panel").querySelectorAll("[data-dm]").forEach(b=>b.onclick=()=>dmOpenById(b.dataset.dm));
 }
+function vdb(){return new Promise((ok,no)=>{const r=indexedDB.open("wl-vid",1);r.onupgradeneeded=()=>r.result.createObjectStore("v");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+async function vidPut(b){const d=await vdb(),id="vd"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);await new Promise((ok,no)=>{const t=d.transaction("v","readwrite");t.objectStore("v").put(b,id);t.oncomplete=ok;t.onerror=()=>no(t.error)});return id}
+async function vidGet(id){try{const d=await vdb();return await new Promise(ok=>{const q=d.transaction("v").objectStore("v").get(id);q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}}
+async function hydVid(){for(const v of document.querySelectorAll("[data-vid]")){if(v.getAttribute("src"))continue;const b=await vidGet(v.dataset.vid);if(b)v.src=URL.createObjectURL(b);else v.outerHTML='<span class="mute">Video not available on this phone</span>'}}
+const bodyOf=b=>b.img?`<img src="${b.img}" alt="Photo" style="display:block;max-width:100%;border-radius:12px">`:b.vid?`<video data-vid="${esc(b.vid)}" controls playsinline preload="metadata" style="display:block;max-width:100%;border-radius:12px;background:#000"></video>`:esc(b.t||"");
 function wireSend(){
  const b=$("#ms"),i=$("#mi");if(!b||!i)return;
- i.setAttribute("enterkeyhint","send");
+i.setAttribute("enterkeyhint","send");
+ const at=document.createElement("button");at.id="at";at.setAttribute("aria-label","Send a photo or video");at.textContent="📎";at.style.cssText="font-size:24px;padding:0 6px;flex:none";i.parentNode.insertBefore(at,i);
+ const fi=document.createElement("input");fi.type="file";fi.accept="image/*,video/*";fi.hidden=true;i.parentNode.appendChild(fi);
+ at.onclick=()=>fi.click();
+ fi.onchange=async()=>{const f=fi.files[0];fi.value="";if(!f)return;const n=$("#cin .note");
+  try{if(f.type.startsWith("image/")){window.__sendMsg({img:await cPhoto(f,720)})}else if(f.type.startsWith("video/")){if(f.size>25*1048576){n.textContent="That video is over 25 MB.";return}n.textContent="Sending…";window.__sendMsg({vid:await vidPut(f)})}else n.textContent="Choose a photo or a video."}catch(e){n.textContent="That file could not be sent."}};
+ hydVid();
  i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();b.click()}});
  b.style.touchAction="manipulation";
  b.addEventListener("touchend",e=>{e.preventDefault();b.click()},{passive:false});
 }
 async function chat(p){
  const m=await loadChat(p);
- openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${p}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${m.length?m.map(b=>`<div style="text-align:right;margin:6px 0"><span style="display:inline-block;background:var(--acc);color:var(--accink);padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Sample accounts do not reply. Two-way chat between real people comes with accounts in the full app.</p></div>`);
+ openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${p}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${m.length?m.map(b=>`<div style="text-align:right;margin:6px 0"><span style="display:inline-block;background:var(--acc);color:var(--accink);padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${bodyOf(b)}</span></div>`).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Sample accounts do not reply. Two-way chat between real people comes with accounts in the full app.</p></div>`);
  const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=inbox;wireSend();
  $("#vc").onclick=()=>{close();startCall(p,false)};
  $("#vd").onclick=()=>{close();startCall(p,true)};
- $("#ms").onclick=async()=>{
-  const v=$("#mi").value.trim();if(!v)return;
-  m.push({t:v,ts:Date.now()});
+ const sendObj=async o=>{
+  m.push(Object.assign({ts:Date.now()},o));
   try{const D=await claude.use("db");if(D&&me.uid)await D.collection("data/users/"+me.uid).doc("chat-"+p).set({m:m.slice(-100)})}catch(e){}
   chat(p);
- };
+ };window.__sendMsg=sendObj;
+ $("#ms").onclick=()=>{const v=$("#mi").value.trim();if(!v)return;sendObj({t:v})};
 }
 const R={};
 const cnt=i=>CLIPS[i].l+(CLIPS[i].o||0)+(liked[i]?1:0);
@@ -1607,18 +1618,18 @@ function dmOpen(uid,name,pre){
 function dmOpenById(id){const d=DMS.find(x=>x.id===id);if(d)dmShow(d)}
 function dmShow(d,pre){
  dmCur=d.id;const o=dmOther(d);
- openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${esc(o.n)}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${d.m.length?d.m.map(b=>{const me2=b.f===me.uid;return `<div style="text-align:${me2?"right":"left"};margin:6px 0"><span style="display:inline-block;background:${me2?"var(--acc)":"var(--bg)"};color:${me2?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" value="${esc(pre||"")}" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Meet in public places and never pay before you see the item.</p></div>`);
+ openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${esc(o.n)}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${d.m.length?d.m.map(b=>{const me2=b.f===me.uid;return `<div style="text-align:${me2?"right":"left"};margin:6px 0"><span style="display:inline-block;background:${me2?"var(--acc)":"var(--bg)"};color:${me2?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${bodyOf(b)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" value="${esc(pre||"")}" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Meet in public places and never pay before you see the item.</p></div>`);
  $("#vc").onclick=()=>{close();startCall(o.n,false)};$("#vd").onclick=()=>{close();startCall(o.n,true)};
  const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=()=>{dmCur=null;loadDMS().then(inbox)};wireSend();
- $("#ms").onclick=async()=>{
-  const v=$("#mi").value.trim();if(!v)return;
+ const sendObj=async o=>{
   try{const D=await claude.use("db");if(D){const s=await D.collection("dms").doc(d.id).get();if(s.exists){const r=s.data();if(r.m&&r.m.length>d.m.length)d.m=r.m}}}catch(e){}
-  d.m.push({f:me.uid,n:me.name,t:v,ts:Date.now()});d.m=d.m.slice(-200);
+  d.m.push(Object.assign({f:me.uid,n:me.name,ts:Date.now()},o));d.m=d.m.slice(-200);
   try{const D=await claude.use("db");if(D)await D.collection("dms").doc(d.id).set(d)}catch(e){}
   notify(dmOther(d).u,"sent you a message");
   dmShow(d);
- };
+ };window.__sendMsg=sendObj;
+ $("#ms").onclick=()=>{const v=$("#mi").value.trim();if(!v)return;sendObj({t:v})};
 }
 setInterval(async()=>{
  if(!dmCur||!$("#sheet").classList.contains("on")||!$("#ml"))return;
@@ -1650,7 +1661,7 @@ async function groupsScreen(){
 }
 function gShow(g){
  gCur=g.id;
- const msgs=g.m.length?g.m.map(b=>{const mine=b.f===me.uid;return `<div style="text-align:${mine?"right":"left"};margin:6px 0">${mine?"":`<div class="mute" style="font-size:12px">@${esc(b.n)}</div>`}<span style="display:inline-block;background:${mine?"var(--acc)":"var(--bg)"};color:${mine?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello to the group.</p>';
+ const msgs=g.m.length?g.m.map(b=>{const mine=b.f===me.uid;return `<div style="text-align:${mine?"right":"left"};margin:6px 0">${mine?"":`<div class="mute" style="font-size:12px">@${esc(b.n)}</div>`}<span style="display:inline-block;background:${mine?"var(--acc)":"var(--bg)"};color:${mine?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${bodyOf(b)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello to the group.</p>';
  open(`<h2 style="margin:0">${esc(g.name)}</h2><p class="mute" style="margin:2px 0 8px;font-size:13px">${g.mem.map(x=>"@"+esc(x.n)).join(", ")}</p><div id="ml" style="max-height:38vh;overflow-y:auto">${msgs}</div><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write to the group" aria-label="Message" style="margin:10px 0 0"><button class="btn" id="ms" style="width:auto;margin:10px 0 0">Send</button></div><button class="btn ghost" id="lv">Leave group</button><button class="btn ghost" id="bk">Back</button>`);
  const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=groupsScreen;
@@ -1817,11 +1828,40 @@ function recorder(){
   let n=3;$("#tm").textContent=n;const c=setInterval(()=>{n--;if(n<=0){clearInterval(c);$("#tm").textContent="";go1()}else $("#tm").textContent=n},1000);
  };
 }
+function photoToVideo(f,song,secs,prog){
+ return new Promise((ok,no)=>{
+  try{
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!window.MediaRecorder)return no(new Error("This phone cannot add music."));
+   const im=new Image();im.onerror=()=>no(new Error("The photo could not be read."));
+   im.onload=async()=>{
+    try{
+     const W=720,H=1280,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+     x.fillStyle="#000";x.fillRect(0,0,W,H);const k=Math.min(W/im.width,H/im.height),w=im.width*k,h=im.height*k;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);
+     const ac=new AC(),d=ac.createMediaStreamDestination(),au=new Audio(song.url);au.crossOrigin="anonymous";au.loop=true;ac.createMediaElementSource(au).connect(d);
+     const cs=c.captureStream(15),out=new MediaStream([...cs.getVideoTracks(),...d.stream.getAudioTracks()]);
+     const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
+     const rc=new MediaRecorder(out,mt?{mimeType:mt,videoBitsPerSecond:1000000,audioBitsPerSecond:128000}:{}),ch=[];
+     rc.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+     const t0=Date.now(),tk=setInterval(()=>{x.drawImage(im,(W-w)/2,(H-h)/2,w,h);if(prog)prog(Math.min(1,(Date.now()-t0)/(secs*1000)))},200);
+     rc.onstop=()=>{clearInterval(tk);try{au.pause();ac.close()}catch(e){}const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"photo."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+     rc.start();await au.play().catch(()=>{});setTimeout(()=>{if(rc.state==="recording")rc.stop()},secs*1000)
+    }catch(e){no(e)}
+   };
+   im.src=URL.createObjectURL(f);
+  }catch(e){no(e)}
+ })
+}
 function photoForm(f){
  stopCam();
  const url=URL.createObjectURL(f);
- open(`<h2>Post your photo</h2><img src="${url}" alt="Your photo" style="width:100%;max-height:44vh;object-fit:contain;border-radius:12px;background:#000"><input class="in" id="cp" type="text" maxlength="200" placeholder="Write a caption" aria-label="Caption"><p class="note" id="st">Photos are shared in Social, up to 5 MB.</p><button class="btn" id="go">Post to Social</button><button class="btn ghost" id="bk">Retake</button>`);
+ open(`<h2>Post your photo</h2><img src="${url}" alt="Your photo" style="width:100%;max-height:44vh;object-fit:contain;border-radius:12px;background:#000"><input class="in" id="cp" type="text" maxlength="200" placeholder="Write a caption" aria-label="Caption"><button class="btn ghost" id="pmp" style="margin-top:8px">♪ Post as a video with music</button><p class="note" id="st">Photos are shared in Social, up to 5 MB.</p><button class="btn" id="go">Post to Social</button><button class="btn ghost" id="bk">Retake</button>`);
  $("#bk").onclick=recorder;
+ $("#pmp").onclick=()=>soundPicker(()=>{
+  if(!SND)return photoForm(f);
+  const sd=SND;SND=null;
+  open(`<h2>Making your video</h2><p class="mute">Putting "${esc(sd.name)}" with your photo for 15 seconds. Keep this screen open.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
+  photoToVideo(f,sd,15,p=>{const b=$("#mb");if(b)b.style.width=Math.round(p*100)+"%"}).then(vf=>postForm(vf,"Photo with music: "+sd.name)).catch(e=>{photoForm(f);const st=$("#st");if(st)st.textContent="Could not add music: "+(e.message||"try again")})
+ });
  $("#go").onclick=async()=>{
   if(f.size>5*1048576){$("#st").textContent="That photo is over 5 MB. Retake it.";return}
   $("#go").disabled=true;$("#st").textContent="Posting…";
