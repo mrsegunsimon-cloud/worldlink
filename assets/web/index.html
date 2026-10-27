@@ -478,11 +478,18 @@ function inbox(){
  $("#panel").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>chat(b.dataset.c));
  $("#panel").querySelectorAll("[data-dm]").forEach(b=>b.onclick=()=>dmOpenById(b.dataset.dm));
 }
+function wireSend(){
+ const b=$("#ms"),i=$("#mi");if(!b||!i)return;
+ i.setAttribute("enterkeyhint","send");
+ i.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();b.click()}});
+ b.style.touchAction="manipulation";
+ b.addEventListener("touchend",e=>{e.preventDefault();b.click()},{passive:false});
+}
 async function chat(p){
  const m=await loadChat(p);
  openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${p}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${m.length?m.map(b=>`<div style="text-align:right;margin:6px 0"><span style="display:inline-block;background:var(--acc);color:var(--accink);padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Sample accounts do not reply. Two-way chat between real people comes with accounts in the full app.</p></div>`);
  const l=$("#ml");l.scrollTop=l.scrollHeight;
- $("#bk").onclick=inbox;
+ $("#bk").onclick=inbox;wireSend();
  $("#vc").onclick=()=>{close();startCall(p,false)};
  $("#vd").onclick=()=>{close();startCall(p,true)};
  $("#ms").onclick=async()=>{
@@ -1598,7 +1605,7 @@ function dmShow(d,pre){
  openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${esc(o.n)}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${d.m.length?d.m.map(b=>{const me2=b.f===me.uid;return `<div style="text-align:${me2?"right":"left"};margin:6px 0"><span style="display:inline-block;background:${me2?"var(--acc)":"var(--bg)"};color:${me2?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" value="${esc(pre||"")}" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Meet in public places and never pay before you see the item.</p></div>`);
  $("#vc").onclick=()=>{close();startCall(o.n,false)};$("#vd").onclick=()=>{close();startCall(o.n,true)};
  const l=$("#ml");l.scrollTop=l.scrollHeight;
- $("#bk").onclick=()=>{dmCur=null;loadDMS().then(inbox)};
+ $("#bk").onclick=()=>{dmCur=null;loadDMS().then(inbox)};wireSend();
  $("#ms").onclick=async()=>{
   const v=$("#mi").value.trim();if(!v)return;
   try{const D=await claude.use("db");if(D){const s=await D.collection("dms").doc(d.id).get();if(s.exists){const r=s.data();if(r.m&&r.m.length>d.m.length)d.m=r.m}}}catch(e){}
