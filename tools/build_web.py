@@ -4,6 +4,7 @@ src, dst = sys.argv[1], sys.argv[2]
 s = open(src, encoding='utf8').read()
 
 SHIM = r'''<script>
+window.__wlGate=true;
 (function(){
  function load(){try{return JSON.parse(localStorage.getItem("wl_db")||"{}")}catch(e){return {}}}
  function save(d){try{localStorage.setItem("wl_db",JSON.stringify(d))}catch(e){}}
@@ -75,8 +76,9 @@ window.addEventListener("load",function(){setTimeout(function(){
   if(on&&/Profile/.test(on.textContent))profile();
  })},1500)});
 </script>"""
+GATE='<script>'+open(__file__.replace('build_web.py','gate.js'),encoding='utf8').read()+'</script>'
 i=s.rfind('</body>')
-s=s[:i]+RESTORE+s[i:]
+s=s[:i]+RESTORE+GATE+s[i:]
 
 # Flutter's SafeArea already keeps the page clear of the status and navigation bars,
 # so the page must not add its own safe-area padding on top (that doubled the gaps).
