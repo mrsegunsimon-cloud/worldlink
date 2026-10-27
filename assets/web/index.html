@@ -5,12 +5,22 @@
  function load(){try{return JSON.parse(localStorage.getItem("wl_db")||"{}")}catch(e){return {}}}
  function save(d){try{localStorage.setItem("wl_db",JSON.stringify(d))}catch(e){}}
  var uid=null;try{uid=localStorage.getItem("wl_uid");if(!uid){uid="u"+Math.random().toString(36).slice(2,10);localStorage.setItem("wl_uid",uid)}}catch(e){uid="u0"}
+ var pend={},nid=0;
+ window.__wlReply=function(id,r){var p=pend[id];if(p){delete pend[id];p(r)}};
+ window.WLN=function(op,data){return new Promise(function(res){
+  if(!window.WLAuth){res({error:"native"});return}
+  var id=++nid;pend[id]=res;
+  WLAuth.postMessage(JSON.stringify(Object.assign({id:id,op:op},data||{})))})};
+ window.__wlUser=null;
  var db={collection:function(n){return{
   get:async function(){var m=load()[n]||{};return{docs:Object.keys(m).map(function(k){return{id:k,data:function(){return JSON.parse(JSON.stringify(m[k]))}}})}},
   doc:function(id){return{
    get:async function(){var m=load()[n]||{};return{exists:id in m,data:function(){return JSON.parse(JSON.stringify(m[id]||{}))}}},
    set:async function(v){var d=load();(d[n]=d[n]||{})[id]=JSON.parse(JSON.stringify(v));save(d);return true}}}}}};
- window.claude={use:async function(k){if(k==="db")return db;if(k==="user")return{id:async function(){return uid}};return null}};
+ window.claude={use:async function(k){
+  if(k==="db")return db;
+  if(k==="user")return{id:async function(){var r=await WLN("state");if(r&&r.user){window.__wlUser=r.user;return r.user.uid}return uid}};
+  return null}};
 })();
 </script>
 <meta charset="utf-8">
@@ -311,26 +321,33 @@ function profile(tabk){
  if(!me.hlLoaded){me.hlLoaded=true;loadHL().then(()=>{if($("#hn1")&&(me.hl||[]).length)profile(tabk)})}
  $("#au").onclick=()=>authSheet("up");$("#ed").onclick=editProfile;$("#ea").onclick=editProfile;$("#pm").onclick=profMenu;
 }
-function authSheet(mode,how){
+function authSheet0(mode,how){
  const up=mode==="up";how=how||"email";
  const tabs=["email","phone"].map(k=>`<button class="btn${how===k?"":" ghost"}" style="width:auto;flex:1;margin:0;padding:10px" data-h="${k}">${k==="email"?"Email":"Phone number"}</button>`).join("");
  const f=how==="email"?`<input class="in" id="ae" type="email" autocomplete="email" placeholder="Email address" aria-label="Email address"><input class="in" id="ap" type="password" autocomplete="${up?"new-password":"current-password"}" placeholder="Password (8+ characters)" aria-label="Password">${up?'':'<p class="note"><a href="#" id="fg">Forgot password?</a></p>'}`:`<input class="in" id="ap2" type="tel" autocomplete="tel" placeholder="+234 801 234 5678" aria-label="Phone number"><p class="note">We will text you a 6-digit code.</p>`;
- open(`<h2>${up?"Create your account":"Welcome back"}</h2><p class="mute">One WorldLink account for videos, sports, campus, market and calls.</p><button class="btn" id="fb" style="background:#1877F2;color:#fff">Continue with Facebook</button><p class="note" style="text-align:center">or</p><div style="display:flex;gap:8px">${tabs}</div>${f}<p class="note" id="st"></p><button class="btn" id="go1">${up?"Create account":"Log in"}</button><button class="btn ghost" id="sw">${up?"I already have an account":"Create a new account"}</button><p class="note">Demo screens only. Real sign-up arrives with the Android app. Nothing you type here is sent anywhere.</p><button class="btn ghost" id="x">Close</button>`);
+ open(`<h2>${up?"Create your account":"Welcome back"}</h2><p class="mute">One WorldLink account for videos, sports, campus, market and calls.</p><button class="btn" id="fb" style="background:#1877F2;color:#fff">Continue with Facebook</button><p class="note" style="text-align:center">or</p><div style="display:flex;gap:8px">${tabs}</div>${f}<p class="note" id="st"></p><button class="btn" id="go1">${up?"Create account":"Log in"}</button><button class="btn ghost" id="sw">${up?"I already have an account":"Create a new account"}</button><p class="note">${window.WLAuth?"Your account is stored securely online.":"Demo screens only. Real sign-up arrives with the Android app. Nothing you type here is sent anywhere."}</p><button class="btn ghost" id="x">Close</button>`);
  $("#panel").querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>authSheet(mode,b.dataset.h));
  $("#sw").onclick=()=>authSheet(up?"in":"up",how);
  $("#fb").onclick=()=>{$("#st").textContent="In the Android app this opens Facebook so you can approve WorldLink."};
- const fg=$("#fg");if(fg)fg.onclick=e=>{e.preventDefault();$("#st").textContent="In the app we email you a link to reset your password."};
+ const fg=$("#fg");if(fg)fg.onclick=e=>{e.preventDefault();if(window.WLAuth){const em=$("#ae").value.trim();if(!/^\S+@\S+\.\S+$/.test(em)){$("#st").textContent="Type your email above first, then tap Forgot password.";return}WLN("reset",{email:em}).then(r=>{$("#st").textContent=r.error?r.error:"Reset link sent to "+em+". Check your inbox."});return}$("#st").textContent="In the app we email you a link to reset your password."};
  $("#go1").onclick=()=>{
   const st=$("#st");
   if(how==="email"){const e=$("#ae").value.trim(),pw=$("#ap").value;
    if(!/^\S+@\S+\.\S+$/.test(e)){st.textContent="Enter a valid email address, like name@example.com.";return}
    if(pw.length<8){st.textContent="Password needs at least 8 characters.";return}
+   if(window.WLAuth){st.textContent="Please wait...";WLN(up?"signup":"login",{email:e,password:pw}).then(function(r){if(r.error){st.textContent=r.error;return}window.__wlUser=r.user;me.uid=r.user.uid;if(me.name==="you")me.name=((r.user.email||"you").split("@")[0].replace(/[^a-zA-Z0-9._]/g,"").slice(0,20))||"you";st.textContent=up?"Account created. A confirmation email was sent to "+e+".":"Welcome back!";setTimeout(function(){close();profile()},900)});return}
    st.textContent=up?"Looks good. In the app we would now email you a link to confirm this address.":"Looks good. In the app you would now be logged in."}
   else{const n=$("#ap2").value.replace(/[\s-]/g,"");
    if(!/^\+\d{8,15}$/.test(n)){st.textContent="Enter the number with country code, like +2348012345678.";return}
    st.textContent="Looks good. In the app we would now text a 6-digit code to "+n+"."}
  };
 }
+function authSheet(mode,how){
+ if(window.__wlUser){
+  open(`<h2>Signed in</h2><p class="mute">${esc(window.__wlUser.email||"")}</p><p class="note">Your account is stored securely online.</p><button class="btn" id="lo">Log out</button><button class="btn ghost" id="x">Close</button>`);
+  $("#lo").onclick=()=>{WLN("logout").then(()=>{window.__wlUser=null;me.uid=null;me.name="you";close();profile()})};
+  return}
+ authSheet0(mode,how)}
 function editProfile(){
  open(`<h2>Edit profile</h2><input class="in" id="nm" maxlength="20" value="${esc(me.name)}" aria-label="Username"><input class="in" id="bi" maxlength="80" value="${esc(me.bio)}" placeholder="Short bio" aria-label="Bio"><p class="note" id="st"></p><button class="btn" id="sv">Save profile</button><button class="btn ghost" id="x">Cancel</button>`);
  $("#sv").onclick=async()=>{
