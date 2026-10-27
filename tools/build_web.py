@@ -49,4 +49,6 @@ rep('function editProfile(){', '''function authSheet(mode,how){
   return}
  authSheet0(mode,how)}
 function editProfile(){''')
+
+rep('font-weight:700;color:inherit">Sign in or create account</button>', 'font-weight:700;color:inherit">${window.__wlUser?"Signed in · Log out":"Sign in or create account"}</button>')
 open(dst, 'w', encoding='utf8').write(s)
