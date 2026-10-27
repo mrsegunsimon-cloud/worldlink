@@ -1760,10 +1760,10 @@ function soundSheet(i){
  const su=$("#su");if(su)su.onclick=()=>{sndPrev(null);SND=sd;close();secFull=false;recorder();const st=$("#st");if(st)st.textContent="Sound ready: "+sd.name+". Tap the red button to record with it."};
  const x=$("#x");if(x)x.onclick=()=>{sndPrev(null);close()};
 }
-function soundPicker(){
+function soundPicker(cb){
  const L=songList();
  open(`<h2>Choose a sound</h2><p class="note" style="margin:0 0 6px">Sounds play while you record and are mixed into your video.</p>${SND?`<button class="btn ghost" id="sno">Remove sound (${esc(SND.name)})</button>`:""}${L.map((x,k)=>`<div class="cm" style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(x.t)}</b><div class="mute" style="font-size:12px">${esc(x.a||"")}</div></div><button class="btn ghost" data-sp="${k}" style="width:auto;margin:0;padding:8px 12px">▶</button><button class="btn" data-su="${k}" style="width:auto;margin:0;padding:8px 12px">Use</button></div>`).join("")||'<p class="mute">No sounds yet.</p>'}<button class="btn ghost" id="sbk">Back to camera</button>`);
- const back=()=>{sndPrev(null);recorder()};
+ const back=()=>{sndPrev(null);cb?cb():recorder()};
  $("#sbk").onclick=back;
  const so=$("#sno");if(so)so.onclick=()=>{SND=null;back()};
  $("#panel").querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>sndPrev(L[+b.dataset.sp].url));
@@ -1804,7 +1804,7 @@ function recorder(){
   src=mixSound(src);
   try{const long=lim>=600;rec=new MediaRecorder(src,mt?{mimeType:mt,videoBitsPerSecond:long?220000:1500000,audioBitsPerSecond:long?32000:128000}:{})}catch(e){$("#st").textContent="Recording is not supported on this device. Tap CREATE and use the phone camera app instead.";return}
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  rec.onstop=()=>{clearInterval(rt);if(stopLoop)stopLoop();if(stopSnd)stopSnd();const type=(rec.mimeType||mt||"video/webm").split(";")[0];postForm(new File(chunks,"clip."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+  rec.onstop=()=>{clearInterval(rt);if(stopLoop)stopLoop();if(stopSnd)stopSnd();const type=(rec.mimeType||mt||"video/webm").split(";")[0];SND=null;postForm(new File(chunks,"clip."+(type.includes("mp4")?"mp4":"webm"),{type}))};
   rec.start();
   let s=0;$("#tm").textContent="0:00";$("#ri").style.cssText="width:30px;height:30px;border-radius:6px;background:#FF2D55";$("#rb").setAttribute("aria-label","Stop recording");$("#st").textContent="";
   rt=setInterval(()=>{s++;$("#tm").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");if(s>=lim&&rec.state==="recording")rec.stop()},1000);
@@ -1830,12 +1830,44 @@ function photoForm(f){
   PS.unshift(it);social();
  };
 }
-function postForm(f){
+function mixMusic(f,song,prog){
+ return new Promise((ok,no)=>{
+  try{
+   const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!window.MediaRecorder)return no(new Error("This phone cannot add music after recording."));
+   const v=document.createElement("video");v.src=URL.createObjectURL(f);v.playsInline=true;v.preload="auto";
+   v.onerror=()=>no(new Error("The video could not be read."));
+   v.onloadedmetadata=async()=>{
+    try{
+     const ac=new AC(),d=ac.createMediaStreamDestination();
+     ac.createMediaElementSource(v).connect(d);
+     const au=new Audio(song.url);au.crossOrigin="anonymous";au.loop=true;const g=ac.createGain();g.gain.value=.6;ac.createMediaElementSource(au).connect(g);g.connect(d);
+     const cap=v.captureStream?v.captureStream():v.mozCaptureStream();
+     const out=new MediaStream([...cap.getVideoTracks(),...d.stream.getAudioTracks()]);
+     const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
+     const rc=new MediaRecorder(out,mt?{mimeType:mt,videoBitsPerSecond:1500000,audioBitsPerSecond:128000}:{});const ch=[];
+     rc.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+     const fin=()=>{try{au.pause();ac.close()}catch(e){}clearInterval(tk)};
+     rc.onstop=()=>{fin();const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"mixed."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+     v.onended=()=>{if(rc.state==="recording")rc.stop()};
+     const tk=setInterval(()=>{if(prog)prog(v.currentTime,v.duration)},300);
+     rc.start();await au.play().catch(()=>{});await v.play()
+    }catch(e){no(e)}
+   };
+  }catch(e){no(e)}
+ })
+}
+function postForm(f,note){
  stopCam();
  const url=URL.createObjectURL(f);
- open(`<h2>Post your video</h2><video src="${url}" controls playsinline style="width:100%;max-height:40vh;border-radius:12px;background:#000"></video><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption"><p class="note" id="st"></p><button class="btn" id="go">Post</button><button class="btn ghost" id="bk">Back</button>`);
+ open(`<h2>Post your video</h2><video src="${url}" controls playsinline style="width:100%;max-height:40vh;border-radius:12px;background:#000"></video><button class="btn ghost" id="pmu" style="margin-top:8px">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption"><p class="note" id="st">${note?esc(note):""}</p><button class="btn" id="go">Post</button><button class="btn ghost" id="bk">Back</button>`);
  $("#bk").onclick=create;
  $("#go").onclick=()=>postVideo(f,$("#cp").value.trim());
+ $("#pmu").onclick=()=>soundPicker(()=>{
+  if(!SND)return postForm(f,note);
+  const sd=SND;SND=null;
+  open(`<h2>Adding music</h2><p class="mute" id="mp">Mixing "${esc(sd.name)}" into your video. Keep this screen open. It takes about as long as the video.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
+  mixMusic(f,sd,(t,dur)=>{const b=$("#mb");if(b&&dur)b.style.width=Math.min(100,Math.round(100*t/dur))+"%"}).then(nf=>postForm(nf,"Music added: "+sd.name)).catch(e=>{postForm(f,"Could not add music: "+(e.message||"try again"))})
+ });
 }
 async function postVideo(f,cap){
  const st=$("#st");
