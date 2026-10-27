@@ -81,7 +81,7 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #fff
 .rail button{display:flex;flex-direction:column;align-items:center;font-size:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6)}
 .rail .ic{font-size:30px;line-height:1.1}
 .rail .on .ic{color:var(--acc)}
-.av{width:46px;height:46px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;font-weight:800;background:#222;color:#fff}
+.av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}.av{overflow:hidden;width:46px;height:46px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;font-weight:800;background:#222;color:#fff}
 .pop{position:absolute;font-size:90px;pointer-events:none;animation:pop .7s ease-out forwards;transform:translate(-50%,-50%)}
 @keyframes pop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}30%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{transform:translate(-50%,-90%) scale(1);opacity:0}}
 @media (prefers-reduced-motion:reduce){.pop{animation-duration:.01s}}
@@ -184,7 +184,7 @@ function build(){
  ${c.src?`<video src="${esc(c.src)}" muted loop playsinline preload="metadata"></video>`:`<div class="big">${c.e}</div>`}<div class="shade"></div>
  <div class="cap"><b>@${esc(c.u)}</b><p id="cp${i}">${esc(c.c)}</p><button data-a="tr" data-i="${i}" style="display:block;margin-bottom:4px;font-size:12px;opacity:.9;padding:2px 0;color:#fff;text-decoration:underline">Translate</button><small>♪ ${esc(c.m)}${c.src?" (tap video for sound)":""}</small></div>
  <div class="rail">
-  <div class="av">${c.u[0].toUpperCase()}</div>
+  <div class="av">${c.uid&&c.uid===me.uid&&me.pic?`<img src="${me.pic}" alt="">`:c.u[0].toUpperCase()}</div>
   <button data-a="like" data-i="${i}" class="${liked[i]?"on":""}" aria-label="Like"><span class="ic">♥</span><span id="l${i}">${fmt(cnt(i))}</span></button>
   <button data-a="cm" data-i="${i}" aria-label="Comments"><span class="ic">💬</span><span id="cc${i}">${c.cm.length+(c.sc||[]).length}</span></button>
   <button data-a="gf" data-i="${i}" aria-label="Send a gift"><span class="ic">🎁</span><span>Gift</span></button>
@@ -316,7 +316,7 @@ function profile(tabk){
  const tb=k=>`<button data-pt="${k}" aria-label="${{v:"Videos",s:"Saved",l:"Liked"}[k]}" style="flex:1;padding:12px 0;display:grid;place-items:center;border-bottom:2px solid ${tabk===k?"var(--ink)":"transparent"};opacity:${tabk===k?1:.5};color:inherit">${ic[k]}</button>`;
  const empty={v:"No videos yet. Tap + to post your first one.",l:"Videos you like will show here.",s:"Videos you save will show here."}[tabk];
  const stat=(n,l)=>`<div><b style="font-size:20px">${n}</b><div class="mute" style="font-size:15px">${l}</div></div>`;
- openFull(`<div class="hd"><button id="ed" aria-label="Edit profile">✎</button><button id="pm" aria-label="Settings">☰</button></div><div class="pgx"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 16px 0"><div style="min-width:0"><div style="font-size:30px;font-weight:800;overflow-wrap:anywhere">${esc(me.name)}</div><div class="mute" style="font-size:17px">@${esc(me.name)}</div><div style="display:flex;gap:26px;margin-top:18px">${stat(me.f.length,"Following")}${stat(0,"Followers")}${stat(fmt(lk),"Likes")}</div></div><button id="ea" aria-label="Change photo" style="position:relative;flex:none"><div class="av" style="width:104px;height:104px;font-size:42px;border-color:var(--line)">${esc(me.name[0].toUpperCase())}</div><span style="position:absolute;right:2px;bottom:2px;width:34px;height:34px;border-radius:50%;background:#1E9BFF;color:#fff;font-size:24px;display:grid;place-items:center;border:3px solid var(--card)">+</span></button></div><p style="margin:14px 16px 8px">${esc(me.bio)||"Add a short bio so people know you."}</p><div style="padding:0 16px 12px"><button id="au" style="border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-weight:700;color:inherit">${window.__wlUser?"Signed in · Log out":"Sign in or create account"}</button></div><div style="display:flex;gap:14px;overflow-x:auto;padding:4px 16px 14px"><button id="hn1" style="flex:none;width:70px;text-align:center;color:inherit"><span style="display:grid;place-items:center;width:64px;height:64px;border-radius:20px;border:1px solid var(--line);margin:0 auto 4px;font-size:30px">+</span><span style="font-size:13px">New</span></button>${(me.hl||[]).map((h,i)=>`<button data-hl="${i}" style="flex:none;width:70px;text-align:center;color:inherit"><span style="display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:var(--bg);border:3px solid var(--line);margin:0 auto 4px;font-size:30px">${h.e}</span><span style="font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.n)}</span></button>`).join("")}</div><div style="display:flex;border-bottom:1px solid var(--line)">${tb("v")}${tb("s")}${tb("l")}</div><div class="pgt">${idx.map(tile).join("")}</div>${idx.length?"":`<p class="mute" style="text-align:center;padding:24px">${empty}</p>`}</div>`);
+ openFull(`<div class="hd"><button id="ed" aria-label="Edit profile">✎</button><button id="pm" aria-label="Settings">☰</button></div><div class="pgx"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 16px 0"><div style="min-width:0"><div style="font-size:30px;font-weight:800;overflow-wrap:anywhere">${esc(me.name)}</div><div class="mute" style="font-size:17px">@${esc(me.name)}</div><div style="display:flex;gap:26px;margin-top:18px">${stat(me.f.length,"Following")}${stat(0,"Followers")}${stat(fmt(lk),"Likes")}</div></div><button id="ea" aria-label="Change photo" style="position:relative;flex:none">${meAv(104,42,"border-color:var(--line)")}<span style="position:absolute;right:2px;bottom:2px;width:34px;height:34px;border-radius:50%;background:#1E9BFF;color:#fff;font-size:24px;display:grid;place-items:center;border:3px solid var(--card)">+</span></button></div><p style="margin:14px 16px 8px">${esc(me.bio)||"Add a short bio so people know you."}</p><div style="padding:0 16px 12px"><button id="au" style="border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-weight:700;color:inherit">${window.__wlUser?"Signed in · Log out":"Sign in or create account"}</button></div><div style="display:flex;gap:14px;overflow-x:auto;padding:4px 16px 14px"><button id="hn1" style="flex:none;width:70px;text-align:center;color:inherit"><span style="display:grid;place-items:center;width:64px;height:64px;border-radius:20px;border:1px solid var(--line);margin:0 auto 4px;font-size:30px">+</span><span style="font-size:13px">New</span></button>${(me.hl||[]).map((h,i)=>`<button data-hl="${i}" style="flex:none;width:70px;text-align:center;color:inherit"><span style="display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:var(--bg);border:3px solid var(--line);margin:0 auto 4px;font-size:30px">${h.e}</span><span style="font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.n)}</span></button>`).join("")}</div><div style="display:flex;border-bottom:1px solid var(--line)">${tb("v")}${tb("s")}${tb("l")}</div><div class="pgt">${idx.map(tile).join("")}</div>${idx.length?"":`<p class="mute" style="text-align:center;padding:24px">${empty}</p>`}</div>`);
  $("#panel").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>profile(b.dataset.pt));
  $("#hn1").onclick=newHL;$("#panel").querySelectorAll("[data-hl]").forEach(b=>b.onclick=()=>hlView(+b.dataset.hl));
  if(!me.hlLoaded){me.hlLoaded=true;loadHL().then(()=>{if($("#hn1")&&(me.hl||[]).length)profile(tabk)})}
@@ -350,6 +350,9 @@ function authSheet0(mode,how){
    st.textContent="Looks good. In the app we would now text a 6-digit code to "+n+"."}
  };
 }
+function picResize(file){return new Promise((ok,no)=>{const fr=new FileReader();fr.onerror=no;fr.onload=()=>{const im=new Image();im.onerror=no;im.onload=()=>{const S=256,k=Math.max(S/im.width,S/im.height),w=im.width*k,h=im.height*k,c=document.createElement("canvas");c.width=S;c.height=S;c.getContext("2d").drawImage(im,(S-w)/2,(S-h)/2,w,h);ok(c.toDataURL("image/jpeg",.8))};im.src=fr.result};fr.readAsDataURL(file)})}
+try{const q=localStorage.getItem("wl-pic");if(q)me.pic=q}catch(e){}
+const meAv=(sz,fs,ex)=>`<div class="av" style="width:${sz}px;height:${sz}px;font-size:${fs}px;${ex||""}">${me.pic?`<img src="${me.pic}" alt="Your photo">`:esc((me.name||"y")[0].toUpperCase())}</div>`;
 function authSheet(mode,how){
  if(window.__wlUser){
   open(`<h2>Signed in</h2><p class="mute">${esc(window.__wlUser.email||"")}</p><p class="note">Your account is stored securely online.</p><button class="btn" id="lo">Log out</button><button class="btn ghost" id="x">Close</button>`);
@@ -357,12 +360,14 @@ function authSheet(mode,how){
   return}
  authSheet0(mode,how)}
 function editProfile(){
- open(`<h2>Edit profile</h2><input class="in" id="nm" maxlength="20" value="${esc(me.name)}" aria-label="Username"><input class="in" id="bi" maxlength="80" value="${esc(me.bio)}" placeholder="Short bio" aria-label="Bio"><p class="note" id="st"></p><button class="btn" id="sv">Save profile</button><button class="btn ghost" id="x">Cancel</button>`);
+ open(`<h2>Edit profile</h2><div style="text-align:center;margin-bottom:6px" id="pv">${meAv(96,40,"margin:0 auto")}</div><label class="btn ghost" style="display:block;text-align:center">📷 Choose a photo<input type="file" id="pf" accept="image/*" style="display:none"></label>${me.pic?'<button class="btn ghost" id="pr">Remove photo</button>':""}<input class="in" id="nm" maxlength="20" value="${esc(me.name)}" aria-label="Username"><input class="in" id="bi" maxlength="80" value="${esc(me.bio)}" placeholder="Short bio" aria-label="Bio"><p class="note" id="st"></p><button class="btn" id="sv">Save profile</button><button class="btn ghost" id="x">Cancel</button>`);
+ $("#pf").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{me.pic=await picResize(f);try{localStorage.setItem("wl-pic",me.pic)}catch(x){}$("#pv").innerHTML=meAv(96,40,"margin:0 auto");$("#st").textContent="Photo ready. Tap Save profile."}catch(x){$("#st").textContent="That photo could not be read."}};
+ const pr=$("#pr");if(pr)pr.onclick=()=>{me.pic="";try{localStorage.removeItem("wl-pic")}catch(x){}$("#pv").innerHTML=meAv(96,40,"margin:0 auto");pr.remove()};
  $("#sv").onclick=async()=>{
   const n=$("#nm").value.trim().replace(/[^a-zA-Z0-9._]/g,"");
   if(n.length<3){$("#st").textContent="Username needs at least 3 letters or numbers.";return}
   me.name=n;me.bio=$("#bi").value.trim();
-  try{const D=await claude.use("db");if(D&&me.uid)await D.collection("profiles").doc(me.uid).set({name:me.name,bio:me.bio})}catch(e){}
+  try{const D=await claude.use("db");if(D&&me.uid)await D.collection("profiles").doc(me.uid).set({name:me.name,bio:me.bio,pic:me.pic||""})}catch(e){}
   profile();
  };
 }
@@ -2043,7 +2048,7 @@ function create0(){
   $("#x").onclick=close;
  };
 }
-(async()=>{try{const D=await claude.use("db");if(!D)return;try{const U=await claude.use("user");if(U){me.uid=await U.id();const p=await D.collection("profiles").doc(me.uid).get();if(p.exists){const d=p.data();me.name=d.name||me.name;me.bio=d.bio||""}const fs=await D.collection("follows").doc(me.uid).get();if(fs.exists)me.f=fs.data().list||[];const bs=await D.collection("data/users/"+me.uid).doc("blocks").get();if(bs.exists)me.b=bs.data().list||[]}}catch(e){}const s=await D.collection("videos").get();
+(async()=>{try{const D=await claude.use("db");if(!D)return;try{const U=await claude.use("user");if(U){me.uid=await U.id();const p=await D.collection("profiles").doc(me.uid).get();if(p.exists){const d=p.data();me.name=d.name||me.name;me.bio=d.bio||"";if(d.pic)me.pic=d.pic}const fs=await D.collection("follows").doc(me.uid).get();if(fs.exists)me.f=fs.data().list||[];const bs=await D.collection("data/users/"+me.uid).doc("blocks").get();if(bs.exists)me.b=bs.data().list||[]}}catch(e){}const s=await D.collection("videos").get();
  s.docs.map(d=>d.data()).filter(v=>v&&!v.del).sort((a,b)=>a.ts-b.ts).forEach(v=>CLIPS.push({u:v.u||"you",c:v.c||"",m:"Original sound - "+(v.u||"you"),l:0,g:["#222","#444"],e:"🎬",cm:[],uid:v.uid,id:v.id||"o"+v.ts,src:v.url}));
  try{await loadR(D)}catch(e){}order=mk(1);build()}catch(e){}})();
 loadGR();loadTR();loadMV();loadLS();loadEV();loadPS();loadST();loadNF();
