@@ -4,10 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 bool fbReady = false;
 
@@ -70,7 +73,53 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF050B24))
       ..addJavaScriptChannel('WLAuth', onMessageReceived: _onMsg)
+      ..setOnPlatformPermissionRequest(_onWebPermission)
       ..loadFlutterAsset('assets/web/index.html');
+    final p = _c.platform;
+    if (p is AndroidWebViewController) {
+      p.setMediaPlaybackRequiresUserGesture(false);
+      p.setOnShowFileSelector(_pickFiles);
+    }
+  }
+
+  // Lets the page use the camera and microphone once the phone user allows it.
+  Future<void> _onWebPermission(PlatformWebViewPermissionRequest req) async {
+    final need = <Permission>[];
+    if (req.types.contains(WebViewPermissionResourceType.camera)) need.add(Permission.camera);
+    if (req.types.contains(WebViewPermissionResourceType.microphone)) need.add(Permission.microphone);
+    if (need.isEmpty) {
+      await req.deny();
+      return;
+    }
+    final st = await need.request();
+    if (st.values.every((s) => s.isGranted)) {
+      await req.grant();
+    } else {
+      await req.deny();
+    }
+  }
+
+  // Makes <input type="file"> work: opens the phone's picker for photos, videos or audio.
+  Future<List<String>> _pickFiles(FileSelectorParams p) async {
+    final acc = p.acceptTypes.join(',').toLowerCase();
+    var t = FileType.any;
+    if (acc.contains('image') && acc.contains('video')) {
+      t = FileType.media;
+    } else if (acc.contains('image')) {
+      t = FileType.image;
+    } else if (acc.contains('video')) {
+      t = FileType.video;
+    } else if (acc.contains('audio')) {
+      t = FileType.audio;
+    }
+    try {
+      final r = await FilePicker.platform.pickFiles(type: t, allowMultiple: p.mode == FileSelectorMode.openMultiple);
+      if (r == null) return [];
+      return r.files.where((f) => f.path != null).map((f) => Uri.file(f.path!).toString()).toList();
+    } catch (e) {
+      debugPrint('file pick failed: $e');
+      return [];
+    }
   }
 
   String? _verificationId;
