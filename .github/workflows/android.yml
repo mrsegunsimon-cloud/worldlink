@@ -34,7 +34,7 @@ jobs:
           code=$?
           if [ $code -ne 0 ]; then
             grep -nE "Error:|error:|rror:|What went wrong|FAILURE|Could not|not found|isn't defined|undefined" build.log | head -12 | while IFS= read -r l; do echo "::error::${l:0:300}"; done
-            tail -5 build.log | while IFS= read -r l; do echo "::error::${l:0:300}"; done
+            grep -A9 "What went wrong" build.log | head -14 | while IFS= read -r l; do echo "::error::W ${l:0:300}"; done
           fi
           exit $code
       - uses: actions/upload-artifact@v4
