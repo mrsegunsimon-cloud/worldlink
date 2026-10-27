@@ -191,7 +191,7 @@ function build(){
   <button data-a="sv" data-i="${i}" aria-label="Save" class="${saved[i]?"on":""}"><span class="ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></span><span id="sv${i}">${fmt(sv0(i))}</span></button>
   <button data-a="sh" data-i="${i}" aria-label="Share"><span class="ic">↗</span><span>Share</span></button>
   <button data-a="rp" data-i="${i}" aria-label="Report or block"><span class="ic">⋯</span><span>More</span></button>
-  <div class="disc" aria-hidden="true">♪</div>
+  <button class="disc" data-a="snd" data-i="${i}" aria-label="Use this sound">♪</button>
  </div></section>`}).join("");watch();
 }
 function shareSheet(i){
@@ -225,6 +225,7 @@ $("#feed").addEventListener("click",e=>{
   else if(a==="rp")reportFlow("video",CLIPS[i].id,CLIPS[i].uid,CLIPS[i].u);
   else if(a==="tr")trCap(i,b);
   else if(a==="sh")shareSheet(i);
+  else if(a==="snd")soundSheet(i);
   return}
  const clip=e.target.closest(".clip");if(!clip)return;
  const now=Date.now();
@@ -479,7 +480,7 @@ function inbox(){
 }
 async function chat(p){
  const m=await loadChat(p);
- open(`<div style="display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">@${p}</h2><div style="display:flex;gap:8px"><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div></div><div id="ml" style="max-height:40vh;overflow-y:auto">${m.length?m.map(b=>`<div style="text-align:right;margin:6px 0"><span style="display:inline-block;background:var(--acc);color:var(--accink);padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" style="margin:10px 0 0"><button class="btn" id="ms" style="width:auto;margin:10px 0 0">Send</button></div><p class="note">Sample accounts do not reply. Two-way chat between real people comes with accounts in the full app.</p><button class="btn ghost" id="bk">Back</button>`);
+ openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${p}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${m.length?m.map(b=>`<div style="text-align:right;margin:6px 0"><span style="display:inline-block;background:var(--acc);color:var(--accink);padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Sample accounts do not reply. Two-way chat between real people comes with accounts in the full app.</p></div>`);
  const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=inbox;
  $("#vc").onclick=()=>{close();startCall(p,false)};
@@ -1594,7 +1595,8 @@ function dmOpen(uid,name,pre){
 function dmOpenById(id){const d=DMS.find(x=>x.id===id);if(d)dmShow(d)}
 function dmShow(d,pre){
  dmCur=d.id;const o=dmOther(d);
- open(`<h2>@${esc(o.n)}</h2><div id="ml" style="max-height:40vh;overflow-y:auto">${d.m.length?d.m.map(b=>{const me2=b.f===me.uid;return `<div style="text-align:${me2?"right":"left"};margin:6px 0"><span style="display:inline-block;background:${me2?"var(--acc)":"var(--bg)"};color:${me2?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" value="${esc(pre||"")}" style="margin:10px 0 0"><button class="btn" id="ms" style="width:auto;margin:10px 0 0">Send</button></div><p class="note">Meet in public places and never pay before you see the item.</p><button class="btn ghost" id="bk">Back</button>`);
+ openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${esc(o.n)}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${d.m.length?d.m.map(b=>{const me2=b.f===me.uid;return `<div style="text-align:${me2?"right":"left"};margin:6px 0"><span style="display:inline-block;background:${me2?"var(--acc)":"var(--bg)"};color:${me2?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${esc(b.t)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" value="${esc(pre||"")}" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Meet in public places and never pay before you see the item.</p></div>`);
+ $("#vc").onclick=()=>{close();startCall(o.n,false)};$("#vd").onclick=()=>{close();startCall(o.n,true)};
  const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=()=>{dmCur=null;loadDMS().then(inbox)};
  $("#ms").onclick=async()=>{
@@ -1735,6 +1737,34 @@ let lim=60,tmr=false,fx="",stk="",stopLoop=null;
 const FX=[["Normal",""],["Warm","sepia(.35) saturate(1.3) hue-rotate(-10deg)"],["Cool","saturate(1.1) hue-rotate(15deg) brightness(1.05)"],["B&W","grayscale(1)"],["Vivid","saturate(1.8) contrast(1.1)"],["Retro","sepia(.6) contrast(.9) brightness(1.05)"],["Glow","brightness(1.15) contrast(.95) blur(.6px)"],["Neon","contrast(1.4) saturate(2) hue-rotate(260deg)"]];
 const STK=["","😎","🎩","👑","❤️","🔥","⭐","🎉"];
 function drawFx(x,v,w,h){x.filter=fx||"none";x.drawImage(v,0,0,w,h);x.filter="none";if(stk){x.font=Math.round(w*.26)+"px serif";x.textAlign="center";x.fillText(stk,w/2,h*.3)}}
+
+let SND=null,stopSnd=null,SNDA=null;
+function sndPrev(url){try{if(SNDA){SNDA.pause();SNDA=null}if(url){SNDA=new Audio(url);SNDA.play().catch(()=>{})}}catch(e){}}
+function clipSound(i){const c=CLIPS[i],nm=(c.m||"").replace(/^♪\s*/,"");const sg=songList().find(x=>x.t&&nm.includes(x.t));if(sg)return{name:sg.t+" · "+sg.a,url:sg.url};if(c.src)return{name:nm,url:c.src};return null}
+function soundSheet(i){
+ const c=CLIPS[i],sd=clipSound(i);
+ open(`<div style="text-align:center"><div style="font-size:44px">♪</div><h2 style="margin:4px 0">${esc((c.m||"").replace(/^♪\s*/,""))}</h2><p class="mute" style="margin:0">Sound from @${esc(c.u)}</p></div>${sd?`<button class="btn ghost" id="sp">▶ Preview sound</button><button class="btn" id="su">🎬 Use this sound</button>`:'<p class="note">This post has no sound that can be reused.</p>'}<button class="btn ghost" id="x">Close</button>`);
+ const sp=$("#sp");if(sp)sp.onclick=()=>sndPrev(sd.url);
+ const su=$("#su");if(su)su.onclick=()=>{sndPrev(null);SND=sd;close();secFull=false;recorder();const st=$("#st");if(st)st.textContent="Sound ready: "+sd.name+". Tap the red button to record with it."};
+ const x=$("#x");if(x)x.onclick=()=>{sndPrev(null);close()};
+}
+function soundPicker(){
+ const L=songList();
+ open(`<h2>Choose a sound</h2><p class="note" style="margin:0 0 6px">Sounds play while you record and are mixed into your video.</p>${SND?`<button class="btn ghost" id="sno">Remove sound (${esc(SND.name)})</button>`:""}${L.map((x,k)=>`<div class="cm" style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(x.t)}</b><div class="mute" style="font-size:12px">${esc(x.a||"")}</div></div><button class="btn ghost" data-sp="${k}" style="width:auto;margin:0;padding:8px 12px">▶</button><button class="btn" data-su="${k}" style="width:auto;margin:0;padding:8px 12px">Use</button></div>`).join("")||'<p class="mute">No sounds yet.</p>'}<button class="btn ghost" id="sbk">Back to camera</button>`);
+ const back=()=>{sndPrev(null);recorder()};
+ $("#sbk").onclick=back;
+ const so=$("#sno");if(so)so.onclick=()=>{SND=null;back()};
+ $("#panel").querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>sndPrev(L[+b.dataset.sp].url));
+ $("#panel").querySelectorAll("[data-su]").forEach(b=>b.onclick=()=>{const x=L[+b.dataset.su];SND={name:x.t+(x.a?" · "+x.a:""),url:x.url};back()});
+}
+function mixSound(src){
+ if(!SND||!window.AudioContext&&!window.webkitAudioContext)return src;
+ try{const ac=new(window.AudioContext||window.webkitAudioContext)(),d=ac.createMediaStreamDestination();
+  if(rs&&rs.getAudioTracks().length)ac.createMediaStreamSource(new MediaStream(rs.getAudioTracks())).connect(d);
+  const au=new Audio(SND.url);au.crossOrigin="anonymous";const g=ac.createGain();g.gain.value=.8;ac.createMediaElementSource(au).connect(g);g.connect(d);g.connect(ac.destination);
+  au.play().catch(()=>{});stopSnd=()=>{try{au.pause();ac.close()}catch(e){}stopSnd=null};
+  return new MediaStream([...src.getVideoTracks(),...d.stream.getAudioTracks()])}catch(e){return src}
+}
 function recorder(){
  const rb=(id,ic,l)=>`<button id="${id}" aria-label="${l}" style="display:block;color:#fff;font-size:26px;padding:10px 4px;text-shadow:0 1px 4px #000">${ic}</button>`;
  const chip=(n,l)=>`<button data-lim="${n}" style="padding:8px 14px;border-radius:999px;font-weight:700;background:${lim===n?"#fff":"transparent"};color:${lim===n?"#000":"#fff"};text-shadow:${lim===n?"none":"0 1px 4px #000"}">${l}</button>`;
@@ -1745,7 +1775,7 @@ function recorder(){
  $("#panel").querySelectorAll("[data-fx]").forEach(b=>b.onclick=()=>{if(rec&&rec.state==="recording")return;fx=FX[+b.dataset.fx][1];recorder();$("#fxp").style.display="block"});
  $("#panel").querySelectorAll("[data-sk]").forEach(b=>b.onclick=()=>{if(rec&&rec.state==="recording")return;stk=b.dataset.sk;recorder();$("#fxp").style.display="block"});
  $("#bk").onclick=close;$("#bl").onclick=goLive;$("#bc").onclick=create;
- $("#sn").onclick=()=>{$("#st").textContent="Adding a sound to your video arrives with the Android app."};
+ $("#sn").onclick=()=>{if(rec&&rec.state==="recording")return;soundPicker()};if(SND)$("#sn").textContent="♪ "+SND.name.slice(0,22);
  $("#fl").onclick=()=>{$("#st").textContent="Use the phone camera app (CREATE) if you need the flash."};
  $("#tm2").style.opacity=tmr?1:.6;$("#tm2").onclick=()=>{tmr=!tmr;$("#tm2").style.opacity=tmr?1:.6;$("#st").textContent=tmr?"Timer on: recording starts after 3 seconds.":"Timer off."};
  $("#panel").querySelectorAll("[data-lim]").forEach(b=>b.onclick=()=>{if(rec&&rec.state==="recording")return;if(+b.dataset.lim===-1){stopCam();textForm();return}lim=+b.dataset.lim;recorder()});
@@ -1759,9 +1789,10 @@ function recorder(){
   chunks=[];
   const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm"].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||"";
   let src=rs;stopLoop=null;if(fx||stk){const v=$("#rv"),c=document.createElement("canvas");c.width=v.videoWidth||720;c.height=v.videoHeight||1280;const x=c.getContext("2d");let on=true;const draw=()=>{if(!on)return;drawFx(x,v,c.width,c.height);requestAnimationFrame(draw)};draw();const cs=c.captureStream(30);rs.getAudioTracks().forEach(t=>cs.addTrack(t));src=cs;stopLoop=()=>{on=false}}
+  src=mixSound(src);
   try{const long=lim>=600;rec=new MediaRecorder(src,mt?{mimeType:mt,videoBitsPerSecond:long?220000:1500000,audioBitsPerSecond:long?32000:128000}:{})}catch(e){$("#st").textContent="Recording is not supported on this device. Tap CREATE and use the phone camera app instead.";return}
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
-  rec.onstop=()=>{clearInterval(rt);if(stopLoop)stopLoop();const type=(rec.mimeType||mt||"video/webm").split(";")[0];postForm(new File(chunks,"clip."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+  rec.onstop=()=>{clearInterval(rt);if(stopLoop)stopLoop();if(stopSnd)stopSnd();const type=(rec.mimeType||mt||"video/webm").split(";")[0];postForm(new File(chunks,"clip."+(type.includes("mp4")?"mp4":"webm"),{type}))};
   rec.start();
   let s=0;$("#tm").textContent="0:00";$("#ri").style.cssText="width:30px;height:30px;border-radius:6px;background:#FF2D55";$("#rb").setAttribute("aria-label","Stop recording");$("#st").textContent="";
   rt=setInterval(()=>{s++;$("#tm").textContent=Math.floor(s/60)+":"+String(s%60).padStart(2,"0");if(s>=lim&&rec.state==="recording")rec.stop()},1000);
