@@ -12,9 +12,20 @@ const NPS=[["restaurant","Restaurants","Where to eat near you"],["park","Parks",
 function nearGrid(){
  return `<p class="note" style="margin:10px 0 0">Tap a place type to list places near you. Tap one to open it in Maps.</p><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">${NPS.map(it=>{const g=GRAD[hsh(it[1])%GRAD.length];return `<a href="#" data-np="${it[0]}" style="display:block;color:inherit;text-decoration:none">${PH[it[0]]?`<img src="${PH[it[0]]}" alt="${esc(it[1])}" loading="lazy" style="display:block;width:100%;height:104px;object-fit:cover;border-radius:14px">`:`<div style="height:104px;border-radius:14px;background:linear-gradient(160deg,${g[0]},${g[1]});display:grid;place-items:center;font-size:48px">${NP[it[0]][1]}</div>`}<div style="font-weight:700;margin-top:6px">${esc(it[1])}</div><div class="mute" style="font-size:13px;line-height:1.3">${esc(it[2])}</div></a>`}).join("")}</div>`;
 }
-async function netGet(url){
- if(window.WLAuth){const r=await WLN("get",{url:url});if(r.error)throw new Error(r.error);return r.body}
- const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}
+async function netGet(url,sec){
+ sec=sec||25;
+ const job=window.WLAuth?WLN("get",{url:url,timeout:sec}).then(r=>{if(r.error)throw new Error(r.error);return r.body}):fetch(url).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.text()});
+ return Promise.race([job,new Promise((_,no)=>setTimeout(()=>no(new Error("The places service is slow right now.")),(sec+3)*1000))])}
+const NQ={restaurant:"restaurant",park:"park",attraction:"tourist attraction",hotel:"hotel",airport:"airport",train:"train station",bus:"bus station",atm:"atm"};
+async function overpassRows(key,C,loc,rad){
+ const q=`[out:json][timeout:15];nwr${C[2]}(around:${rad},${loc.lat},${loc.lng});out center 60;`;
+ const hosts=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
+ const txt=await Promise.any(hosts.map(h=>netGet(h+"?data="+encodeURIComponent(q),15)));
+ return(JSON.parse(txt).elements||[]).map(e=>({la:e.lat??(e.center&&e.center.lat),lo:e.lon??(e.center&&e.center.lon),t:e.tags||{}}))}
+async function nominatimRows(key,loc,rad){
+ const d=rad/111000,vb=[loc.lng-d,loc.lat+d,loc.lng+d,loc.lat-d].join(",");
+ const j=JSON.parse(await netGet("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=40&bounded=1&viewbox="+vb+"&q="+encodeURIComponent(NQ[key]),15));
+ return j.map(r=>{const p=(r.display_name||"").split(",").map(x=>x.trim());return{la:+r.lat,lo:+r.lon,t:{name:r.name||p[0],"addr:full":p.slice(1,3).join(", ")}}})}
 async function getLoc(){
  if(window.WLAuth){const r=await WLN("location");if(r.error)throw new Error(r.error);return{lat:r.lat,lng:r.lng,label:"your location"}}
  return new Promise((ok,no)=>{if(!navigator.geolocation)return no(new Error("Location is not available here."));navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,label:"your location"}),()=>no(new Error("Location was not allowed.")),{timeout:15000})})}
@@ -31,16 +42,14 @@ async function nearList(key,loc){
   open(head("Searching around "+esc(loc.label)+"…")+'<p class="mute" style="padding:20px 0">Looking for places…</p><button class="btn ghost" id="x">Close</button>');$("#npb").onclick=back;
   let rad=C[3],els=[];
   for(let tries=0;tries<3;tries++){
-   const q=`[out:json][timeout:25];nwr${C[2]}(around:${rad},${loc.lat},${loc.lng});out center 120;`;
-   let txt=null;
-   for(const host of["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter"]){try{txt=await netGet(host+"?data="+encodeURIComponent(q));break}catch(e){}}
-   if(txt===null)throw new Error("The places service is busy. Try again in a minute.");
-   els=JSON.parse(txt).elements||[];
-   const named=els.filter(e=>e.tags&&(e.tags.name||(key==="atm"&&(e.tags.operator||e.tags.brand))));
-   if(named.length>=6||tries===2){els=named;break}
+   let got=null,fb=false;
+   try{got=await overpassRows(key,C,loc,rad)}catch(e){fb=true;try{got=await nominatimRows(key,loc,rad*2)}catch(e2){got=null}}
+   if(got===null)throw new Error("The places service is busy. Check your internet and try again in a minute.");
+   const named=got.filter(e=>e.t&&(e.t.name||(key==="atm"&&(e.t.operator||e.t.brand))));
+   if(named.length>=6||tries===2||fb){els=named;if(fb)rad*=2;break}
    rad*=3}
   const seen={},rows=[];
-  els.forEach(e=>{const la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return;const t=e.tags,name=t.name||t.operator||t.brand||C[0].replace(/s$/,"");const k=name+"|"+la.toFixed(3)+"|"+lo.toFixed(3);if(seen[k])return;seen[k]=1;
+  els.forEach(e=>{const la=e.la,lo=e.lo;if(la==null||lo==null||isNaN(la))return;const t=e.t,name=t.name||t.operator||t.brand||C[0].replace(/s$/,"");const k=name+"|"+la.toFixed(3)+"|"+lo.toFixed(3);if(seen[k])return;seen[k]=1;
    const adr=t["addr:full"]||[t["addr:housenumber"],t["addr:street"],t["addr:suburb"]||t["addr:city"]].filter(Boolean).join(" ");
    rows.push({name,la,lo,d:npDist(loc.lat,loc.lng,la,lo),adr,ph:t.phone||t["contact:phone"]||"",oh:t.opening_hours||""})});
   rows.sort((a,b)=>a.d-b.d);const top=rows.slice(0,40);

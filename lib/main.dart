@@ -162,7 +162,7 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
       final u = Uri.parse(j['url'] as String);
       final r = await http
           .get(u, headers: {'User-Agent': 'WorldLink/1.0 (mrsegunsimon@gmail.com)', 'Accept': 'application/json'})
-          .timeout(const Duration(seconds: 40));
+          .timeout(Duration(seconds: (j['timeout'] as num?)?.toInt() ?? 25));
       if (r.statusCode != 200) return {'error': 'The places service answered ${r.statusCode}. Try again in a minute.'};
       return {'body': utf8.decode(r.bodyBytes)};
     }
