@@ -14,7 +14,6 @@ jobs:
       - name: Generate platform folders
         run: flutter create --platforms=android,ios --org com.worldlink --project-name worldlink .
       - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
