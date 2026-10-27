@@ -67,4 +67,9 @@ window.addEventListener("load",function(){setTimeout(function(){
 </script>"""
 i=s.rfind('</body>')
 s=s[:i]+RESTORE+s[i:]
+
+# Flutter's SafeArea already keeps the page clear of the status and navigation bars,
+# so the page must not add its own safe-area padding on top (that doubled the gaps).
+for side in ("top","bottom","left","right"):
+    s = s.replace("env(safe-area-inset-%s,0px)" % side, "0px")
 open(dst, 'w', encoding='utf8').write(s)

@@ -28,13 +28,13 @@
 <title>WorldLink</title>
 <style>
 :root{--bg:#070D24;--card:#111A3D;--ink:#fff;--mute:#9AA6CC;--line:#222E63;--acc:#FF7A1A;--accink:#0B1030;--sos:#FF3B30;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+box-sizing:border-box;padding-top:0px;padding-bottom:0px}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#F4F6FD;--card:#fff;--ink:#0B1646;--mute:#5A6590;--line:#DDE3F5;--acc:#D9530A;--accink:#fff}}
 :root[data-theme="light"]{--bg:#F4F6FD;--card:#fff;--ink:#0B1646;--mute:#5A6590;--line:#DDE3F5;--acc:#D9530A;--accink:#fff}
-html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+html{height:100%;scroll-padding-top:0px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;overflow:hidden}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:#070D24;z-index:60}
+body::before{content:"";position:fixed;inset:0 0 auto;height:0px;background:#070D24;z-index:60}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .stage{flex:1;position:relative;min-height:0;background:#070D24}
@@ -49,8 +49,8 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #fff
 #call{position:fixed;inset:0;z-index:90;background:linear-gradient(170deg,#1B1F3B,#0B0E1E);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center}
 #call.on{display:flex}
 .cv{text-align:center;padding:0 20px}.cv .av{margin:0 auto 12px}
-.pip{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:16px;width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:14px;background:#222;transform:scaleX(-1)}
-.ctl{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 36px);display:flex;gap:18px}
+.pip{position:absolute;top:calc(0px + 16px);right:16px;width:96px;aspect-ratio:3/4;object-fit:cover;border-radius:14px;background:#222;transform:scaleX(-1)}
+.ctl{position:absolute;bottom:calc(0px + 36px);display:flex;gap:18px}
 .ctl button{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.18);font-size:24px;color:#fff}
 .ctl button.off{background:#fff;color:#000;opacity:.7}
 .ctl .end{background:var(--sos)}
@@ -62,12 +62,12 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #fff
 @media (prefers-reduced-motion:reduce){#splash{transition:none}}
 #story.on{display:block}
 #story img,#story video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.bars{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;right:8px;display:flex;gap:4px;z-index:3}
+.bars{position:absolute;top:calc(0px + 8px);left:8px;right:8px;display:flex;gap:4px;z-index:3}
 .bars i{flex:1;height:3px;background:rgba(255,255,255,.35);border-radius:2px;overflow:hidden}
 .bars i.d{background:#fff}
 .bars i.c::after{content:"";display:block;height:100%;background:#fff;transform-origin:left;animation:fill var(--d,5s) linear forwards}
 @keyframes fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.who{position:absolute;top:calc(env(safe-area-inset-top,0px) + 20px);left:12px;right:12px;display:flex;align-items:center;gap:10px;z-index:3;text-shadow:0 1px 3px #000}
+.who{position:absolute;top:calc(0px + 20px);left:12px;right:12px;display:flex;align-items:center;gap:10px;z-index:3;text-shadow:0 1px 3px #000}
 .who span{opacity:.8;font-size:13px;flex:1}
 .who button{color:#fff;font-size:20px;padding:6px 10px}
 .nv{position:absolute;top:70px;bottom:0;width:36%;z-index:2}
@@ -103,7 +103,7 @@ nav button.on{color:var(--ink);font-weight:700}
 nav .plus{flex:none;width:52px;height:34px;border-radius:10px;background:#fff;color:#000;font-size:24px;font-weight:700;box-shadow:-3px 0 0 #3EA6FF,3px 0 0 #FF7A1A;margin:0 8px;padding:0}
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:70}
 .sheet.on{display:flex}
-.panel{background:var(--card);color:var(--ink);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:80vh;overflow-y:auto}
+.panel{background:var(--card);color:var(--ink);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + 0px);max-height:80vh;overflow-y:auto}
 .panel h2{margin:0 0 6px;font-size:19px}
 .mute{color:var(--mute)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
@@ -138,7 +138,7 @@ nav button{position:relative}nav .nb{position:absolute;top:0;left:55%;background
 .ncv .pl{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
 .ncv .ct{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}
 body.mini .sheet.sec .panel{padding-bottom:96px}body.mini .sheet.full .pgx{padding-bottom:84px}
-#sosf{position:fixed;left:max(12px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 60px);z-index:40;background:#E5233B;color:#fff;font-weight:800;font-size:13px;letter-spacing:.04em;border-radius:999px;padding:7px 12px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+#sosf{position:fixed;left:max(12px,0px);top:calc(0px + 60px);z-index:40;background:#E5233B;color:#fff;font-weight:800;font-size:13px;letter-spacing:.04em;border-radius:999px;padding:7px 12px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
 nav{flex:none!important;min-height:fit-content}</style>
 </head>
 <body>
@@ -865,7 +865,7 @@ function miniUp(){
  $("#mo").onclick=nowPlaying;$("#mp").onclick=togglePlay;$("#mn").onclick=()=>nextT();$("#mx").onclick=()=>{PL.a.pause();PL.q=[];PL.i=-1;const n=document.getElementById("np");if(n)n.remove();miniUp();rowMarks()};
 }
 addEventListener("resize",()=>{try{if(PL.q[PL.i])miniUp()}catch(e){}});
-function nowPlaying(){if(!PL.q[PL.i])return;let o=document.getElementById("np");if(o)o.remove();o=document.createElement("div");o.id="np";o.style.cssText="position:fixed;inset:0;z-index:88;background:linear-gradient(170deg,#12307F,#0B0E1E);color:#fff;overflow-y:auto;padding:max(14px,env(safe-area-inset-top,0px)) 20px calc(24px + env(safe-area-inset-bottom,0px))";document.body.appendChild(o);npBuild()}
+function nowPlaying(){if(!PL.q[PL.i])return;let o=document.getElementById("np");if(o)o.remove();o=document.createElement("div");o.id="np";o.style.cssText="position:fixed;inset:0;z-index:88;background:linear-gradient(170deg,#12307F,#0B0E1E);color:#fff;overflow-y:auto;padding:max(14px,0px) 20px calc(24px + 0px)";document.body.appendChild(o);npBuild()}
 function npBuild(){
  const o=document.getElementById("np"),c=PL.q[PL.i];if(!o||!c)return;
  const sz=Math.min(innerWidth-70,340);
@@ -904,7 +904,7 @@ function openVideo(i){
  const L=vidList(),x=L[i];if(!x)return;VPI=i;try{PL.a.pause()}catch(e){}
  let o=document.getElementById("vp");if(o)o.remove();
  o=document.createElement("div");o.id="vp";o.style.cssText="position:fixed;inset:0;z-index:92;background:#000;color:#fff;display:flex;flex-direction:column";
- o.innerHTML=`<video id="vpv" src="${esc(x.url)}" playsinline autoplay style="flex:1;min-height:0;width:100%;object-fit:contain;background:#000"></video><div id="vpc" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.55),transparent 22%,transparent 62%,rgba(0,0,0,.7))"><div style="display:flex;align-items:center;gap:10px;padding:max(12px,env(safe-area-inset-top,0px)) 14px 0"><button id="vx" aria-label="Close video" style="color:#fff;font-size:26px">←</button><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.t)}</b></div><div style="display:flex;justify-content:center;align-items:center;gap:34px"><button id="vpv2" aria-label="Previous video" style="color:#fff;font-size:30px">⏮</button><button id="vpp" aria-label="Play or pause" style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.9);color:#000;font-size:30px">⏸</button><button id="vnx" aria-label="Next video" style="color:#fff;font-size:30px">⏭</button></div><div style="padding:0 16px calc(14px + env(safe-area-inset-bottom,0px))"><input id="vr" type="range" min="0" max="1000" value="0" aria-label="Seek" style="width:100%;accent-color:#FF7A1A"><div style="display:flex;align-items:center;gap:12px;font-size:13px"><span id="vt">0:00 / 0:00</span><span style="flex:1"></span><button id="vm" aria-label="Mute" style="color:#fff;font-size:18px">🔊</button><button id="vs" style="color:#fff;font-weight:700">1x</button><button id="vf" aria-label="Fullscreen" style="color:#fff;font-size:18px">⛶</button></div><div style="font-size:12px;opacity:.7;margin-top:4px">${esc(x.a||"")}${x.lic?" · "+esc(x.lic):""}</div></div></div><p id="ve" class="note" style="position:absolute;left:0;right:0;top:46%;text-align:center;color:#FFB4A8"></p>`;
+ o.innerHTML=`<video id="vpv" src="${esc(x.url)}" playsinline autoplay style="flex:1;min-height:0;width:100%;object-fit:contain;background:#000"></video><div id="vpc" style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.55),transparent 22%,transparent 62%,rgba(0,0,0,.7))"><div style="display:flex;align-items:center;gap:10px;padding:max(12px,0px) 14px 0"><button id="vx" aria-label="Close video" style="color:#fff;font-size:26px">←</button><b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.t)}</b></div><div style="display:flex;justify-content:center;align-items:center;gap:34px"><button id="vpv2" aria-label="Previous video" style="color:#fff;font-size:30px">⏮</button><button id="vpp" aria-label="Play or pause" style="width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.9);color:#000;font-size:30px">⏸</button><button id="vnx" aria-label="Next video" style="color:#fff;font-size:30px">⏭</button></div><div style="padding:0 16px calc(14px + 0px)"><input id="vr" type="range" min="0" max="1000" value="0" aria-label="Seek" style="width:100%;accent-color:#FF7A1A"><div style="display:flex;align-items:center;gap:12px;font-size:13px"><span id="vt">0:00 / 0:00</span><span style="flex:1"></span><button id="vm" aria-label="Mute" style="color:#fff;font-size:18px">🔊</button><button id="vs" style="color:#fff;font-weight:700">1x</button><button id="vf" aria-label="Fullscreen" style="color:#fff;font-size:18px">⛶</button></div><div style="font-size:12px;opacity:.7;margin-top:4px">${esc(x.a||"")}${x.lic?" · "+esc(x.lic):""}</div></div></div><p id="ve" class="note" style="position:absolute;left:0;right:0;top:46%;text-align:center;color:#FFB4A8"></p>`;
  document.body.appendChild(o);
  const v=$("#vpv"),c=$("#vpc");let hide;
  const show=()=>{c.style.opacity=1;c.style.pointerEvents="auto";clearTimeout(hide);hide=setTimeout(()=>{if(!v.paused){c.style.opacity=0;c.style.pointerEvents="none"}},3000)};
@@ -969,7 +969,7 @@ function linkPreview(u,title,desc){
  const em=(HOSTE.find(r=>r[0].test(host+" "+title))||[0,"🔗"])[1],g=GRAD[hsh(title||host)%GRAD.length];
  let o=document.getElementById("lp");if(o)o.remove();
  o=document.createElement("div");o.id="lp";
- o.style.cssText="position:fixed;inset:0;z-index:95;background:var(--card);color:var(--ink);overflow-y:auto;padding:14px 16px calc(24px + env(safe-area-inset-bottom,0px))";
+ o.style.cssText="position:fixed;inset:0;z-index:95;background:var(--card);color:var(--ink);overflow-y:auto;padding:14px 16px calc(24px + 0px)";
  o.innerHTML=`<button id="lpb" class="btn ghost" style="width:auto;margin:0 0 12px;padding:8px 16px">← Back</button><div class="ncv" style="height:${Math.round(innerHeight*.32)}px;background:linear-gradient(160deg,${g[0]},${g[1]});font-size:90px">${em}<span class="ct">Opens on ${esc(host)}</span></div><h2 style="font-size:23px;line-height:1.25;margin:14px 0 6px">${esc(title||host)}</h2>${desc?`<p style="font-size:16px;line-height:1.5;margin:0 0 6px">${esc(desc)}</p>`:""}<button class="btn" id="lpo" style="margin-top:14px">Open on ${esc(host)}</button><p class="note">You are leaving WorldLink. The page, its pictures and any video play on ${esc(host)}. This preview is made by WorldLink from what we know about the link.</p>`;
  document.body.appendChild(o);
  $("#lpb").onclick=()=>o.remove();$("#lpo").onclick=()=>{openExt(u);o.remove()};
