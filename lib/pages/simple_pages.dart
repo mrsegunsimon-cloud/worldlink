@@ -28,6 +28,12 @@ class CreatePage extends StatelessWidget {
   Widget build(BuildContext context) => const _Soon('Create', 'Camera, face effects and voice effects arrive in the next build.', Icons.videocam);
 }
 
+class FriendsPage extends StatelessWidget {
+  const FriendsPage({super.key});
+  @override
+  Widget build(BuildContext context) => const _Soon('Friends', 'Friends and nearby people arrive in the next build.', Icons.people);
+}
+
 class InboxPage extends StatelessWidget {
   const InboxPage({super.key});
   @override
