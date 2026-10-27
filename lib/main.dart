@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
 
 bool fbReady = false;
 
@@ -73,10 +74,10 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFF050B24))
       ..addJavaScriptChannel('WLAuth', onMessageReceived: _onMsg)
-      ..setOnPlatformPermissionRequest(_onWebPermission)
       ..loadFlutterAsset('assets/web/index.html');
     final p = _c.platform;
     if (p is AndroidWebViewController) {
+      p.setOnPlatformPermissionRequest(_onWebPermission);
       p.setMediaPlaybackRequiresUserGesture(false);
       p.setOnShowFileSelector(_pickFiles);
     }
