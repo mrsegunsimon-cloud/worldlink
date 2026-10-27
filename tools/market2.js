@@ -143,6 +143,8 @@ const MKS=[
  ["Books & vinyl","📀",["Vinyl record","Poetry book","Novel set","Comic collection","Sheet music","CD box set"],[2000,60000]]],
  ["Rhythm House","Canvas & Co","Studio Plug","Beat Shop"]]
 ];
+/*MKPH*/const MKPH={};/*ENDMKPH*/
+/*MKCR*/const MKCR={};/*ENDMKCR*/
 const MCITY=["Lagos","Abuja","Port Harcourt","Ibadan","Kano","Enugu","Benin City","Accra","Nairobi"];
 const MSTORES=[];const MPRODS=[];
 (function(){
@@ -160,14 +162,15 @@ const MSTORES=[];const MPRODS=[];
     const step=price>1e6?50000:price>1e5?5000:price>1e4?500:100;
     price=Math.max(step,Math.round(price/step)*step);
     const st=first+((pid+k)%(sid-first));
-    MPRODS.push({id:"p"+pid,t:t,p:price,si:si,bi:bi,st:st,em:sub[1],g:S[3],cond:(k%3===0?"New":k%3===1?"Like new":"Used"),city:MSTORES[st].city});
+    MPRODS.push({id:"p"+pid,pk:"p"+si+"."+bi+"."+k,t:t,p:price,si:si,bi:bi,st:st,em:sub[1],g:S[3],cond:(k%3===0?"New":k%3===1?"Like new":"Used"),city:MSTORES[st].city});
     pid++})})});
 })();
 let MKV={v:"home",a:null,b:null};
+const mkPic=(keys,em,g,h,fs)=>{const k=keys.find(x=>MKPH[x]);return k?`<div style="height:${h}px;border-radius:14px;overflow:hidden;background:#222"><img src="${MKPH[k]}" alt="" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover"></div>`:mkTile(em,g,h,fs)};
 const mkTile=(em,g,h,fs)=>`<div style="height:${h}px;border-radius:14px;background:linear-gradient(150deg,${g[0]},${g[1]});display:grid;place-items:center;font-size:${fs}px">${em}</div>`;
-const mkSecTile=i=>{const S=MKS[i],n=MPRODS.filter(p=>p.si===i).length;const ph=S[4]&&PH[S[4]];
- return `<button data-sec="${i}" style="text-align:left;color:inherit;padding:0"><div style="position:relative;height:92px;border-radius:14px;overflow:hidden;background:linear-gradient(150deg,${S[3][0]},${S[3][1]})">${ph?`<img src="${PH[S[4]]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55">`:""}<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:42px;text-shadow:0 2px 6px rgba(0,0,0,.4)">${S[2]}</div></div><div style="font-weight:700;font-size:14px;margin-top:4px">${S[1]}</div><div class="mute" style="font-size:12px">${S[5].length} sections · ${n} items</div></button>`};
-const mkProdCard=p=>`<button data-pr="${p.id}" style="text-align:left;color:inherit;padding:0">${mkTile(p.em,p.g,104,44)}<div style="font-weight:700;font-size:14px;margin-top:4px;line-height:1.25">${esc(p.t)}</div><div style="color:var(--acc);font-weight:800">${naira(p.p)}</div><div class="mute" style="font-size:12px">${esc(MSTORES[p.st].name)} · ${esc(p.city)}</div></button>`;
+const mkSecTile=i=>{const S=MKS[i],n=MPRODS.filter(p=>p.si===i).length;const ph=MKPH["s"+i]||(S[4]&&PH[S[4]]);
+ return `<button data-sec="${i}" style="text-align:left;color:inherit;padding:0"><div style="position:relative;height:92px;border-radius:14px;overflow:hidden;background:linear-gradient(150deg,${S[3][0]},${S[3][1]})">${ph?`<img src="${ph}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:""}${MKPH["s"+i]?`<div style="position:absolute;left:0;right:0;bottom:0;height:46px;background:linear-gradient(transparent,rgba(0,0,0,.65))"></div>`:`<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:42px;text-shadow:0 2px 6px rgba(0,0,0,.4)">${S[2]}</div>`}</div><div style="font-weight:700;font-size:14px;margin-top:4px">${S[1]}</div><div class="mute" style="font-size:12px">${S[5].length} sections · ${n} items</div></button>`};
+const mkProdCard=p=>`<button data-pr="${p.id}" style="text-align:left;color:inherit;padding:0">${mkPic([p.pk,"b"+p.si+"."+p.bi],p.em,p.g,104,44)}<div style="font-weight:700;font-size:14px;margin-top:4px;line-height:1.25">${esc(p.t)}</div><div style="color:var(--acc);font-weight:800">${naira(p.p)}</div><div class="mute" style="font-size:12px">${esc(MSTORES[p.st].name)} · ${esc(p.city)}</div></button>`;
 const mkStoreCard=s=>`<button data-st="${s.id}" style="flex:none;width:132px;text-align:left;color:inherit;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--card)"><div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(150deg,${s.g[0]},${s.g[1]});display:grid;place-items:center;font-size:22px">${s.em}</div><div style="font-weight:700;font-size:13px;margin-top:6px;line-height:1.2">${esc(s.name)}</div><div class="mute" style="font-size:12px">★ ${s.rating} · ${esc(s.city)}</div></button>`;
 const mkGrid=h=>`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${h}</div>`;
 function mkWire(){
@@ -179,6 +182,7 @@ function mkWire(){
  P.querySelectorAll("[data-mb]").forEach(b=>b.onclick=()=>{const f=MKV.from;MKV=f&&f.v?f:{v:"home"};market()});
  P.querySelectorAll("[data-mh]").forEach(b=>b.onclick=()=>{MKV={v:"home"};market()});
  const q=$("#mq2");if(q)q.onchange=()=>{const t=q.value.trim();MKV=t?{v:"search",a:t}:{v:"home"};market()};
+ const mc=$("#mcr");if(mc)mc.onclick=mkCredits;
  const c=$("#cm0");if(c)c.onclick=()=>{market0()};
  const sl=$("#sl");if(sl)sl.onclick=sell;
  P.querySelectorAll("[data-sv2]").forEach(b=>b.onclick=()=>{const id=b.dataset.sv2;const i=SAV.indexOf(id);if(i>=0)SAV.splice(i,1);else SAV.push(id);try{localStorage.setItem("wl-sav",JSON.stringify(SAV))}catch(e){}market()});
@@ -196,11 +200,11 @@ function market(){
    +`<h3 style="margin:14px 0 8px">Online stores</h3><div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px">${top.map(mkStoreCard).join("")}</div>`
    +`<h3 style="margin:14px 0 8px">Shop by section</h3>${mkGrid(MKS.map((s,i)=>mkSecTile(i)).join(""))}`
    +`<h3 style="margin:16px 0 8px">Trending now</h3>${mkGrid(MPRODS.filter((p,i)=>i%11===0).slice(0,8).map(mkProdCard).join(""))}`
-   +`<button class="btn ghost" id="cm0">Community listings from people near you</button><button class="btn" id="sl">Sell something</button><p class="note">Stores and products shown here are a sample catalogue while real online stores open. Meet in a public place, check items before you pay, and never send money to someone you have not met.</p><button class="btn ghost" id="x">Close</button>`;
+   +`<button class="btn ghost" id="cm0">Community listings from people near you</button><button class="btn ghost" id="mcr">Photo credits</button><button class="btn" id="sl">Sell something</button><p class="note">Stores and products shown here are a sample catalogue while real online stores open. Meet in a public place, check items before you pay, and never send money to someone you have not met.</p><button class="btn ghost" id="x">Close</button>`;
  }else if(v==="sec"){
   const i=MKV.a,S=MKS[i];
   h=mkHead(S[2]+" "+S[1],S[5].length+" sections",S[3][0],S[3][1],"mh")
-   +`<h3 style="margin:6px 0 8px">Sections</h3>`+mkGrid(S[5].map((b,j)=>`<button data-sub="${j}" style="text-align:left;color:inherit;padding:0">${mkTile(b[1],S[3],86,40)}<div style="font-weight:700;font-size:14px;margin-top:4px">${esc(b[0])}</div><div class="mute" style="font-size:12px">${b[2].length} items</div></button>`).join(""))
+   +`<h3 style="margin:6px 0 8px">Sections</h3>`+mkGrid(S[5].map((b,j)=>`<button data-sub="${j}" style="text-align:left;color:inherit;padding:0">${mkPic(["b"+MKV.a+"."+j],b[1],S[3],86,40)}<div style="font-weight:700;font-size:14px;margin-top:4px">${esc(b[0])}</div><div class="mute" style="font-size:12px">${b[2].length} items</div></button>`).join(""))
    +`<h3 style="margin:16px 0 8px">Stores in ${esc(S[1])}</h3><div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px">${MSTORES.filter(s=>s.sec===i).map(mkStoreCard).join("")}</div>`
    +`<h3 style="margin:16px 0 8px">Popular in ${esc(S[1])}</h3>${mkGrid(MPRODS.filter(p=>p.si===i&&p.id.slice(1)%3===0).slice(0,8).map(mkProdCard).join(""))}`
    +`<button class="btn ghost" data-mh>Back to marketplace</button>`;
@@ -218,7 +222,7 @@ function market(){
    +`<button class="btn ghost" data-mh>Back to marketplace</button>`;
  }else if(v==="prod"){
   const p=MPRODS.find(x=>x.id===MKV.a),s=MSTORES[p.st],S=MKS[p.si],B=S[5][p.bi],sv=SAV.includes(p.id);
-  h=mkHead(esc(p.t),S[1]+" · "+B[0],p.g[0],p.g[1],"mb")+mkTile(p.em,p.g,200,96)
+  h=mkHead(esc(p.t),S[1]+" · "+B[0],p.g[0],p.g[1],"mb")+mkPic([p.pk,"b"+p.si+"."+p.bi],p.em,p.g,200,96)
    +`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><b style="font-size:24px;color:var(--acc)">${naira(p.p)}</b><span class="mute">${p.cond}</span></div>`
    +`<button data-st="${s.id}" style="display:flex;gap:10px;align-items:center;width:100%;text-align:left;color:inherit;padding:10px;border:1px solid var(--line);border-radius:14px;margin-top:10px"><div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(150deg,${s.g[0]},${s.g[1]});display:grid;place-items:center;font-size:20px">${s.em}</div><div style="flex:1"><b>${esc(s.name)}</b><div class="mute" style="font-size:12px">★ ${s.rating} · ${esc(s.city)}</div></div><span class="mute">View store ›</span></button>`
    +`<p style="margin:10px 0">${esc(p.t)} from ${esc(s.name)} in ${esc(p.city)}. Ask the store about size, colour, delivery and warranty before you pay.</p>`
@@ -239,4 +243,11 @@ function market(){
  open(h);
  mkWire();
  const sc=$("#panel");if(sc)sc.scrollTop=0;
+}
+
+function mkCredits(){
+ const ks=Object.keys(MKCR);
+ const nm=k=>{if(k[0]==="s")return MKS[+k.slice(1)][1];if(k[0]==="b"){const a=k.slice(1).split(".");return MKS[+a[0]][5][+a[1]][0]}const a=k.slice(1).split(".");return MKS[+a[0]][5][+a[1]][2][+a[2]]};
+ open(`<h2>Photo credits</h2><p class="mute">Marketplace pictures come from Wikimedia Commons and are shared under free licences. Thank you to the photographers.</p>${ks.length?ks.map(k=>`<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:13px"><b>${esc(nm(k))}</b><div class="mute">${esc(MKCR[k][0]||"Unknown")} · ${esc(MKCR[k][1]||"")}</div></div>`).join(""):'<p class="mute">No photos yet.</p>'}<button class="btn ghost" id="mcb">Back to marketplace</button><button class="btn ghost" id="x">Close</button>`);
+ $("#mcb").onclick=()=>{MKV={v:"home"};market()};
 }
