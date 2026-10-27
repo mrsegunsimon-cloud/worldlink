@@ -10,6 +10,8 @@ jobs:
         with: { channel: stable, cache: true }
       - name: Generate platform folders
         run: flutter create --platforms=android,ios --org com.worldlink --project-name worldlink .
+      - name: Location permission text for iPhone
+        run: /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string WorldLink uses your location to list places near you." ios/Runner/Info.plist
       - run: flutter pub get
       - run: flutter build ios --release --no-codesign
       - uses: actions/upload-artifact@v4

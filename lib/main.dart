@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 bool fbReady = false;
@@ -150,6 +153,19 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
 
   Future<Map<String, dynamic>> _handle(Map<String, dynamic> j) async {
     final op = j['op'] as String;
+    if (op == 'location') return _location();
+    if (op == 'open') {
+      await launchUrl(Uri.parse(j['url'] as String), mode: LaunchMode.externalApplication);
+      return {'ok': true};
+    }
+    if (op == 'get') {
+      final u = Uri.parse(j['url'] as String);
+      final r = await http
+          .get(u, headers: {'User-Agent': 'WorldLink/1.0 (mrsegunsimon@gmail.com)', 'Accept': 'application/json'})
+          .timeout(const Duration(seconds: 40));
+      if (r.statusCode != 200) return {'error': 'The places service answered ${r.statusCode}. Try again in a minute.'};
+      return {'body': utf8.decode(r.bodyBytes)};
+    }
     if (!fbReady) {
       return op == 'state' ? {'user': null} : {'error': 'Online accounts are not switched on in this build yet.'};
     }
@@ -182,6 +198,27 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
         return {'ok': true};
     }
     return {'error': 'Unknown request.'};
+  }
+
+  Future<Map<String, dynamic>> _location() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return {'error': 'Location is switched off on your phone. Turn it on and try again.'};
+    }
+    var perm = await Geolocator.checkPermission();
+    if (perm == LocationPermission.denied) perm = await Geolocator.requestPermission();
+    if (perm == LocationPermission.denied || perm == LocationPermission.deniedForever) {
+      return {'error': 'Location permission was not allowed. Allow it in your phone settings, or search a city instead.'};
+    }
+    try {
+      final p = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium, timeLimit: Duration(seconds: 20)),
+      );
+      return {'lat': p.latitude, 'lng': p.longitude};
+    } catch (_) {
+      final last = await Geolocator.getLastKnownPosition();
+      if (last != null) return {'lat': last.latitude, 'lng': last.longitude};
+      return {'error': 'Could not get your location. Try again outside, or search a city instead.'};
+    }
   }
 
   Future<void> _onMsg(JavaScriptMessage m) async {

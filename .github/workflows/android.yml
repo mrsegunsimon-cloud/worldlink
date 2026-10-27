@@ -17,7 +17,8 @@ jobs:
         run: |
           sed -i 's/flutter.minSdkVersion/23/' android/app/build.gradle* || true
           sed -i 's|<application|<uses-permission android:name="android.permission.INTERNET"/>\n    <application|' android/app/src/main/AndroidManifest.xml
-          grep -n "INTERNET" android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n    <application|' android/app/src/main/AndroidManifest.xml
+          grep -n "INTERNET\|LOCATION" android/app/src/main/AndroidManifest.xml
           grep -n "minSdk" android/app/build.gradle*
       - name: Use the fixed signing key so the app fingerprint never changes
         run: |
