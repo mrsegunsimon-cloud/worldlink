@@ -139,7 +139,7 @@ nav button{position:relative}nav .nb{position:absolute;top:0;left:55%;background
 .ncv .ct{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700}
 body.mini .sheet.sec .panel{padding-bottom:96px}body.mini .sheet.full .pgx{padding-bottom:84px}
 #sosf{position:fixed;left:max(12px,env(safe-area-inset-left,0px));top:calc(env(safe-area-inset-top,0px) + 60px);z-index:40;background:#E5233B;color:#fff;font-weight:800;font-size:13px;letter-spacing:.04em;border-radius:999px;padding:7px 12px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
-</style>
+nav{flex:none!important;min-height:fit-content}</style>
 </head>
 <body>
 <div class="stage">
@@ -1433,5 +1433,13 @@ loadGR();loadTR();loadMV();loadLS();loadEV();loadPS();loadST();loadNF();
 setTimeout(()=>$("#splash").classList.add("off"),1300);
 build();
 </script>
-</body>
+<script>
+window.addEventListener("load",function(){setTimeout(function(){
+ WLN("state").then(function(r){if(!r||!r.user)return;
+  window.__wlUser=r.user;me.uid=r.user.uid;
+  if(me.name==="you")me.name=((r.user.email||"you").split("@")[0].replace(/[^a-zA-Z0-9._]/g,"").slice(0,20))||"you";
+  var on=document.querySelector("nav button.on");
+  if(on&&/Profile/.test(on.textContent))profile();
+ })},1500)});
+</script></body>
 </html>

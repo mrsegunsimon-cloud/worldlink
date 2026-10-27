@@ -51,4 +51,20 @@ rep('function editProfile(){', '''function authSheet(mode,how){
 function editProfile(){''')
 
 rep('font-weight:700;color:inherit">Sign in or create account</button>', 'font-weight:700;color:inherit">${window.__wlUser?"Signed in · Log out":"Sign in or create account"}</button>')
+
+rep('</style>', 'nav{flex:none!important;min-height:fit-content}</style>') if s.count('</style>')==1 else None
+if s.count('</style>')!=1:
+    i=s.rfind('</style>'); s=s[:i]+'nav{flex:none!important}'+s[i:]
+
+RESTORE = """<script>
+window.addEventListener("load",function(){setTimeout(function(){
+ WLN("state").then(function(r){if(!r||!r.user)return;
+  window.__wlUser=r.user;me.uid=r.user.uid;
+  if(me.name==="you")me.name=((r.user.email||"you").split("@")[0].replace(/[^a-zA-Z0-9._]/g,"").slice(0,20))||"you";
+  var on=document.querySelector("nav button.on");
+  if(on&&/Profile/.test(on.textContent))profile();
+ })},1500)});
+</script>"""
+i=s.rfind('</body>')
+s=s[:i]+RESTORE+s[i:]
 open(dst, 'w', encoding='utf8').write(s)
