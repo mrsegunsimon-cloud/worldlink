@@ -335,10 +335,17 @@ function authSheet0(mode,how){
   if(how==="email"){const e=$("#ae").value.trim(),pw=$("#ap").value;
    if(!/^\S+@\S+\.\S+$/.test(e)){st.textContent="Enter a valid email address, like name@example.com.";return}
    if(pw.length<8){st.textContent="Password needs at least 8 characters.";return}
-   if(window.WLAuth){st.textContent="Please wait...";WLN(up?"signup":"login",{email:e,password:pw}).then(function(r){if(r.error){st.textContent=r.error;return}window.__wlUser=r.user;me.uid=r.user.uid;if(me.name==="you")me.name=((r.user.email||"you").split("@")[0].replace(/[^a-zA-Z0-9._]/g,"").slice(0,20))||"you";st.textContent=up?"Account created. A confirmation email was sent to "+e+".":"Welcome back!";setTimeout(function(){close();profile()},900)});return}
+   if(window.WLAuth){st.textContent="Please wait...";WLN(up?"signup":"login",{email:e,password:pw}).then(function(r){if(r.error){st.textContent=r.error;return}window.__wlUser=r.user;me.uid=r.user.uid;if(me.name==="you")me.name=(r.user.name||"you");st.textContent=up?"Account created. A confirmation email was sent to "+e+".":"Welcome back!";setTimeout(function(){close();profile()},900)});return}
    st.textContent=up?"Looks good. In the app we would now email you a link to confirm this address.":"Looks good. In the app you would now be logged in."}
   else{const n=$("#ap2").value.replace(/[\s-]/g,"");
    if(!/^\+\d{8,15}$/.test(n)){st.textContent="Enter the number with country code, like +2348012345678.";return}
+   if(window.WLAuth){st.textContent="Sending code...";WLN("phone_send",{phone:n}).then(function(r){if(r.error){st.textContent=r.error;return}
+    var done=function(u){window.__wlUser=u;me.uid=u.uid;if(me.name==="you")me.name=u.name||"you";st.textContent="Welcome!";setTimeout(function(){close();profile()},700)};
+    if(r.user){done(r.user);return}
+    $("#ap2").insertAdjacentHTML("afterend",'<input class="in" id="ac" inputmode="numeric" maxlength="6" placeholder="6-digit code" aria-label="Code">');
+    st.textContent="Code sent to "+n+". Enter it below.";
+    var g=$("#go1");g.textContent="Verify code";
+    g.onclick=function(){var c=$("#ac").value.trim();if(!/^\d{6}$/.test(c)){st.textContent="Enter the 6-digit code.";return}st.textContent="Checking...";WLN("phone_verify",{code:c}).then(function(v){if(v.error){st.textContent=v.error;return}done(v.user)})}});return}
    st.textContent="Looks good. In the app we would now text a 6-digit code to "+n+"."}
  };
 }
@@ -1437,7 +1444,7 @@ build();
 window.addEventListener("load",function(){setTimeout(function(){
  WLN("state").then(function(r){if(!r||!r.user)return;
   window.__wlUser=r.user;me.uid=r.user.uid;
-  if(me.name==="you")me.name=((r.user.email||"you").split("@")[0].replace(/[^a-zA-Z0-9._]/g,"").slice(0,20))||"you";
+  if(me.name==="you")me.name=(r.user.name||"you");
   var on=document.querySelector("nav button.on");
   if(on&&/Profile/.test(on.textContent))profile();
  })},1500)});

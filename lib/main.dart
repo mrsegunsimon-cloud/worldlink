@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -69,8 +70,50 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
       ..loadFlutterAsset('assets/web/index.html');
   }
 
-  Map<String, dynamic> _user(User? u) =>
-      u == null ? {'user': null} : {'user': {'uid': u.uid, 'email': u.email ?? ''}};
+  String? _verificationId;
+  int? _resendToken;
+
+  Map<String, dynamic> _user(User? u) {
+    if (u == null) return {'user': null};
+    final mail = u.email ?? '';
+    final phone = u.phoneNumber ?? '';
+    var name = mail.split('@').first.replaceAll(RegExp(r'[^a-zA-Z0-9._]'), '');
+    if (name.length > 20) name = name.substring(0, 20);
+    if (name.isEmpty) {
+      final d = phone.replaceAll(RegExp(r'[^0-9]'), '');
+      name = 'user${d.length >= 4 ? d.substring(d.length - 4) : d}';
+    }
+    return {
+      'user': {'uid': u.uid, 'email': mail.isNotEmpty ? mail : phone, 'name': name}
+    };
+  }
+
+  Future<Map<String, dynamic>> _sendCode(String phone) async {
+    final done = Completer<Map<String, dynamic>>();
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: phone,
+      forceResendingToken: _resendToken,
+      timeout: const Duration(seconds: 60),
+      verificationCompleted: (cred) async {
+        try {
+          final r = await FirebaseAuth.instance.signInWithCredential(cred);
+          if (!done.isCompleted) done.complete(_user(r.user));
+        } catch (_) {}
+      },
+      verificationFailed: (e) {
+        if (!done.isCompleted) done.complete({'error': _human(e)});
+      },
+      codeSent: (id, token) {
+        _verificationId = id;
+        _resendToken = token;
+        if (!done.isCompleted) done.complete({'ok': true});
+      },
+      codeAutoRetrievalTimeout: (id) {
+        _verificationId = id;
+      },
+    );
+    return done.future;
+  }
 
   String _human(FirebaseAuthException e) {
     switch (e.code) {
@@ -88,6 +131,16 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
         return 'No internet connection. Try again.';
       case 'too-many-requests':
         return 'Too many tries. Wait a minute and try again.';
+      case 'invalid-phone-number':
+        return 'That phone number is not valid. Use the format +2348012345678.';
+      case 'invalid-verification-code':
+        return 'Wrong code. Check the text message and try again.';
+      case 'session-expired':
+        return 'The code expired. Request a new one.';
+      case 'quota-exceeded':
+        return 'Too many text messages today. Try again tomorrow.';
+      case 'app-not-authorized':
+        return 'This app build is not approved for phone login yet.';
       case 'operation-not-allowed':
         return 'Email login is not switched on in Firebase yet.';
       default:
@@ -116,6 +169,14 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
       case 'reset':
         await a.sendPasswordResetEmail(email: j['email'] as String);
         return {'ok': true};
+      case 'phone_send':
+        return _sendCode(j['phone'] as String);
+      case 'phone_verify':
+        final id = _verificationId;
+        if (id == null) return {'error': 'Request a new code first.'};
+        final cr = await a.signInWithCredential(
+            PhoneAuthProvider.credential(verificationId: id, smsCode: j['code'] as String));
+        return _user(cr.user);
       case 'logout':
         await a.signOut();
         return {'ok': true};
