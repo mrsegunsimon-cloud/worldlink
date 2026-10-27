@@ -82,4 +82,7 @@ s=s[:i]+RESTORE+s[i:]
 # so the page must not add its own safe-area padding on top (that doubled the gaps).
 for side in ("top","bottom","left","right"):
     s = s.replace("env(safe-area-inset-%s,0px)" % side, "0px")
+
+# Smaller right-hand action buttons on the Home feed
+i=s.rfind('</style>'); s=s[:i]+".rail{gap:8px!important;right:8px!important}.rail button{font-size:10.5px!important}.rail .ic{font-size:19px!important;line-height:1.15!important}.rail svg{width:21px!important;height:21px!important}.rail .av{width:36px!important;height:36px!important;font-size:14px;border-width:2px}.rail .disc{width:28px!important;height:28px!important;font-size:11px!important}"+s[i:]
 open(dst, 'w', encoding='utf8').write(s)
