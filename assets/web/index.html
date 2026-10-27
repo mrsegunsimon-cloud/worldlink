@@ -926,7 +926,73 @@ async function nearList(key,loc){
    $("#npg").onclick=async()=>{const q=$("#npq").value.trim();if(q.length<2){$("#st").textContent="Type a city name.";return}$("#st").textContent="Searching…";
     try{const j=JSON.parse(await netGet("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q)));if(!j.length){$("#st").textContent="City not found.";return}window.__loc={lat:+j[0].lat,lng:+j[0].lon,label:j[0].display_name.split(",")[0]};nearList(key,window.__loc)}catch(e){$("#st").textContent="Could not search right now."}}}}
 }
-document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-np]");if(b){e.preventDefault();e.stopPropagation();nearList(b.dataset.np)}},true);
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-np]");if(b){e.preventDefault();e.stopPropagation();if(b.dataset.np==="beach")beachHome();else nearList(b.dataset.np)}},true);
+
+/* ===== Beaches by country: pick a country, see its beaches with stars, open one for details and directions ===== */
+const BCO=[["NG","Nigeria"],["GH","Ghana"],["ZA","South Africa"],["KE","Kenya"],["TZ","Tanzania"],["EG","Egypt"],["MA","Morocco"],["SN","Senegal"],["CV","Cape Verde"],["MU","Mauritius"],["SC","Seychelles"],["MZ","Mozambique"],["MG","Madagascar"],["NA","Namibia"],["AO","Angola"],["CM","Cameroon"],["GA","Gabon"],["CI","Ivory Coast"],["BJ","Benin"],["TG","Togo"],["SL","Sierra Leone"],["LR","Liberia"],["GM","Gambia"],["ES","Spain"],["PT","Portugal"],["FR","France"],["IT","Italy"],["GR","Greece"],["HR","Croatia"],["TR","Turkey"],["GB","United Kingdom"],["IE","Ireland"],["US","United States"],["CA","Canada"],["MX","Mexico"],["BR","Brazil"],["CO","Colombia"],["AR","Argentina"],["PE","Peru"],["CL","Chile"],["JM","Jamaica"],["BS","Bahamas"],["CU","Cuba"],["DO","Dominican Republic"],["BB","Barbados"],["TT","Trinidad and Tobago"],["AU","Australia"],["NZ","New Zealand"],["ID","Indonesia"],["TH","Thailand"],["PH","Philippines"],["MY","Malaysia"],["VN","Vietnam"],["IN","India"],["LK","Sri Lanka"],["MV","Maldives"],["JP","Japan"],["KR","South Korea"],["CN","China"],["AE","United Arab Emirates"],["OM","Oman"],["SA","Saudi Arabia"],["IL","Israel"],["CY","Cyprus"],["MT","Malta"]];
+const bFlag=c=>String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0)));
+const BINFO={
+ "Elegushi Beach":"A lively Lekki beach known for music, parties and events, busiest on weekends and holidays. Expect an entry fee and food and drink stalls.",
+ "Tarkwa Bay":"A sheltered bay near Lagos harbour that you reach by a short boat ride. Calm water makes it popular for swimming and beginner surfing.",
+ "Landmark Beach":"A resort-style beach at Oniru, Victoria Island, with restaurants, events and a paid entry. Good for an organised day out.",
+ "Alpha Beach":"A quieter Lekki beach, usually less crowded than the big party beaches. Ask locals about sea conditions before swimming.",
+ "Badagry Beach":"A long, open Atlantic beach near the historic town of Badagry, close to the Benin border. Strong waves, so swim with care.",
+ "Eleko Beach":"A wide, open beach in Ibeju-Lekki, popular with day visitors and events. The sea can be rough.",
+ "Ibeno Beach":"A very long sandy beach in Akwa Ibom State, often described as one of the longest in West Africa.",
+ "La Campagne Tropicana":"A beach resort in Ibeju-Lekki with lodging and activities. Check current opening and prices before you go."};
+function bRate(){try{return JSON.parse(localStorage.getItem("wl-brate")||"{}")}catch(e){return{}}}
+function bSave(o){try{localStorage.setItem("wl-brate",JSON.stringify(o))}catch(e){}}
+const bKey=(cc,n)=>cc+"|"+n;
+function bAvg(k){const r=bRate()[k];return r&&r.n?{avg:r.s/r.n,n:r.n,me:r.me||0}:{avg:0,n:0,me:0}}
+const bStarTxt=(a,n)=>n?`<span style="color:#F5B301">${"★".repeat(Math.round(a))}${"☆".repeat(5-Math.round(a))}</span> ${a.toFixed(1)} (${n})`:`<span class="mute">☆☆☆☆☆ No ratings yet</span>`;
+function beachHome(pin){
+ const list=BCO.slice().sort((a,b)=>a[1]<b[1]?-1:1);
+ if(pin){const i=list.findIndex(x=>x[0]===pin);if(i>0)list.unshift(list.splice(i,1)[0])}
+ open(`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><button id="npb" style="font-size:22px;padding:4px 10px">←</button><div><b style="font-size:18px">🏖️ Beaches</b><div class="mute" style="font-size:13px">Choose a country</div></div></div><input class="in" id="bcq" placeholder="Search a country" aria-label="Search a country" style="margin-top:0"><div id="bcl">${list.map((c,i)=>`<button data-bc="${c[0]}" data-bn="${esc(c[1])}" style="display:flex;width:100%;align-items:center;gap:12px;text-align:left;color:inherit;padding:12px 0;border-bottom:1px solid var(--line)"><span style="font-size:28px">${bFlag(c[0])}</span><b style="flex:1">${esc(c[1])}${pin&&i===0?' <span class="mute" style="font-weight:400;font-size:12px">· your country</span>':""}</b><span class="mute">›</span></button>`).join("")}</div><button class="btn ghost" id="x">Close</button>`);
+ $("#npb").onclick=()=>explore("places");
+ const wire=()=>$("#panel").querySelectorAll("[data-bc]").forEach(b=>b.onclick=()=>beachCountry(b.dataset.bc,b.dataset.bn));wire();
+ $("#bcq").oninput=e=>{const q=e.target.value.trim().toLowerCase();$("#panel").querySelectorAll("[data-bc]").forEach(b=>b.style.display=!q||b.dataset.bn.toLowerCase().includes(q)?"flex":"none")};
+ if(!pin&&!window.__cc){window.__cc="?";(async()=>{try{const l=window.__loc||await getLoc();window.__loc=l;const j=JSON.parse(await netGet("https://nominatim.openstreetmap.org/reverse?format=json&zoom=3&lat="+l.lat+"&lon="+l.lng,10));window.__cc=(j.address&&j.address.country_code||"").toUpperCase();if($("#bcl")&&window.__cc.length===2)beachHome(window.__cc)}catch(e){window.__cc=""}})()}
+ else if(!pin&&window.__cc&&window.__cc.length===2){beachHome(window.__cc)}
+}
+async function beachCountry(cc,name){
+ const head=s=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><button id="npb" style="font-size:22px;padding:4px 10px">←</button><div><b style="font-size:18px">${bFlag(cc)} Beaches in ${esc(name)}</b><div class="mute" style="font-size:13px">${s}</div></div></div>`;
+ open(head("Loading the list…")+'<p class="mute" style="padding:20px 0">Please wait…</p><button class="btn ghost" id="x">Close</button>');$("#npb").onclick=()=>beachHome();
+ try{
+  const q=`[out:json][timeout:25];area["ISO3166-1"="${cc}"][admin_level=2]->.a;nwr["natural"="beach"]["name"](area.a);out center 300;`;
+  const hosts=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
+  const txt=await Promise.any(hosts.map(h=>netGet(h+"?data="+encodeURIComponent(q),28)));
+  const seen={},rows=[];
+  (JSON.parse(txt).elements||[]).forEach(e=>{const la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return;const t=e.tags||{},n=t.name;if(!n)return;const k=n+"|"+la.toFixed(2)+"|"+lo.toFixed(2);if(seen[k])return;seen[k]=1;
+   rows.push({n,la,lo,t,area:t["addr:city"]||t["addr:state"]||t["is_in:state"]||t["is_in"]||"",key:bKey(cc,n)})});
+  const L=window.__loc;rows.forEach(r=>r.d=L?npDist(L.lat,L.lng,r.la,r.lo):null);
+  rows.sort((a,b)=>{const ca=BINFO[a.n]?0:1,cb=BINFO[b.n]?0:1;if(ca!==cb)return ca-cb;const ra=bAvg(a.key).avg,rb=bAvg(b.key).avg;if(ra!==rb)return rb-ra;if(a.d!=null&&b.d!=null)return a.d-b.d;return a.n<b.n?-1:1});
+  const show=rows.slice(0,120);
+  const li=r=>{const s=bAvg(r.key);return `<button data-br="${rows.indexOf(r)}" style="display:block;width:100%;text-align:left;color:inherit;padding:12px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:8px"><b>🏖️ ${esc(r.n)}</b><span class="mute" style="white-space:nowrap">${r.d!=null?npFmt(r.d):""}</span></div><div style="font-size:13px">${bStarTxt(s.avg,s.n)}</div><div class="mute" style="font-size:12px">${r.area?esc(r.area)+" · ":""}${r.la.toFixed(3)}, ${r.lo.toFixed(3)}</div></button>`};
+  open(head(rows.length?rows.length+" beaches"+(rows.length>120?" (showing 120)":"")+(L?", nearest first":""):"")+(rows.length?`<input class="in" id="bq" placeholder="Search beaches" aria-label="Search beaches" style="margin-top:0"><div id="bl">${show.map(li).join("")}</div>`:'<p class="mute" style="padding:20px 0">No named beaches found for this country on the map yet.</p>')+`<p class="note">Beaches come from OpenStreetMap contributors. Star ratings come from WorldLink users.</p><button class="btn ghost" id="x">Close</button>`);
+  $("#npb").onclick=()=>beachHome();
+  $("#panel").querySelectorAll("[data-br]").forEach(b=>b.onclick=()=>beachDetail(rows[+b.dataset.br],cc,name));
+  const bq=$("#bq");if(bq)bq.oninput=e=>{const v=e.target.value.trim().toLowerCase();$("#panel").querySelectorAll("[data-br]").forEach(b=>b.style.display=!v||rows[+b.dataset.br].n.toLowerCase().includes(v)?"block":"none")};
+ }catch(e){
+  open(head("")+'<p style="padding:14px 0">The map servers are busy or slow. Try again in a minute.</p><button class="btn" id="npr">Try again</button><button class="btn ghost" id="x">Close</button>');
+  $("#npb").onclick=()=>beachHome();$("#npr").onclick=()=>beachCountry(cc,name)}
+}
+function beachDetail(r,cc,name){
+ const s=bAvg(r.key),t=r.t||{};
+ const about=BINFO[r.n]||t.description||"A beach listed on the map. Check sea conditions, safety and any entry fee locally before you go.";
+ const facts=[["Access",t.access],["Fee",t.fee],["Surface",t.surface],["Lifeguard",t.lifeguard],["Toilets",t.toilets],["Opening hours",t.opening_hours],["Website",t.website||t["contact:website"]],["Phone",t.phone||t["contact:phone"]]].filter(x=>x[1]);
+ open(`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><button id="npb" style="font-size:22px;padding:4px 10px">←</button><div><b style="font-size:20px">🏖️ ${esc(r.n)}</b><div class="mute" style="font-size:13px">${bFlag(cc)} ${esc(name)}${r.area?" · "+esc(r.area):""}</div></div></div>
+ <div style="font-size:16px;margin:6px 0" id="bst">${bStarTxt(s.avg,s.n)}</div>
+ <div style="display:flex;gap:6px;align-items:center;margin:6px 0"><span class="mute" style="font-size:13px">${s.me?"Your rating":"Rate it"}:</span>${[1,2,3,4,5].map(i=>`<button data-rt="${i}" aria-label="${i} star" style="font-size:28px;color:${i<=s.me?"#F5B301":"var(--mute)"};padding:0 2px">${i<=s.me?"★":"☆"}</button>`).join("")}</div>
+ <h3 style="margin:14px 0 4px">About</h3><p style="margin:0">${esc(about)}</p>
+ ${facts.length?`<h3 style="margin:14px 0 4px">Details</h3>${facts.map(f=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="mute">${f[0]}:</span> ${esc(String(f[1]))}</div>`).join("")}`:""}
+ <h3 style="margin:14px 0 4px">Location</h3><p class="mute" style="margin:0">${r.la.toFixed(5)}, ${r.lo.toFixed(5)}${r.d!=null?" · "+npFmt(r.d)+" from you":""}</p>
+ <button class="btn" id="bdr" style="margin-top:12px">Directions</button><button class="btn ghost" id="bmp">Open in Maps</button><button class="btn ghost" id="x">Close</button>`);
+ $("#npb").onclick=()=>beachCountry(cc,name);
+ $("#bdr").onclick=()=>openUrl("https://www.google.com/maps/dir/?api=1&destination="+r.la+","+r.lo);
+ $("#bmp").onclick=()=>openUrl("https://www.google.com/maps/search/?api=1&query="+r.la+","+r.lo);
+ $("#panel").querySelectorAll("[data-rt]").forEach(b=>b.onclick=()=>{const v=+b.dataset.rt,o=bRate(),x=o[r.key]||{s:0,n:0,me:0};if(x.me){x.s-=x.me}else x.n+=1;x.s+=v;x.me=v;o[r.key]=x;bSave(o);beachDetail(r,cc,name)});
+}
 
 function sell(){
  open(`<h2>Sell something</h2><input class="in" id="lt" maxlength="60" placeholder="What are you selling?" aria-label="Title"><input class="in" id="lp" maxlength="20" placeholder="Price, for example 15,000 naira" aria-label="Price"><input class="in" id="la" maxlength="40" placeholder="City or area" aria-label="City or area"><select id="lc" aria-label="Category">${CATS.slice(1).map(c=>`<option>${c}</option>`).join("")}</select><input class="in" id="ld" maxlength="140" placeholder="Short description" aria-label="Description"><input class="in" id="lk" maxlength="60" placeholder="How buyers can reach you (optional)" aria-label="Contact"><p class="note" style="margin:6px 0 0">Anything you enter in contact is public. Add a photo (optional, up to 5 MB):</p><input class="in" id="lf" type="file" accept="image/*" aria-label="Photo"><p class="note" id="st"></p><button class="btn" id="lg">Post listing</button><button class="btn ghost" id="lb">Back</button>`);
