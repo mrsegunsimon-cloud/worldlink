@@ -26,7 +26,17 @@ jobs:
           mkdir -p ~/.android
           cp tools/debug.keystore ~/.android/debug.keystore
       - run: flutter pub get
-      - run: flutter build apk --release
+      - name: Build the APK (and show the first errors if it fails)
+        shell: bash
+        run: |
+          set +e
+          flutter build apk --release > build.log 2>&1
+          code=$?
+          if [ $code -ne 0 ]; then
+            grep -nE "Error:|error:|rror:|What went wrong|FAILURE|Could not|not found|isn't defined|undefined" build.log | head -12 | while IFS= read -r l; do echo "::error::${l:0:300}"; done
+            tail -5 build.log | while IFS= read -r l; do echo "::error::${l:0:300}"; done
+          fi
+          exit $code
       - uses: actions/upload-artifact@v4
         with:
           name: worldlink-android-apk
