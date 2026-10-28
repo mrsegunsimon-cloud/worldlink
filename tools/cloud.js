@@ -46,8 +46,9 @@
    var t=await tok();if(!t||!window.__wlUser)throw new Error("Sign in first");
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
    var name="u/"+window.__wlUser.uid+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+"."+ext;
+   function sbh(f){var h={"apikey":SB.key,"Content-Type":f.type||"application/octet-stream","x-upsert":"false"};if(SB.key.indexOf("sb_")!==0)h.Authorization="Bearer "+SB.key;return h}
    if(SB.url){
-    var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:{"apikey":SB.key,"Authorization":"Bearer "+SB.key,"Content-Type":file.type||"application/octet-stream","x-upsert":"false"},body:file});
+    var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:sbh(file),body:file});
     if(!r2.ok)throw new Error("upload "+r2.status);
     return{url:SB.url+"/storage/v1/object/public/media/"+name}}
    var r=await fetch("https://firebasestorage.googleapis.com/v0/b/"+B+"/o?name="+encodeURIComponent(name),{method:"POST",headers:{"Authorization":"Firebase "+t,"Content-Type":file.type||"application/octet-stream"},body:file});
