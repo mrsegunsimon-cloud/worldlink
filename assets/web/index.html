@@ -2062,7 +2062,7 @@ function bindNews(arr,kind,back){
 }
 function newsCards(list,kind){return list.map(([n,i])=>`<button data-ns="${kind}${i}" style="display:block;width:100%;text-align:left;margin:0 0 18px;color:inherit">${cover(n[1],kind==="w"?worldEmoji(n[1],n[0]):sportEmoji(n[0]+" "+n[1]),170,kind==="w"?"":n[0],sportPh(kind,n))}<b style="display:block;font-size:18px;line-height:1.25;margin-top:8px">${esc(n[1])}</b><span class="mute" style="font-size:13px">${esc(n[3])}</span></button>`).join("")}
 function newsHtml(){
- return `<p class="note" style="margin:10px 0 12px">Top sports stories from October 25 and 26, 2026. Tap a story to open it.</p>${newsFeed(NEWS.map((n,i)=>[n,i]),"s")}`;
+ return `<p class="note" style="margin:10px 0 12px">${NEWSAT||"Top sports stories from October 25 and 26, 2026."} Tap a story to open it.</p>${newsFeed(NEWS.map((n,i)=>[n,i]),"s")}`;
 }
 function newsHtmlOld(){
  return `<p class="note" style="margin:10px 0 4px">Top stories from October 25 and 26, 2026. Tap a story to read it on the publisher's site.</p>${NEWS.map(n=>{const b=`<div style="font-size:12px;color:var(--acc);font-weight:700">${esc(n[0])}</div><b>${esc(n[1])}</b><div style="margin-top:2px">${esc(n[2])}</div><div class="mute" style="font-size:12px;margin-top:2px">${esc(n[3])}</div>`;return n[4]?`<a class="cm" style="display:block;color:inherit;text-decoration:none" target="_blank" rel="noopener" href="${esc(n[4])}">${b}</a>`:`<div class="cm">${b}</div>`}).join("")}`;
@@ -2082,12 +2082,27 @@ const WN=[
 ["sci","Forecasters use AI to predict hurricanes","Hurricane forecasters are using artificial intelligence more and more in their predictions, NPR reports.","NPR","https://www.npr.org/sections/news/"],
 ["sci","Bots now outnumber people online","NPR reports that automated bots now make up more of the internet’s traffic than humans do.","NPR","https://www.npr.org/sections/news/"]
 ];
+let NEWSAT="";
+async function liveNews(){
+ try{
+  const r=await WLN("get",{url:"https://mrsegunsimon-cloud.github.io/worldlink/news.json?t="+Date.now()});
+  if(!r||r.error||!r.body)return;
+  const j=JSON.parse(r.body);
+  const ok=a=>Array.isArray(a)&&a.every(x=>Array.isArray(x)&&x.length>=5&&typeof x[1]==="string"&&/^https:\/\//.test(x[4]));
+  if(!j||!ok(j.world)||!ok(j.sports)||j.world.length<8||j.sports.length<6)return;
+  WN.length=0;j.world.forEach(x=>WN.push(x));NEWS.length=0;j.sports.forEach(x=>NEWS.push(x));
+  Object.keys(VID).forEach(k=>delete VID[k]);Object.keys(TRN).forEach(k=>delete TRN[k]);
+  const d=new Date(j.updated*1000);
+  NEWSAT="Updated "+d.toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+".";
+ }catch(e){}
+}
+setTimeout(liveNews,600);setInterval(liveNews,600000);
 function worldNews(t){
  t=t||"top";
  const L={top:"Top",africa:"Africa",biz:"Business",sci:"Health & Tech"};
  const tabs=Object.keys(L).map(k=>`<button class="btn${k===t?"":" ghost"}" style="margin:0;padding:8px 2px;font-size:13px" data-t="${k}">${L[k]}</button>`).join("");
  const items=WN.map((n,i)=>[n,i]).filter(([n])=>n[0].split(",").includes(t));
- open(banner("📰","World News","Top stories, Africa, business and health","#1E6FFF","#0B1646","w_world")+`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">${tabs}</div><p class="note" style="margin:10px 0 4px">Saved on October 26, 2026. Tap a story to open it.</p>${newsFeed(items,"w")}<button class="btn ghost" id="x">Close</button>`);
+ open(banner("📰","World News","Top stories, Africa, business and health","#1E6FFF","#0B1646","w_world")+`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">${tabs}</div><p class="note" style="margin:10px 0 4px">${NEWSAT||"Saved on October 26, 2026."} Tap a story to open it.</p>${newsFeed(items,"w")}<button class="btn ghost" id="x">Close</button>`);
  $("#panel").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>worldNews(b.dataset.t));
  bindNews(WN,"w",()=>worldNews(t));
 }
