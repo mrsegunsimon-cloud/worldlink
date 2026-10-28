@@ -1199,16 +1199,27 @@ function beachHome(pin){
  if(!pin&&!window.__cc){window.__cc="?";(async()=>{try{const l=window.__loc||await getLoc();window.__loc=l;const j=JSON.parse(await netGet("https://nominatim.openstreetmap.org/reverse?format=json&zoom=3&lat="+l.lat+"&lon="+l.lng,10));window.__cc=(j.address&&j.address.country_code||"").toUpperCase();if($("#bcl")&&window.__cc.length===2)beachHome(window.__cc)}catch(e){window.__cc=""}})()}
  else if(!pin&&window.__cc&&window.__cc.length===2){beachHome(window.__cc)}
 }
+
+async function beachData(){
+ if(window.__bd!==undefined)return window.__bd;
+ window.__bd=null;
+ try{window.__bd=JSON.parse(await netGet("https://mrsegunsimon-cloud.github.io/worldlink/beaches.json?t="+Date.now(),25))}catch(e){window.__bd=null}
+ return window.__bd}
 async function beachCountry(cc,name){
  const head=s=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><button id="npb" style="font-size:22px;padding:4px 10px">←</button><div><b style="font-size:18px">${bFlag(cc)} Beaches in ${esc(name)}</b><div class="mute" style="font-size:13px">${s}</div></div></div>`;
  open(head("Loading the list…")+'<p class="mute" style="padding:20px 0">Please wait…</p><button class="btn ghost" id="x">Close</button>');$("#npb").onclick=()=>beachHome();
  try{
+  const seen={},rows=[];
+  const BD=await beachData(),pre=BD&&BD[cc];
+  if(pre&&pre.length){pre.forEach(p=>rows.push({n:p[0],la:p[1],lo:p[2],t:p[4]||{},area:p[3]||"",key:bKey(cc,p[0])}))}
+  else{
   const q=`[out:json][timeout:25];area["ISO3166-1"="${cc}"][admin_level=2]->.a;nwr["natural"="beach"]["name"](area.a);out center 300;`;
   const hosts=["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"];
   const txt=await Promise.any(hosts.map(h=>netGet(h+"?data="+encodeURIComponent(q),28)));
-  const seen={},rows=[];
+
   (JSON.parse(txt).elements||[]).forEach(e=>{const la=e.lat??(e.center&&e.center.lat),lo=e.lon??(e.center&&e.center.lon);if(la==null||lo==null)return;const t=e.tags||{},n=t.name;if(!n)return;const k=n+"|"+la.toFixed(2)+"|"+lo.toFixed(2);if(seen[k])return;seen[k]=1;
    rows.push({n,la,lo,t,area:t["addr:city"]||t["addr:state"]||t["is_in:state"]||t["is_in"]||"",key:bKey(cc,n)})});
+  }
   const L=window.__loc;rows.forEach(r=>r.d=L?npDist(L.lat,L.lng,r.la,r.lo):null);
   rows.sort((a,b)=>{const ca=BINFO[a.n]?0:1,cb=BINFO[b.n]?0:1;if(ca!==cb)return ca-cb;const ra=bAvg(a.key).avg,rb=bAvg(b.key).avg;if(ra!==rb)return rb-ra;if(a.d!=null&&b.d!=null)return a.d-b.d;return a.n<b.n?-1:1});
   const show=rows.slice(0,120);

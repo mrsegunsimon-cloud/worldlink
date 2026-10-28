@@ -26,6 +26,9 @@ jobs:
           mkdir -p site
           python3 tools/make_web.py assets/web/index.html assets/firebase_config.json site/index.html
           touch site/.nojekyll
+      - name: Beach list
+        continue-on-error: true
+        run: cp assets/beaches.json site/beaches.json
       - name: Fresh news
         continue-on-error: true
         run: python3 tools/fetch_news.py site/news.json

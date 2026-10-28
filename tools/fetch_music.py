@@ -10,9 +10,21 @@ def get(u,n=600000):
 def one(a):
     name,handle=a
     try:
-        h=get("https://www.youtube.com/@"+handle)
-        m=re.search(r'"channelId":"(UC[\w-]{22})"',h) or re.search(r'channel/(UC[\w-]{22})',h)
-        if not m:WHY.append(name+": no channel id in page ("+str(len(h))+" bytes)");return None
+        cid=None;h=""
+        try:
+            h=get("https://www.youtube.com/results?search_query="+urllib.request.quote(name)+"&sp=EgIQAg%253D%253D")
+            first=name.lower().split()[0]
+            for m in re.finditer(r'"channelRenderer":\{"channelId":"(UC[\w-]{22})".{0,1500}?"title":\{"simpleText":"([^"]+)"',h,re.S):
+                if first in html.unescape(m.group(2)).lower():cid=m.group(1);break
+        except Exception:pass
+        if not cid:
+            try:
+                h=get("https://www.youtube.com/@"+handle)
+                m=re.search(r'"(?:channelId|externalId|browseId)":"(UC[\w-]{22})"',h) or re.search(r'channel/(UC[\w-]{22})',h)
+                cid=m.group(1) if m else None
+            except Exception:cid=None
+        if not cid:WHY.append(name+": channel not found ("+str(len(h))+" bytes)");return None
+        m=type("M",(),{"group":lambda self,i:cid})()
         root=ET.fromstring(get("https://www.youtube.com/feeds/videos.xml?channel_id="+m.group(1),400000))
         v=[]
         for e in root.iter("{http://www.w3.org/2005/Atom}entry"):
