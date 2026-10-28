@@ -1,6 +1,7 @@
 /* ===== Online storage: Firestore (records) and Cloud Storage (photos, videos) over HTTPS with the user's sign-in token ===== */
 (function(){
- var P="__PROJECT__",B="__BUCKET__";
+ var P="__PROJECT__",B="__BUCKET__",SB={url:"__SBURL__",key:"__SBKEY__"};
+ if(SB.url.indexOf("__")===0)SB.url="";
  var FS="https://firestore.googleapis.com/v1/projects/"+P+"/databases/(default)/documents";
  function tok(){return WLN("token").then(function(r){return r&&r.token||null}).catch(function(){return null})}
  function enc(v){
@@ -45,6 +46,10 @@
    var t=await tok();if(!t||!window.__wlUser)throw new Error("Sign in first");
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
    var name="u/"+window.__wlUser.uid+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+"."+ext;
+   if(SB.url){
+    var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:{"apikey":SB.key,"Authorization":"Bearer "+SB.key,"Content-Type":file.type||"application/octet-stream","x-upsert":"false"},body:file});
+    if(!r2.ok)throw new Error("upload "+r2.status);
+    return{url:SB.url+"/storage/v1/object/public/media/"+name}}
    var r=await fetch("https://firebasestorage.googleapis.com/v0/b/"+B+"/o?name="+encodeURIComponent(name),{method:"POST",headers:{"Authorization":"Firebase "+t,"Content-Type":file.type||"application/octet-stream"},body:file});
    if(!r.ok)throw new Error("upload "+r.status);
    var j=await r.json();

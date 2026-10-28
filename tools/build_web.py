@@ -86,7 +86,9 @@ window.addEventListener("load",function(){setTimeout(function(){
 </script>"""
 import json as _json,os as _os
 _cfg=_json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','assets','firebase_config.json')))
-CLOUD='<script>'+open(__file__.replace('build_web.py','cloud.js'),encoding='utf8').read().replace('__PROJECT__',_cfg['projectId']).replace('__BUCKET__',_cfg.get('storageBucket') or _cfg['projectId']+'.firebasestorage.app')+'</script>'
+_sbp=_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','assets','supabase_config.json')
+_sb=_json.load(open(_sbp)) if _os.path.exists(_sbp) else {}
+CLOUD='<script>'+open(__file__.replace('build_web.py','cloud.js'),encoding='utf8').read().replace('__PROJECT__',_cfg['projectId']).replace('__SBURL__',_sb.get('url','').rstrip('/')).replace('__SBKEY__',_sb.get('anonKey','')).replace('__BUCKET__',_cfg.get('storageBucket') or _cfg['projectId']+'.firebasestorage.app')+'</script>'
 GATE='<script>'+open(__file__.replace('build_web.py','gate.js'),encoding='utf8').read()+'</script>'
 i=s.rfind('</body>')
 s=s[:i]+CLOUD+RESTORE+GATE+s[i:]
