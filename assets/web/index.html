@@ -2243,8 +2243,9 @@ function storyView(n,back,key){
  const vd=VID[key]||(/^[\w-]{11}$/.test(n[6]||"")?n[6]:""),auto=!VID[key]&&!!vd;
  open(`<button class="btn ghost" id="sb" style="width:auto;margin:0 0 10px;padding:8px 16px">← Back</button>${vd?`<div style="position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000"><iframe src="https://www.youtube.com/embed/${vd}?rel=0&playsinline=1${auto?"&autoplay=1&mute=1&end=30&enablejsapi=1":""}" title="Video for this story" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>${auto&&n[7]?`<div class="note" style="margin:6px 0 0">▶ Preview: ${esc(n[7])}. Tap the speaker to hear it.</div>`:""}<a href="https://www.youtube.com/watch?v=${vd}" target="_blank" rel="noopener" style="display:block;margin-top:6px;font-size:13px;color:var(--acc)">Video not playing? Open it on YouTube</a>`:(n[5]&&/^https:\/\//.test(n[5])?`<img src="${esc(n[5])}" alt="" referrerpolicy="no-referrer" style="width:100%;border-radius:14px;max-height:34vh;object-fit:cover;background:#111">`:cover(tl,em,Math.round(innerHeight*.34),lab,sportPh(key&&key[0],n)))}<h2 style="font-size:24px;line-height:1.2;margin:14px 0 6px">${esc(tl)}</h2><div class="mute" style="font-size:13px;margin-bottom:10px">${esc(n[3])}</div><p style="font-size:17px;line-height:1.5;margin:0">${esc(n[2])}</p>${TRN[key]?`<p style="color:var(--acc);font-size:17px">${esc(TRN[key])}</p>`:""}<div style="margin-top:14px">${n[4]?`<button class="btn" id="sr1">Read the full story</button>`:""}${vd?"":`<button class="btn ghost" id="sv1">▶ Watch video coverage</button>`}<button class="btn ghost" id="st1">${TRN[key]?"Show original only":"Translate"}</button><div style="display:flex;gap:8px;margin-top:10px"><input class="in" id="yl" placeholder="Paste a YouTube link to play it here" aria-label="YouTube link" style="margin:0"><button class="btn" id="yp" style="width:auto;margin:0;padding:0 18px">Play</button></div><p class="note" id="ye" style="margin:6px 0 0"></p></div><p class="note">${n[5]?"Photo from the publisher. ":sportPh(key&&key[0],n)?"The photo shows the topic in general, not this exact story. ":"The picture is an illustration made by WorldLink. "}Photos and videos stay on the publisher's page and on YouTube, so we link to them and do not copy them. The preview video may be related coverage, not an exact match.</p>`);
  $("#yp").onclick=()=>{const id=ytId($("#yl").value);if(!id){$("#ye").textContent="That is not a YouTube video link. Copy it from YouTube using Share, then paste it here.";return}VID[key]=id;storyView(n,back,key)};
- if(auto){const f=$("#panel").querySelector("iframe");if(f){
+ if(auto){const f=$("#panel").querySelector("iframe");if(f){const ALT=(Array.isArray(n[8])?n[8]:[]).filter(x=>/^[\w-]{11}$/.test(x)&&x!==vd).slice(0,3);
   const h=e=>{if(e.source!==f.contentWindow)return;let d=e.data;if(typeof d==="string"){try{d=JSON.parse(d)}catch(_){return}}
+   if(d&&d.event==="onError"&&ALT.length){const nx=ALT.shift();f.src="https://www.youtube.com/embed/"+nx+"?rel=0&playsinline=1&autoplay=1&mute=1&end=30&enablejsapi=1";return}
    if(d&&d.event==="onError"){window.removeEventListener("message",h);const bx=f.parentNode;
     if(bx&&bx.parentNode){const nt=bx.nextElementSibling;if(nt&&/Preview:/.test(nt.textContent))nt.textContent="This video cannot be played inside the app, so here is the story photo instead.";
      bx.outerHTML=n[5]&&/^https:\/\//.test(n[5])?`<img src="${esc(n[5])}" alt="" referrerpolicy="no-referrer" style="width:100%;border-radius:14px;max-height:34vh;object-fit:cover;background:#111">`:cover(tl,em,Math.round(innerHeight*.34),lab,sportPh(key&&key[0],n))}}};
@@ -2494,9 +2495,35 @@ window.addEventListener("load",function(){setTimeout(function(){
   return !!(notHome||open||vis)}
  function feed(v){return v&&v.closest&&v.closest("#feed")}
  var P=HTMLMediaElement.prototype.play;
+ /* Sound: Home videos start WITH sound. If the browser refuses, start muted and unmute on the first tap. The person's own mute choice is remembered. */
+ var userMuted=false;try{userMuted=localStorage.getItem("wl_muted")==="1"}catch(e){}
+ var prog=false;
+ function setM(v,m){v.__wlm=m;try{v.muted=m}catch(e){}}
+ function pill(show){
+  var p=document.getElementById("wlsnd");
+  if(!show){if(p)p.remove();return}
+  if(p)return;
+  p=document.createElement("div");p.id="wlsnd";p.textContent="\uD83D\uDD0A Tap for sound";
+  p.setAttribute("style","position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nh,64px) + 14px);z-index:60;background:rgba(0,0,0,.72);color:#fff;border-radius:999px;padding:10px 18px;font:700 14px system-ui,sans-serif;pointer-events:none");
+  document.body.appendChild(p)}
+ document.addEventListener("volumechange",function(e){var v=e.target;if(!feed(v)||v.__wlm===v.muted)return;v.__wlm=v.muted;userMuted=!!v.muted;try{localStorage.setItem("wl_muted",userMuted?"1":"0")}catch(_){ }if(!userMuted){window.__wlNeed=false;pill(false)}},true);
+ function unlock(e){
+  if(!window.__wlNeed)return;
+  window.__wlNeed=false;pill(false);
+  if(userMuted)return;
+  document.querySelectorAll("#feed video").forEach(function(v){setM(v,false)});
+  if(e&&e.type==="click"&&e.target&&e.target.closest&&e.target.closest(".clip")&&!e.target.closest("button,a,input")){e.stopImmediatePropagation();e.preventDefault()}}
+ ["click","keydown"].forEach(function(t){document.addEventListener(t,unlock,true)});
  HTMLMediaElement.prototype.play=function(){
-  if(feed(this)&&away()){this.__wlp=1;return Promise.resolve()}
-  return P.apply(this,arguments)};
+  var v=this;
+  if(feed(v)&&away()){v.__wlp=1;return Promise.resolve()}
+  if(!feed(v))return P.apply(v,arguments);
+  setM(v,userMuted||!!window.__wlNeed);
+  var pr=P.apply(v,arguments);
+  if(pr&&pr.catch)return pr.catch(function(err){
+   if(!v.muted){setM(v,true);window.__wlNeed=true;pill(true);return P.call(v)}
+   throw err});
+  return pr};
  var was=false;
  function tick(){
   var a=away();

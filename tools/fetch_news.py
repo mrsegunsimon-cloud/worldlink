@@ -106,6 +106,7 @@ def attach(rows,vids,fallback=True):
         if best and bs>=2:row+= [best[0],best[2]+": "+best[1]];n+=1
         elif fallback:
             vid,t,nm=vids[k%len(vids)];row+=[vid,"Latest from "+nm+": "+t]
+        if len(row)>=8:row.append([c[0] for c in vids if c[0]!=row[6]][:4])
     return n
 vw=yt(CH_W);mw=attach(world,vw)
 vs=[];vtag={}
@@ -125,6 +126,7 @@ for row in sports:
     else:
         k=rot.get(row[0],0);rot[row[0]]=k+1
         v,t,nm=cand[k%len(cand)];row+=[v,"Latest from "+nm+": "+t]
+    row.append([c[0] for c in cand if c[0]!=row[6]][:4])
 print("::notice title=WorldLink news::world %d sports %d, photos %d, matched videos %d/%d, channel videos %d/%d, sports with video %d"%(len(world),len(sports),sum(1 for r in world+sports if r[5]),mw,ms,len(vw),len(vs),sum(1 for r in sports if len(r)>6)))
 print("world",len(world),"sports",len(sports))
 if len(world)<8 or len(sports)<6:
