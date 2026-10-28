@@ -6,7 +6,7 @@ def get(url):
     try:
         return json.loads(urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=25).read())
     except Exception as e:
-        print("skip",url,e);return None
+        print("::notice title=sports-error::%s -> %s"%(url.split("espn.com")[-1][:70],str(e)[:120]));return None
 LG=[("epl","soccer/eng.1",True),("la","soccer/esp.1",True),("it","soccer/ita.1",True),("de","soccer/ger.1",True),("fr","soccer/fra.1",True),("cl","soccer/uefa.champions",True),
     ("nba","basketball/nba",False),("nfl","football/nfl",False),("mlb","baseball/mlb",False),("nhl","hockey/nhl",False),("mls","soccer/usa.1",False),("mma","mma/ufc",False)]
 today=datetime.datetime.utcnow().date()
