@@ -314,8 +314,8 @@ function hlView(i){
  $("#hd").onclick=async()=>{me.hl.splice(i,1);await saveHL();profile()};
 }
 function profMenu(){
- open(`<h2>Settings</h2><button class="btn" id="wl">Wallet and earnings</button><button class="btn ghost" id="au">Sign in or create account</button><button class="btn ghost" id="bl">Blocked accounts (${me.b.length})</button><button class="btn ghost" id="md">Moderator tools</button><button class="btn ghost" id="bk">Back to profile</button>`);
- $("#wl").onclick=wallet;$("#au").onclick=()=>authSheet("up");$("#bl").onclick=blockedList;$("#md").onclick=modScreen;$("#bk").onclick=()=>profile();
+ open(`<h2>Settings</h2><button class="btn" id="wl">Wallet and earnings</button><button class="btn ghost" id="iv2">📨 Invite friends</button><button class="btn ghost" id="au">Sign in or create account</button><button class="btn ghost" id="bl">Blocked accounts (${me.b.length})</button><button class="btn ghost" id="md">Moderator tools</button><button class="btn ghost" id="bk">Back to profile</button>`);
+ $("#iv2").onclick=inviteFriends;$("#wl").onclick=wallet;$("#au").onclick=()=>authSheet("up");$("#bl").onclick=blockedList;$("#md").onclick=modScreen;$("#bk").onclick=()=>profile();
 }
 function profile(tabk){
  tabk=tabk||"v";
@@ -401,13 +401,19 @@ function editProfile(){
  };
 }
 const PEOPLE=[["maya.ortiz","Lemon trees and good neighbors"],["sam.lee","Community organizer"],["goalhub","Football highlights"],["campus.daily","Study tips"],["dj.kemi","Music producer"]];
+function inviteFriends(){
+ const url="https://mrsegunsimon-cloud.github.io/worldlink/"+(me.name&&me.name!=="you"?"?ref="+encodeURIComponent(me.name):""),txt="Join me on WorldLink - videos, photos, news, sports, music and beaches from all over the world. Be one of the first creators and get a Founding Creator badge + free coins 🌍";
+ if(navigator.share){navigator.share({title:"WorldLink",text:txt,url}).catch(()=>{});return}
+ open(`<h2>Invite friends</h2><p class="mute">Copy this message and send it on WhatsApp, Instagram or Telegram.</p><textarea class="in" id="ivt" rows="5" readonly>${esc(txt+" "+url)}</textarea><button class="btn" id="ivc">Copy message</button><button class="btn ghost" id="x">Close</button>`);
+ $("#ivc").onclick=async()=>{try{await navigator.clipboard.writeText($("#ivt").value);$("#ivc").textContent="Copied ✓"}catch(e){$("#ivt").select();$("#ivc").textContent="Select and copy the text"}};
+}
 function friends(tk){
  tk=tk||"s";
  const list=tk==="f"?PEOPLE.filter(p=>me.f.includes(p[0])):PEOPLE;
  const row=p=>{const f=me.f.includes(p[0]);return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0"><div class="av" style="width:52px;height:52px;flex:none;border-width:0;font-size:20px;background:${"#1E6FFF,#FF7A1A,#7C5CFF,#0E9F6E".split(",")[p[0].charCodeAt(0)%4]}">${p[0][0].toUpperCase()}</div><div style="flex:1;min-width:0"><b>${p[0]}</b><div class="mute" style="font-size:13px">${p[1]}</div></div><button class="btn${f?" ghost":""}" style="width:auto;margin:0;padding:8px 18px;border-radius:8px" data-p="${p[0]}">${f?"Following":"Follow"}</button></div>`};
  const tb=(k,l)=>`<button data-ft="${k}" style="flex:1;padding:10px 0;font-weight:700;border-bottom:2px solid ${tk===k?"var(--ink)":"transparent"};opacity:${tk===k?1:.55}">${l}</button>`;
- openFull(`<div class="hd"><button id="x" aria-label="Close" style="font-size:22px">✕</button><b id="frx" style="font-size:20px">Friends</b><span style="width:40px"></span></div><div class="pgx" style="padding:0 16px"><div style="display:flex;border-bottom:1px solid var(--line)">${tb("s","Suggested")}${tb("f","Following ("+me.f.length+")")}</div>${list.map(row).join("")||'<p class="mute" style="text-align:center;padding:20px 0">You are not following anyone yet. Open Suggested to find people.</p>'}</div>`);
- $("#panel").querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>friends(b.dataset.ft));
+ openFull(`<div class="hd"><button id="x" aria-label="Close" style="font-size:22px">✕</button><b id="frx" style="font-size:20px">Friends</b><span style="width:40px"></span></div><div class="pgx" style="padding:0 16px"><button class="btn" id="inv" style="margin:6px 0 8px">📨 Invite friends to WorldLink</button><div style="display:flex;border-bottom:1px solid var(--line)">${tb("s","Suggested")}${tb("f","Following ("+me.f.length+")")}</div>${list.map(row).join("")||'<p class="mute" style="text-align:center;padding:20px 0">You are not following anyone yet. Open Suggested to find people.</p>'}</div>`);
+ $("#inv").onclick=inviteFriends;$("#panel").querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>friends(b.dataset.ft));
  $("#panel").querySelectorAll("[data-p]").forEach(b=>b.onclick=async()=>{
   const u=b.dataset.p;me.f=me.f.includes(u)?me.f.filter(x=>x!==u):me.f.concat(u);
   try{const D=await claude.use("db");if(D&&me.uid)await D.collection("follows").doc(me.uid).set({list:me.f})}catch(e){}
