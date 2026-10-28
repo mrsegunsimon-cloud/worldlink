@@ -7,11 +7,29 @@ ARTISTS=[("Burna Boy","burnaboy"),("Wizkid","wizkidofficial"),("Davido","davido"
  ("Taylor Swift","taylorswift"),("Beyoncé","beyonce"),("Drake","drake"),("Ed Sheeran","edsheeran"),("Rihanna","rihanna"),("The Weeknd","theweeknd"),("Bruno Mars","brunomars"),("Coldplay","coldplay"),("Adele","adele"),("Dua Lipa","dualipa"),("Billie Eilish","billieeilish"),("Shakira","shakira"),("BLACKPINK","BLACKPINK"),("Bad Bunny","badbunny"),("Kendrick Lamar","kendricklamar"),("Ariana Grande","arianagrande")]
 def get(u,n=600000):
     return urllib.request.urlopen(urllib.request.Request(u,headers=UA),timeout=20).read(n).decode("utf8","ignore")
+import urllib.parse
+WD={}
+def wikidata():
+    vals=" ".join('"%s"@en'%n.replace('"','') for n,_ in ARTISTS)
+    q='''SELECT ?l ?c ?sl WHERE { VALUES ?l { %s } ?a rdfs:label ?l; wdt:P2397 ?c; wikibase:sitelinks ?sl. { ?a wdt:P31 wd:Q5 } UNION { ?a wdt:P31 wd:Q215380 } }'''%vals
+    for k in range(3):
+        try:
+            r=urllib.request.urlopen(urllib.request.Request("https://query.wikidata.org/sparql?format=json&query="+urllib.parse.quote(q),headers={"User-Agent":"WorldLink music (mrsegunsimon@gmail.com)","Accept":"application/sparql-results+json"}),timeout=60).read()
+            best={}
+            for b in json.loads(r)["results"]["bindings"]:
+                n=b["l"]["value"];sl=int(b["sl"]["value"])
+                if re.fullmatch(r"UC[\w-]{22}",b["c"]["value"]) and sl>best.get(n,(0,))[0]:best[n]=(sl,b["c"]["value"])
+            for n,(sl,c) in best.items():WD[n]=c
+            return
+        except Exception as ex:
+            WHY.append("wikidata: "+str(ex)[:50]);time.sleep(5)
+wikidata()
 def one(a):
     name,handle=a
     try:
-        cid=None;h=""
+        cid=WD.get(name);h=""
         try:
+            if cid:raise Exception("have")
             h=get("https://www.youtube.com/results?search_query="+urllib.request.quote(name)+"&sp=EgIQAg%253D%253D")
             first=name.lower().split()[0]
             for m in re.finditer(r'"channelRenderer":\{"channelId":"(UC[\w-]{22})".{0,1500}?"title":\{"simpleText":"([^"]+)"',h,re.S):
