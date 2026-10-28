@@ -25,10 +25,16 @@ jobs:
         run: |
           mkdir -p site
           python3 tools/make_web.py assets/web/index.html assets/firebase_config.json site/index.html
-          python3 tools/fetch_news.py site/news.json || true
-          python3 tools/fetch_sports.py site/sports.json || true
-          python3 tools/fetch_music.py site/music.json || true
           touch site/.nojekyll
+      - name: Fresh news
+        continue-on-error: true
+        run: python3 tools/fetch_news.py site/news.json
+      - name: Fresh sports scores
+        continue-on-error: true
+        run: python3 tools/fetch_sports.py site/sports.json
+      - name: Music videos
+        continue-on-error: true
+        run: python3 tools/fetch_music.py site/music.json
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
       - id: deployment

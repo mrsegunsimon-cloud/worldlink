@@ -84,17 +84,18 @@ def sdb_table(lid):
         try:rows.append([int(e["intRank"]),e["strTeam"],int(e["intWin"]),int(e["intDraw"]),int(e["intLoss"]),int(e["intPoints"])])
         except Exception:continue
     rows.sort(key=lambda r:r[0]);return rows
-res={};ng=0
+res={};ng=0;SUM=[]
 for key,code,tab,lid in LG:
     g=games(code);t=table(code) if tab else []
     src="espn"
     if len(g)<2 and lid:g=sdb_games(lid);src="sportsdb"
     if tab and len(t)<8 and lid:t=sdb_table(lid)
-    print("::notice title=sports::%s games %d table %d (%s)"%(key,len(g),len(t),src))
+    print("%s games %d table %d (%s)"%(key,len(g),len(t),src));SUM.append("%s %d/%d"%(key,len(g),len(t)))
     ent={}
     if len(g)>=2:ent["games"]=g;ng+=1
     if len(t)>=8:ent["table"]=t
     if ent:res[key]=ent
+print("::notice title=sports::"+", ".join(SUM))
 if ng<4:
     print("Too little came back; keeping the previous version.");sys.exit(0)
 json.dump({"updated":int(time.time()),"leagues":res},open(sys.argv[1],"w",encoding="utf8"),ensure_ascii=False)
