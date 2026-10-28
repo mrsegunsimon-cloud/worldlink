@@ -29,6 +29,9 @@ jobs:
       - name: Beach list
         continue-on-error: true
         run: cp assets/beaches.json site/beaches.json
+      - name: Starter videos
+        continue-on-error: true
+        run: mkdir -p site/starter && cp assets/starter/*.mp4 site/starter/
       - name: Fresh news
         continue-on-error: true
         run: python3 tools/fetch_news.py site/news.json
