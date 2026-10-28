@@ -8,16 +8,18 @@ near=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"near.js"),enc
 codes=re.findall(r'\["([A-Z]{2})","',re.search(r"const BCO=\[(.*?)\];",near,re.S).group(1))
 out=json.load(open(sys.argv[1])) if os.path.exists(sys.argv[1]) else {}
 def query(cc):
-    q='[out:json][timeout:120];area["ISO3166-1"="%s"][admin_level=2]->.a;nwr["natural"="beach"]["name"](area.a);out center 400;'%cc
+    q='[out:json][timeout:60];area["ISO3166-1"="%s"][admin_level=2]->.a;nwr["natural"="beach"]["name"](area.a);out center 400;'%cc
     for h in HOSTS:
         try:
-            r=urllib.request.urlopen(urllib.request.Request(h+"?data="+urllib.parse.quote(q),headers=UA),timeout=150).read()
+            r=urllib.request.urlopen(urllib.request.Request(h+"?data="+urllib.parse.quote(q),headers=UA),timeout=70).read()
             return json.loads(r).get("elements",[])
         except Exception as e:
             print("::notice title=beaches-error::%s %s %s"%(cc,h.split("//")[1][:14],str(e)[:60]));time.sleep(5)
     return None
-ok=0
+ok=0;T0=time.time()
 for cc in codes:
+    if time.time()-T0>75*60:
+        print("::notice title=beaches-stop::time limit reached before "+cc);break
     el=query(cc)
     if el is None:continue
     seen=set();rows=[]
@@ -31,7 +33,9 @@ for cc in codes:
         area=t.get("addr:city") or t.get("addr:state") or t.get("is_in:state") or t.get("is_in") or ""
         tags={k2:str(t[k2])[:200] for k2 in KEEP if t.get(k2)}
         rows.append([n[:80],round(la,5),round(lo,5),str(area)[:60],tags])
-    if rows:out[cc]=rows;ok+=1
-    time.sleep(3)
+    if rows:
+        out[cc]=rows;ok+=1
+        json.dump(out,open(sys.argv[1],"w",encoding="utf8"),ensure_ascii=False,separators=(",",":"))
+    time.sleep(2)
 print("::notice title=beaches::%d of %d countries updated, %d beaches in file"%(ok,len(codes),sum(len(v) for v in out.values())))
 if ok:json.dump(out,open(sys.argv[1],"w",encoding="utf8"),ensure_ascii=False,separators=(",",":"))

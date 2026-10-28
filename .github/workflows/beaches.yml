@@ -8,12 +8,14 @@ permissions:
 jobs:
   beaches:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v4
       - name: Collect beaches for every country
+        continue-on-error: true
         run: python3 tools/fetch_beaches.py assets/beaches.json
       - name: Save the list
+        if: always()
         run: |
           git config user.name "worldlink-bot"
           git config user.email "noreply@users.noreply.github.com"
