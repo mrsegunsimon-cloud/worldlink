@@ -1,6 +1,6 @@
 """Collect fresh headlines from public news feeds into news.json. Usage: fetch_news.py out.json
 Runs in GitHub Actions (every few hours). A feed that fails is skipped; if too little comes back nothing is written."""
-import sys,json,re,html,time,urllib.request,xml.etree.ElementTree as ET
+import urllib.error,sys,json,re,html,time,urllib.request,xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 UA={"User-Agent":"Mozilla/5.0 (WorldLink news fetcher)"}
 def feed(url,limit=12):
@@ -75,6 +75,14 @@ CH_S=[("ESPN FC","UC6c1z7bA__85CIWZ_jpCK-Q",["FOOTBALL","PREMIER LEAGUE","LA LIG
 STOP=set("with from that this have will after about their over into says said amid more than what when where were been they them also"
  " would could should news live latest report reports new year".split())
 def toks(t):return {w for w in re.findall(r"[a-z0-9]{4,}",t.lower()) if w not in STOP}
+_ok={}
+def embeddable(v):
+    if v in _ok:return _ok[v]
+    try:
+        urllib.request.urlopen(urllib.request.Request("https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v="+v,headers=UA),timeout=15).read();_ok[v]=True
+    except urllib.error.HTTPError as ex:_ok[v]=(ex.code not in (401,403,404))
+    except Exception:_ok[v]=True
+    return _ok[v]
 def yt(chs):
     out=[]
     for name,cid in chs:
@@ -84,7 +92,7 @@ def yt(chs):
             for e in root.iter("{http://www.w3.org/2005/Atom}entry"):
                 vid=e.findtext("{http://www.youtube.com/xml/schemas/2015}videoId") or ""
                 title=e.findtext("{http://www.w3.org/2005/Atom}title") or ""
-                if re.fullmatch(r"[\w-]{11}",vid) and "#shorts" not in title.lower():out.append((vid,html.unescape(title),name))
+                if re.fullmatch(r"[\w-]{11}",vid) and "#shorts" not in title.lower() and embeddable(vid):out.append((vid,html.unescape(title),name))
         except Exception as ex:print("skip yt",name,ex)
     return out
 def attach(rows,vids,fallback=True):

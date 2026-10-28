@@ -406,7 +406,7 @@ function friends(tk){
  const list=tk==="f"?PEOPLE.filter(p=>me.f.includes(p[0])):PEOPLE;
  const row=p=>{const f=me.f.includes(p[0]);return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0"><div class="av" style="width:52px;height:52px;flex:none;border-width:0;font-size:20px;background:${"#1E6FFF,#FF7A1A,#7C5CFF,#0E9F6E".split(",")[p[0].charCodeAt(0)%4]}">${p[0][0].toUpperCase()}</div><div style="flex:1;min-width:0"><b>${p[0]}</b><div class="mute" style="font-size:13px">${p[1]}</div></div><button class="btn${f?" ghost":""}" style="width:auto;margin:0;padding:8px 18px;border-radius:8px" data-p="${p[0]}">${f?"Following":"Follow"}</button></div>`};
  const tb=(k,l)=>`<button data-ft="${k}" style="flex:1;padding:10px 0;font-weight:700;border-bottom:2px solid ${tk===k?"var(--ink)":"transparent"};opacity:${tk===k?1:.55}">${l}</button>`;
- open(`<h2 style="text-align:center;font-size:17px">Friends</h2><div style="display:flex;border-bottom:1px solid var(--line)">${tb("s","Suggested")}${tb("f","Following ("+me.f.length+")")}</div>${list.map(row).join("")||'<p class="mute" style="text-align:center;padding:20px 0">You are not following anyone yet. Open Suggested to find people.</p>'}<button class="btn ghost" id="x">Close</button>`);
+ openFull(`<div class="hd"><button id="x" aria-label="Close" style="font-size:22px">✕</button><b id="frx" style="font-size:20px">Friends</b><span style="width:40px"></span></div><div class="pgx" style="padding:0 16px"><div style="display:flex;border-bottom:1px solid var(--line)">${tb("s","Suggested")}${tb("f","Following ("+me.f.length+")")}</div>${list.map(row).join("")||'<p class="mute" style="text-align:center;padding:20px 0">You are not following anyone yet. Open Suggested to find people.</p>'}</div>`);
  $("#panel").querySelectorAll("[data-ft]").forEach(b=>b.onclick=()=>friends(b.dataset.ft));
  $("#panel").querySelectorAll("[data-p]").forEach(b=>b.onclick=async()=>{
   const u=b.dataset.p;me.f=me.f.includes(u)?me.f.filter(x=>x!==u):me.f.concat(u);
@@ -1659,7 +1659,7 @@ function dsVideo(id,title,artist){
  bx.innerHTML=`<div style="position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000"><iframe id="dsfr" src="https://www.youtube.com/embed/${id}?rel=0&playsinline=1&autoplay=1&enablejsapi=1" title="${esc(title)}" style="position:absolute;inset:0;width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div><div class="note" style="margin:6px 0 0">${esc(artist)}: ${esc(title)}</div><a href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener" style="display:block;font-size:13px;color:var(--acc)">Video not playing? Open it on YouTube</a>`;
  const f=$("#dsfr");if(!f)return;
  const h=e=>{if(e.source!==f.contentWindow)return;let d=e.data;if(typeof d==="string"){try{d=JSON.parse(d)}catch(_){return}}
-  if(d&&d.event==="onError"){window.removeEventListener("message",h);bx.innerHTML=`<p class="note">This video is blocked in your country or cannot be shown here.</p><a class="btn ghost" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">Open on YouTube</a>`}};
+  if(d&&d.event==="onError"){window.removeEventListener("message",h);bx.innerHTML=`<p class="note">This video cannot be played inside the app.</p><a class="btn ghost" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">Open on YouTube</a>`}};
  window.addEventListener("message",h);
  f.addEventListener("load",()=>{try{f.contentWindow.postMessage(JSON.stringify({event:"listening",id:1,channel:"widget"}),"*")}catch(e){}});
  bx.scrollIntoView({block:"nearest"});
@@ -2246,7 +2246,7 @@ function storyView(n,back,key){
  if(auto){const f=$("#panel").querySelector("iframe");if(f){
   const h=e=>{if(e.source!==f.contentWindow)return;let d=e.data;if(typeof d==="string"){try{d=JSON.parse(d)}catch(_){return}}
    if(d&&d.event==="onError"){window.removeEventListener("message",h);const bx=f.parentNode;
-    if(bx&&bx.parentNode){const nt=bx.nextElementSibling;if(nt&&/Preview:/.test(nt.textContent))nt.textContent="This video is blocked in your country, so here is the story photo instead.";
+    if(bx&&bx.parentNode){const nt=bx.nextElementSibling;if(nt&&/Preview:/.test(nt.textContent))nt.textContent="This video cannot be played inside the app, so here is the story photo instead.";
      bx.outerHTML=n[5]&&/^https:\/\//.test(n[5])?`<img src="${esc(n[5])}" alt="" referrerpolicy="no-referrer" style="width:100%;border-radius:14px;max-height:34vh;object-fit:cover;background:#111">`:cover(tl,em,Math.round(innerHeight*.34),lab,sportPh(key&&key[0],n))}}};
   window.addEventListener("message",h);
   f.addEventListener("load",()=>{try{f.contentWindow.postMessage(JSON.stringify({event:"listening",id:1,channel:"widget"}),"*")}catch(e){}})}}
