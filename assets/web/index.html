@@ -320,16 +320,34 @@ function profile(tabk){
  const all=CLIPS.map((c,i)=>i),mineI=all.filter(i=>CLIPS[i].src&&(!CLIPS[i].uid||CLIPS[i].uid===me.uid));
  const idx=tabk==="v"?mineI:tabk==="l"?all.filter(i=>liked[i]):all.filter(i=>saved[i]);
  const lk=mineI.reduce((n,i)=>n+(CLIPS[i].l||0),0);
- const tile=i=>{const c=CLIPS[i];return `<div>${c.src?`<video src="${esc(c.src)}" muted playsinline preload="metadata"></video>`:`<div style="width:100%;height:100%;background:linear-gradient(165deg,${c.g[0]},${c.g[1]});display:grid;place-items:center;font-size:40px">${c.e}</div>`}<span class="vw">▷ ${fmt(c.l||0)}</span></div>`};
+ const tile=i=>{const c=CLIPS[i];return `<div data-ci="${i}" style="cursor:pointer">${c.src?`<video src="${esc(c.src)}" muted playsinline preload="metadata"></video>`:`<div style="width:100%;height:100%;background:linear-gradient(165deg,${c.g[0]},${c.g[1]});display:grid;place-items:center;font-size:40px">${c.e}</div>`}<span class="vw">▷ ${fmt(c.l||0)}</span></div>`};
  const ic={v:'<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 4h4v16h-4z"/></svg>',s:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',l:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-8-5.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.6-8 11-8 11z"/></svg>'};
  const tb=k=>`<button data-pt="${k}" aria-label="${{v:"Videos",s:"Saved",l:"Liked"}[k]}" style="flex:1;padding:12px 0;display:grid;place-items:center;border-bottom:2px solid ${tabk===k?"var(--ink)":"transparent"};opacity:${tabk===k?1:.5};color:inherit">${ic[k]}</button>`;
  const empty={v:"No videos yet. Tap + to post your first one.",l:"Videos you like will show here.",s:"Videos you save will show here."}[tabk];
  const stat=(n,l)=>`<div><b style="font-size:20px">${n}</b><div class="mute" style="font-size:15px">${l}</div></div>`;
  openFull(`<div class="hd"><button id="ed" aria-label="Edit profile">✎</button><button id="pm" aria-label="Settings">☰</button></div><div class="pgx"><div style="display:flex;justify-content:space-between;gap:12px;padding:6px 16px 0"><div style="min-width:0"><div style="font-size:30px;font-weight:800;overflow-wrap:anywhere">${esc(me.name)}</div><div class="mute" style="font-size:17px">@${esc(me.name)}</div><div style="display:flex;gap:26px;margin-top:18px">${stat(me.f.length,"Following")}${stat(0,"Followers")}${stat(fmt(lk),"Likes")}</div></div><button id="ea" aria-label="Change photo" style="position:relative;flex:none">${meAv(104,42,"border-color:var(--line)")}<span style="position:absolute;right:2px;bottom:2px;width:34px;height:34px;border-radius:50%;background:#1E9BFF;color:#fff;font-size:24px;display:grid;place-items:center;border:3px solid var(--card)">+</span></button></div><p style="margin:14px 16px 8px">${esc(me.bio)||"Add a short bio so people know you."}</p><div style="padding:0 16px 12px"><button id="au" style="border:1px solid var(--line);border-radius:999px;padding:10px 18px;font-weight:700;color:inherit">${window.__wlUser?"Signed in · Log out":"Sign in or create account"}</button></div><div style="display:flex;gap:14px;overflow-x:auto;padding:4px 16px 14px"><button id="hn1" style="flex:none;width:70px;text-align:center;color:inherit"><span style="display:grid;place-items:center;width:64px;height:64px;border-radius:20px;border:1px solid var(--line);margin:0 auto 4px;font-size:30px">+</span><span style="font-size:13px">New</span></button>${(me.hl||[]).map((h,i)=>`<button data-hl="${i}" style="flex:none;width:70px;text-align:center;color:inherit"><span style="display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:var(--bg);border:3px solid var(--line);margin:0 auto 4px;font-size:30px">${h.e}</span><span style="font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(h.n)}</span></button>`).join("")}</div><div style="display:flex;border-bottom:1px solid var(--line)">${tb("v")}${tb("s")}${tb("l")}</div><div class="pgt">${idx.map(tile).join("")}</div>${idx.length?"":`<p class="mute" style="text-align:center;padding:24px">${empty}</p>`}</div>`);
  $("#panel").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>profile(b.dataset.pt));
+ $("#panel").querySelectorAll("[data-ci]").forEach(d=>d.onclick=()=>myPost(+d.dataset.ci,tabk));
  $("#hn1").onclick=newHL;$("#panel").querySelectorAll("[data-hl]").forEach(b=>b.onclick=()=>hlView(+b.dataset.hl));
  if(!me.hlLoaded){me.hlLoaded=true;loadHL().then(()=>{if($("#hn1")&&(me.hl||[]).length)profile(tabk)})}
  $("#au").onclick=()=>authSheet("up");$("#ed").onclick=editProfile;$("#ea").onclick=editProfile;$("#pm").onclick=profMenu;
+}
+function myPost(i,tabk,ask){
+ const c=CLIPS[i];if(!c)return;
+ const mine=!!(c.src&&(!c.uid||c.uid===me.uid));
+ const bar=mine?(ask?`<p style="margin:0;font-weight:700">Delete this for everyone? This cannot be undone.</p><div style="display:flex;gap:8px"><button class="btn ghost" id="dn" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Keep it</button><button class="btn red" id="dy" style="margin:0;flex:1">Yes, delete</button></div>`:`<button class="btn red" id="dl" style="margin:0">Delete</button>`):"";
+ openFull(`<div style="position:relative;height:100%;background:#000;color:#fff">${c.src?`<video id="mpv" src="${esc(c.src)}" autoplay loop playsinline controls style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain"></video>`:`<div style="position:absolute;inset:0;display:grid;place-items:center;font-size:90px;background:linear-gradient(165deg,${c.g[0]},${c.g[1]})">${c.e}</div>`}<button id="mpx" aria-label="Close" style="position:absolute;top:12px;left:12px;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:20px">✕</button><div style="position:absolute;left:0;right:0;bottom:0;padding:44px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:8px"><p style="margin:0">${esc(c.c||"")}</p>${bar}</div></div>`,true);
+ const v=$("#mpv");if(v)v.play().catch(()=>{});
+ $("#mpx").onclick=()=>profile(tabk);
+ if($("#dl"))$("#dl").onclick=()=>myPost(i,tabk,true);
+ if($("#dn"))$("#dn").onclick=()=>myPost(i,tabk,false);
+ if($("#dy"))$("#dy").onclick=async()=>{
+  $("#dy").disabled=true;$("#dy").textContent="Deleting…";
+  try{const D=await claude.use("db");if(D&&c.id){const r=await D.collection("videos").doc(c.id).get();if(r.exists)await D.collection("videos").doc(c.id).set(Object.assign(r.data(),{del:true}))}}catch(e){}
+  const k=CLIPS.indexOf(c);if(k>=0)CLIPS.splice(k,1);
+  for(const m of [liked,saved]){const o={};Object.keys(m).forEach(q=>{q=+q;if(q<k)o[q]=m[q];else if(q>k)o[q-1]=m[q]});Object.keys(m).forEach(q=>delete m[q]);Object.assign(m,o)}
+  profile(tabk);
+ };
 }
 function authSheet0(mode,how){
  const up=mode==="up";how=how||"email";
@@ -1917,7 +1935,8 @@ function mixMusic(f,song,prog){
 function postForm(f,note){
  stopCam();
  const url=URL.createObjectURL(f);
- open(`<h2>Post your video</h2><video src="${url}" controls playsinline style="width:100%;max-height:40vh;border-radius:12px;background:#000"></video><button class="btn ghost" id="pmu" style="margin-top:8px">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption"><p class="note" id="st">${note?esc(note):""}</p><button class="btn" id="go">Post</button><button class="btn ghost" id="bk">Back</button>`);
+ openFull(`<div style="position:relative;height:100%;background:#000;color:#fff"><video id="pvv" src="${url}" autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><button id="pvt" aria-label="Play or pause" style="position:absolute;inset:0;width:100%;background:none"></button><div style="position:absolute;left:0;right:0;bottom:0;padding:40px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:8px"><button class="btn ghost" id="pmu" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption" style="margin:0"><p class="note" id="st" style="margin:0;color:#fff">${note?esc(note):""}</p><div style="display:flex;gap:8px"><button class="btn ghost" id="bk" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button><button class="btn" id="go" style="margin:0;flex:2">Post</button></div></div></div>`,true);
+ {const pv=$("#pvv");if(pv){pv.play().catch(()=>{});$("#pvt").onclick=()=>{pv.paused?pv.play().catch(()=>{}):pv.pause()}}}
  $("#bk").onclick=create;
  $("#go").onclick=()=>postVideo(f,$("#cp").value.trim());
  $("#pmu").onclick=()=>soundPicker(()=>{
