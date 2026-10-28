@@ -1,7 +1,7 @@
 """Fresh scores, fixtures and tables from ESPN's public feeds into sports.json. Usage: fetch_sports.py out.json
 A feed that fails is skipped. If nothing useful comes back, nothing is written."""
 import sys,json,time,datetime,urllib.request
-UA={"User-Agent":"Mozilla/5.0 (WorldLink sports fetcher)"}
+UA={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36","Accept":"application/json, text/plain, */*","Accept-Language":"en-US,en;q=0.9"}
 def get(url):
     try:
         return json.loads(urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=25).read())
