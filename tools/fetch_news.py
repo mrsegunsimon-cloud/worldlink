@@ -14,7 +14,13 @@ def feed(url,limit=12):
             d=re.sub(r"\s+"," ",d)
             try:ts=parsedate_to_datetime(g("pubDate")).timestamp()
             except Exception:ts=0
-            if title and link.startswith("http"):out.append((ts,title,d[:320],link))
+            img=""
+            for ch in it.iter():
+                tg=ch.tag.split("}")[-1]
+                u=ch.get("url") or ""
+                if u.startswith("https://") and (tg=="thumbnail" or (tg in("content","enclosure") and ((ch.get("type") or "").startswith("image") or re.search(r"\.(jpe?g|png|webp)(\?|$)",u,re.I)))):
+                    img=re.sub(r"/(standard|news)/\d+/",r"/\1/800/",u);break
+            if title and link.startswith("http"):out.append((ts,title,d[:320],link,img))
             if len(out)>=limit:break
         return out
     except Exception as e:
@@ -22,12 +28,12 @@ def feed(url,limit=12):
 def pick(sources,tags,cap):
     rows=[]
     for name,url in sources:
-        for ts,t,d,l in feed(url):rows.append((ts,tags,t,d or t,name,l))
+        for ts,t,d,l,im in feed(url):rows.append((ts,tags,t,d or t,name,l,im))
     rows.sort(key=lambda r:-r[0]);seen=set();out=[]
-    for ts,tg,t,d,n,l in rows:
+    for ts,tg,t,d,n,l,im in rows:
         k=re.sub(r"\W+","",t.lower())[:60]
         if k in seen:continue
-        seen.add(k);out.append([tg,t,d,n,l])
+        seen.add(k);out.append([tg,t,d,n,l,im])
         if len(out)>=cap:break
     return out
 world=[]
@@ -43,13 +49,25 @@ def tag(t,d,default):
     return default
 raw=[]
 for name,url,dflt in [("BBC Sport","https://feeds.bbci.co.uk/sport/football/rss.xml","FOOTBALL"),("BBC Sport","https://feeds.bbci.co.uk/sport/rss.xml","SPORT"),("ESPN","https://www.espn.com/espn/rss/nba/news","NBA"),("ESPN","https://www.espn.com/espn/rss/nfl/news","NFL"),("ESPN","https://www.espn.com/espn/rss/mlb/news","MLB"),("ESPN","https://www.espn.com/espn/rss/soccer/news","FOOTBALL")]:
-    for ts,t,d,l in feed(url,10):raw.append((ts,tag(t,d,dflt),t,d or t,name,l))
+    for ts,t,d,l,im in feed(url,10):raw.append((ts,tag(t,d,dflt),t,d or t,name,l,im))
 raw.sort(key=lambda r:-r[0]);seen=set();sports=[]
-for ts,tg,t,d,n,l in raw:
+for ts,tg,t,d,n,l,im in raw:
     k=re.sub(r"\W+","",t.lower())[:60]
     if k in seen:continue
-    seen.add(k);sports.append([tg,t,d,n,l])
+    seen.add(k);sports.append([tg,t,d,n,l,im])
     if len(sports)>=24:break
+def og(url):
+    try:
+        h=urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=10).read(400000).decode("utf8","ignore")
+        m=re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',h) or re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image',h)
+        u=html.unescape(m.group(1)) if m else ""
+        return u if u.startswith("https://") else ""
+    except Exception:return ""
+budget=45
+for row in world+sports:
+    if not row[5] and budget>0:
+        budget-=1;row[5]=og(row[4])
+print("with photos",sum(1 for r in world+sports if r[5]),"of",len(world+sports))
 print("world",len(world),"sports",len(sports))
 if len(world)<8 or len(sports)<6:
     print("Too little came back; keeping the previous version.");sys.exit(0)
