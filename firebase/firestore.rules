@@ -44,6 +44,13 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data) || isMod();
     }
 
+    // Verified payments: only the payments helper account can write; each person can read their own
+    match /credits/{id} {
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow create: if signedIn() && request.auth.token.email == 'payments@worldlink.app';
+      allow update, delete: if false;
+    }
+
     // Reports are for moderators only
     match /reports/{id} {
       allow create: if signedIn();
