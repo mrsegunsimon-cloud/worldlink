@@ -8,13 +8,14 @@ near=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),"near.js"),enc
 codes=re.findall(r'\["([A-Z]{2})","',re.search(r"const BCO=\[(.*?)\];",near,re.S).group(1))
 out=json.load(open(sys.argv[1])) if os.path.exists(sys.argv[1]) else {}
 def query(cc):
-    q='[out:json][timeout:60];area["ISO3166-1"="%s"][admin_level=2]->.a;nwr["natural"="beach"]["name"](area.a);out center 400;'%cc
-    for h in HOSTS:
+    q='''SELECT ?bLabel ?bDescription ?coord ?sl WHERE { ?b wdt:P31 wd:Q40080; wdt:P17 ?c; wdt:P625 ?coord; wikibase:sitelinks ?sl. ?c wdt:P297 "%s". SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } ORDER BY DESC(?sl) LIMIT 300'''%cc
+    u="https://query.wikidata.org/sparql?format=json&query="+urllib.parse.quote(q)
+    for k in range(3):
         try:
-            r=urllib.request.urlopen(urllib.request.Request(h+"?data="+urllib.parse.quote(q),headers=UA),timeout=70).read()
-            return json.loads(r).get("elements",[])
+            r=urllib.request.urlopen(urllib.request.Request(u,headers={"User-Agent":UA["User-Agent"],"Accept":"application/sparql-results+json"}),timeout=70).read()
+            return json.loads(r)["results"]["bindings"]
         except Exception as e:
-            print("::notice title=beaches-error::%s %s %s"%(cc,h.split("//")[1][:14],str(e)[:60]));time.sleep(5)
+            print("::notice title=beaches-error::%s try %d %s"%(cc,k+1,str(e)[:70]));time.sleep(6)
     return None
 ok=0;T0=time.time()
 for cc in codes:
@@ -24,15 +25,18 @@ for cc in codes:
     if el is None:continue
     seen=set();rows=[]
     for e in el:
-        la=e.get("lat",(e.get("center") or {}).get("lat"));lo=e.get("lon",(e.get("center") or {}).get("lon"))
-        t=e.get("tags") or {};n=t.get("name")
-        if la is None or lo is None or not n:continue
-        k="%s|%.2f|%.2f"%(n,la,lo)
-        if k in seen:continue
-        seen.add(k)
-        area=t.get("addr:city") or t.get("addr:state") or t.get("is_in:state") or t.get("is_in") or ""
-        tags={k2:str(t[k2])[:200] for k2 in KEEP if t.get(k2)}
-        rows.append([n[:80],round(la,5),round(lo,5),str(area)[:60],tags])
+        try:
+            n=e["bLabel"]["value"]
+            if re.fullmatch(r"Q\d+",n):continue
+            m=re.match(r"Point\(([-\d.eE]+) ([-\d.eE]+)\)",e["coord"]["value"])
+            if not m:continue
+            lo,la=float(m.group(1)),float(m.group(2))
+            k="%s|%.2f|%.2f"%(n,la,lo)
+            if k in seen:continue
+            seen.add(k)
+            d=(e.get("bDescription") or {}).get("value","")
+            rows.append([n[:80],round(la,5),round(lo,5),"",({"description":d[:200]} if d else {})])
+        except Exception:continue
     if rows:
         out[cc]=rows;ok+=1
         json.dump(out,open(sys.argv[1],"w",encoding="utf8"),ensure_ascii=False,separators=(",",":"))
