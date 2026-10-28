@@ -268,7 +268,7 @@ function sos(){
  const s=$("#c"),a=$("#call");const up=()=>{const n=NUMS[s.value][1];a.textContent="Call "+n;a.href="tel:"+n};s.onchange=up;s.value=2;up();$("#hd").onclick=hospitals}
 $("#srch").onclick=searchAll;
 function theme(){const r=document.documentElement;const dark=getComputedStyle(r).getPropertyValue("--bg").trim()==="#070D24";r.setAttribute("data-theme",dark?"light":"dark");close()}
-document.querySelector("nav").onclick=e=>{const b=e.target.closest("button");if(!b)return;secFull=false;if(b.dataset.n==="Home")return close();if(b.dataset.n!=="Create")document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+document.querySelector("nav").onclick=e=>{const b=e.target.closest("button");if(!b)return;secFull=false;if(b.dataset.n==="Home"){close();const fd=$("#feed");if(fd)fd.scrollTo({top:0,behavior:"smooth"});return}if(b.dataset.n!=="Create")document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
  if(b.dataset.n==="Create")return create();
  if(b.dataset.n==="Profile")return profile();
  if(b.dataset.n==="Friends")return friends();
@@ -1393,7 +1393,7 @@ function social(){
   const it={id:"p"+Date.now(),t,u:me.name,o:me.uid,ts:Date.now(),l:[],cm:[]};
   if(f)it.img=URL.createObjectURL(f);
   try{const D=await claude.use("db");if(f){const A=await claude.use("assets");const r=await A.upload(f);it.img=r.url}if(D&&me.uid)await D.collection("posts").doc(it.id).set(it)}catch(e){}
-  PS.unshift(it);$("#pt").value="";social();
+  PS.unshift(it);notify("*","posted in Social"+(t?": "+t.slice(0,40):" a photo"));$("#pt").value="";social();
  };
 }
 async function saveB(){try{const D=await claude.use("db");if(D&&me.uid)await D.collection("data/users/"+me.uid).doc("blocks").set({list:me.b})}catch(e){}}
@@ -1490,7 +1490,7 @@ $("#story").onclick=async e=>{
  else if(a==="del"){const s=SQ[si];s.del=true;try{const D=await claude.use("db");if(D&&me.uid)await D.collection("stories").doc(s.id).set(s)}catch(er){}ST=ST.filter(y=>y!==s);SQ=SQ.filter(y=>y!==s);showS()}
 };
 let NF=[];
-async function loadNF(){try{const D=await claude.use("db"),U=await claude.use("user");if(!D||!U)return;const id=await U.id();const s=await D.collection("notifs").get();NF=s.docs.map(d=>d.data()).filter(n=>n&&n.to===id).sort((a,b)=>b.ts-a.ts);const z=await D.collection("data/users/"+id).doc("notifseen").get();me.ns=z.exists?(z.data().ts||0):0;badge()}catch(e){}}
+async function loadNF(){try{const D=await claude.use("db"),U=await claude.use("user");if(!D||!U)return;const id=await U.id();const s=await D.collection("notifs").get();NF=s.docs.map(d=>d.data()).filter(n=>n&&(n.to===id||(n.to==="*"&&n.from!==me.name&&Date.now()-n.ts<12096e5))).sort((a,b)=>b.ts-a.ts);const z=await D.collection("data/users/"+id).doc("notifseen").get();me.ns=z.exists?(z.data().ts||0):0;badge()}catch(e){}}
 function badge(){const n=NF.filter(x=>x.ts>me.ns&&!blocked(null,x.from)).length,b=$("#bd");b.textContent=n>9?"9+":n;b.style.display=n?"block":"none";const nb=$("#nbi");if(nb){nb.textContent=n>9?"9+":n;nb.style.display=n?"block":"none"}}
 async function notify(to,text){if(!to||to===me.uid)return;try{const D=await claude.use("db");if(!D)return;const id="n"+Date.now()+Math.floor(Math.random()*1e3);await D.collection("notifs").doc(id).set({id,to,from:me.name,text,ts:Date.now()})}catch(e){}}
 async function notifs(){
@@ -1847,9 +1847,10 @@ async function startCam(){
 function stopCam(){clearInterval(rt);if(rec&&rec.state==="recording"){rec.onstop=null;try{rec.stop()}catch(e){}}if(rs){rs.getTracks().forEach(t=>t.stop());rs=null}}
 function create(){
  stopCam();
- open(`<h2 style="text-align:center;font-size:17px">Create</h2><p class="mute" style="text-align:center;margin:0 0 6px">Videos can be up to 20 MB, about one minute.</p><button class="btn" id="cr" style="background:#FF2D55;color:#fff">● Record with camera</button><button class="btn ghost" id="gl">Go live</button><label class="btn ghost" style="cursor:pointer">Choose a video from phone<input id="cf" type="file" accept="video/*" hidden></label><label class="btn ghost" style="cursor:pointer">Open phone camera app<input id="cc" type="file" accept="video/*" capture hidden></label><button class="btn ghost" id="x">Cancel</button>`);
- $("#gl").onclick=goLive;
+ open(`<h2 style="text-align:center;font-size:17px">Create</h2><p class="mute" style="text-align:center;margin:0 0 6px">Videos can be up to 20 MB, about one minute.</p><button class="btn" id="cr" style="background:#FF2D55;color:#fff">● Record with camera</button><button class="btn ghost" id="gl">Go live</button><label class="btn ghost" style="cursor:pointer">Choose a video from phone<input id="cf" type="file" accept="video/*" hidden></label><label class="btn ghost" style="cursor:pointer">📷 Choose a photo from phone<input id="cpi" type="file" accept="image/*" hidden></label><label class="btn ghost" style="cursor:pointer">Open phone camera app<input id="cc" type="file" accept="video/*" capture hidden></label><button class="btn ghost" id="x">Cancel</button>`);
+ PFX="";$("#gl").onclick=goLive;
  $("#cr").onclick=recorder;
+ $("#cpi").onchange=e=>{if(e.target.files[0])photoForm(e.target.files[0])};
  $("#cc").onchange=e=>{if(e.target.files[0])postForm(e.target.files[0])};
  $("#cf").onchange=e=>{if(e.target.files[0])postForm(e.target.files[0])};
 }
@@ -1933,15 +1934,83 @@ function soundSheet(i){
  const su=$("#su");if(su)su.onclick=()=>{sndPrev(null);SND=sd;close();secFull=false;recorder();const st=$("#st");if(st)st.textContent="Sound ready: "+sd.name+". Tap the red button to record with it."};
  const x=$("#x");if(x)x.onclick=()=>{sndPrev(null);close()};
 }
+/* Create 2: genre+search music picker, photo posting, filters for photos and videos */
+const GEN=[["Afrobeat","afrobeats",""],["Amapiano","amapiano",""],["Gospel","gospel worship",""],["Highlife","highlife",""],["Hip-hop","hip hop","Hip-Hop/Rap"],["R&B","r&b soul","R&B/Soul"],["Pop","pop","Pop"],["Reggae","reggae","Reggae"],["Dancehall","dancehall","Dancehall"],["Country","country","Country"],["Blues","blues","Blues"],["Jazz","jazz","Jazz"],["Rock","rock","Rock"],["Latin","latin","Latin"],["Lo-fi","lofi","Lo-Fi"],["Classical","classical","Classical"]];
+let SPL=[];
+async function spLoad(q,genre){
+ const box=$("#spr");if(!box)return;
+ box.innerHTML='<p class="mute">Loading music…</p>';
+ const E=encodeURIComponent(q||"");
+ const u=(genre&&!q)?`https://api.audius.co/v1/tracks/trending?app_name=WorldLink&limit=15&time=week&genre=${encodeURIComponent(genre)}`:`https://api.audius.co/v1/tracks/search?query=${E}&app_name=WorldLink&limit=15`;
+ let d=typeof dsGet==="function"?await dsGet(u):null;
+ if(!$("#spr"))return;
+ let A=((d&&d.data)||[]).filter(x=>x&&x.id&&x.is_streamable!==false);
+ if(!A.length&&genre&&!q&&typeof dsGet==="function"){d=await dsGet(`https://api.audius.co/v1/tracks/search?query=${encodeURIComponent(genre)}&app_name=WorldLink&limit=15`);A=((d&&d.data)||[]).filter(x=>x&&x.id&&x.is_streamable!==false)}
+ if(!$("#spr"))return;
+ SPL=A.map(x=>({t:x.title||"Untitled",a:(x.user&&x.user.name)||"",url:`https://api.audius.co/v1/tracks/${encodeURIComponent(x.id)}/stream?app_name=WorldLink`}));
+ box.innerHTML=SPL.length?SPL.map((x,k)=>`<div class="cm" style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(x.t)}</b><div class="mute" style="font-size:12px">${esc(x.a)}</div></div><button class="btn ghost" data-xp="${k}" style="width:auto;margin:0;padding:8px 12px">▶</button><button class="btn" data-xu="${k}" style="width:auto;margin:0;padding:8px 12px">Use</button></div>`).join(""):'<p class="mute">No free songs found. Try another word or genre.</p>';
+ box.querySelectorAll("[data-xp]").forEach(b=>b.onclick=()=>sndPrev(SPL[+b.dataset.xp].url));
+ box.querySelectorAll("[data-xu]").forEach(b=>b.onclick=()=>{const x=SPL[+b.dataset.xu];SND={name:x.t+(x.a?" · "+x.a:""),url:x.url};spBack()});
+}
+let spBack=()=>{};
 function soundPicker(cb){
  const L=songList();
- open(`<h2>Choose a sound</h2><p class="note" style="margin:0 0 6px">Sounds play while you record and are mixed into your video.</p>${SND?`<button class="btn ghost" id="sno">Remove sound (${esc(SND.name)})</button>`:""}${L.map((x,k)=>`<div class="cm" style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(x.t)}</b><div class="mute" style="font-size:12px">${esc(x.a||"")}</div></div><button class="btn ghost" data-sp="${k}" style="width:auto;margin:0;padding:8px 12px">▶</button><button class="btn" data-su="${k}" style="width:auto;margin:0;padding:8px 12px">Use</button></div>`).join("")||'<p class="mute">No sounds yet.</p>'}<button class="btn ghost" id="sbk">Back to camera</button>`);
- const back=()=>{sndPrev(null);cb?cb():recorder()};
+ open(`<h2>Choose music</h2><p class="note" style="margin:0 0 6px">Pick a type of music, or search any song or artist. Free songs only.</p>${SND?`<button class="btn ghost" id="sno">Remove music (${esc(SND.name)})</button>`:""}<div style="display:flex;gap:8px"><input class="in" id="sq" maxlength="60" placeholder="Search music" aria-label="Search music" style="margin:0"><button class="btn" id="sg" style="width:auto;margin:0;padding:8px 16px">Search</button></div><div style="display:flex;gap:6px;overflow-x:auto;padding:10px 0">${GEN.map((g,i)=>`<button data-gn="${i}" style="flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:inherit;font-weight:600">${g[0]}</button>`).join("")}</div><div id="spr"></div><h3 style="margin:14px 0 4px;font-size:15px">WorldLink free library</h3>${L.map((x,k)=>`<div class="cm" style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0"><b>${esc(x.t)}</b><div class="mute" style="font-size:12px">${esc(x.a||"")}</div></div><button class="btn ghost" data-sp="${k}" style="width:auto;margin:0;padding:8px 12px">▶</button><button class="btn" data-su="${k}" style="width:auto;margin:0;padding:8px 12px">Use</button></div>`).join("")||'<p class="mute">No sounds yet.</p>'}<button class="btn ghost" id="sbk">Back</button>`);
+ const back=()=>{sndPrev(null);cb?cb():recorder()};spBack=back;
  $("#sbk").onclick=back;
  const so=$("#sno");if(so)so.onclick=()=>{SND=null;back()};
  $("#panel").querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>sndPrev(L[+b.dataset.sp].url));
  $("#panel").querySelectorAll("[data-su]").forEach(b=>b.onclick=()=>{const x=L[+b.dataset.su];SND={name:x.t+(x.a?" · "+x.a:""),url:x.url};back()});
+ $("#panel").querySelectorAll("[data-gn]").forEach(b=>b.onclick=()=>{const g=GEN[+b.dataset.gn];$("#panel").querySelectorAll("[data-gn]").forEach(x=>x.style.background="");b.style.background="var(--bg)";spLoad(g[1],"");if(g[2])spLoad("",g[2])});
+ const go=()=>{const q=$("#sq").value.trim();if(q)spLoad(q,"")};
+ $("#sg").onclick=go;$("#sq").onkeydown=e=>{if(e.key==="Enter")go()};
+ spLoad("","Pop");
 }
+/* ---- filters ---- */
+let PFX="";
+const fxStrip=()=>`<div id="fxs" style="display:flex;gap:6px;overflow-x:auto;padding:6px 0">${FX.map((f,i)=>`<button data-pf="${i}" style="flex:none;padding:6px 12px;border-radius:999px;border:1px solid rgba(128,128,128,.5);font-weight:600;font-size:13px;color:inherit;background:${f[1]===PFX?"rgba(128,128,128,.35)":"transparent"}">${f[0]}</button>`).join("")}</div>`;
+function fxWire(el){
+ document.querySelectorAll("[data-pf]").forEach(b=>b.onclick=()=>{PFX=FX[+b.dataset.pf][1];if(el)el.style.filter=PFX;document.querySelectorAll("[data-pf]").forEach(x=>x.style.background=FX[+x.dataset.pf][1]===PFX?"rgba(128,128,128,.35)":"transparent")});
+}
+function bakePhoto(f,css){
+ return new Promise(ok=>{
+  if(!css)return ok(f);
+  try{const im=new Image();im.onerror=()=>ok(f);im.onload=()=>{try{const m=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*m);c.height=Math.round(im.height*m);const x=c.getContext("2d");if(!("filter" in x))return ok(f);x.filter=css;x.drawImage(im,0,0,c.width,c.height);c.toBlob(b=>ok(b?new File([b],"photo.jpg",{type:"image/jpeg"}):f),"image/jpeg",.88)}catch(e){ok(f)}};im.src=URL.createObjectURL(f)}catch(e){ok(f)}
+ });
+}
+function filterVideo(f,css,prog){
+ return new Promise((ok,no)=>{
+  try{
+   if(!window.MediaRecorder)return no(new Error("This phone cannot add filters."));
+   const v=document.createElement("video");v.src=URL.createObjectURL(f);v.playsInline=true;v.preload="auto";v.onerror=()=>no(new Error("The video could not be read."));
+   v.onloadedmetadata=async()=>{
+    try{
+     const k=Math.min(1,960/Math.max(v.videoWidth,v.videoHeight)),W=Math.round(v.videoWidth*k)||720,H=Math.round(v.videoHeight*k)||1280,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+     if(!("filter" in x))return no(new Error("Filters on videos need Chrome or the Android app."));
+     const AC=window.AudioContext||window.webkitAudioContext;let ac=null,tracks=[];
+     if(AC){try{ac=new AC();const d=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(d);tracks=d.stream.getAudioTracks()}catch(e){ac=null}}
+     const out=new MediaStream([...c.captureStream(25).getVideoTracks(),...tracks]);
+     const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
+     const rc=new MediaRecorder(out,mt?{mimeType:mt,videoBitsPerSecond:1500000,audioBitsPerSecond:128000}:{}),ch=[];
+     rc.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+     let run=true;const draw=()=>{if(!run)return;x.filter=css;x.drawImage(v,0,0,W,H);if(prog)prog(v.currentTime,v.duration);requestAnimationFrame(draw)};
+     rc.onstop=()=>{run=false;try{ac&&ac.close()}catch(e){}const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"filtered."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+     v.onended=()=>{if(rc.state==="recording")rc.stop()};
+     rc.start();draw();await v.play()
+    }catch(e){no(e)}
+   };
+  }catch(e){no(e)}
+ })
+}
+async function postWithFilter(f,cap){
+ if(!PFX)return postVideo(f,cap);
+ const css=PFX;
+ open(`<h2>Adding your filter</h2><p class="mute">This takes about as long as the video. Keep this screen open.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
+ try{const nf=await filterVideo(f,css,(t,d)=>{const b=$("#mb");if(b&&d)b.style.width=Math.min(100,Math.round(100*t/d))+"%"});PFX="";postFormPost(nf,cap)}
+ catch(e){PFX="";postForm(f,"Could not add the filter: "+(e.message||"try again"))}
+}
+function postFormPost(nf,cap){open('<h2>Posting…</h2><p class="note" id="st"></p><button class="btn" id="go" style="display:none">x</button>');postVideo(nf,cap)}
+
 function mixSound(src){
  if(!SND||!window.AudioContext&&!window.webkitAudioContext)return src;
  try{const ac=new(window.AudioContext||window.webkitAudioContext)(),d=ac.createMediaStreamDestination();
@@ -2016,20 +2085,20 @@ function photoToVideo(f,song,secs,prog){
 function photoForm(f){
  stopCam();
  const url=URL.createObjectURL(f);
- open(`<h2>Post your photo</h2><img src="${url}" alt="Your photo" style="width:100%;max-height:44vh;object-fit:contain;border-radius:12px;background:#000"><input class="in" id="cp" type="text" maxlength="200" placeholder="Write a caption" aria-label="Caption"><button class="btn ghost" id="pmp" style="margin-top:8px">♪ Post as a video with music</button><p class="note" id="st">Photos are shared in Social, up to 5 MB.</p><button class="btn" id="go">Post to Social</button><button class="btn ghost" id="bk">Retake</button>`);
- $("#bk").onclick=recorder;
+ open(`<h2>Post your photo</h2><img id="pimg" src="${url}" alt="Your photo" style="width:100%;max-height:40vh;object-fit:contain;border-radius:12px;background:#000;filter:${PFX||"none"}">${fxStrip()}<input class="in" id="cp" type="text" maxlength="200" placeholder="Write a caption" aria-label="Caption"><button class="btn ghost" id="pmp" style="margin-top:8px">🎬 Turn into a video with music</button><p class="note" id="st">Photos are shared in Social, up to 5 MB.</p><button class="btn" id="go">Post to Social</button><button class="btn ghost" id="bk">Retake</button>`);
+ $("#bk").onclick=recorder;fxWire($("#pimg"));
  $("#pmp").onclick=()=>soundPicker(()=>{
   if(!SND)return photoForm(f);
   const sd=SND;SND=null;
   open(`<h2>Making your video</h2><p class="mute">Putting "${esc(sd.name)}" with your photo for 15 seconds. Keep this screen open.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
-  photoToVideo(f,sd,15,p=>{const b=$("#mb");if(b)b.style.width=Math.round(p*100)+"%"}).then(vf=>postForm(vf,"Photo with music: "+sd.name)).catch(e=>{photoForm(f);const st=$("#st");if(st)st.textContent="Could not add music: "+(e.message||"try again")})
+  bakePhoto(f,PFX).then(g=>photoToVideo(g,sd,15,p=>{const b=$("#mb");if(b)b.style.width=Math.round(p*100)+"%"})).then(vf=>postForm(vf,"Photo with music: "+sd.name)).catch(e=>{photoForm(f);const st=$("#st");if(st)st.textContent="Could not add music: "+(e.message||"try again")})
  });
  $("#go").onclick=async()=>{
   if(f.size>5*1048576){$("#st").textContent="That photo is over 5 MB. Retake it.";return}
   $("#go").disabled=true;$("#st").textContent="Posting…";
-  const it={id:"p"+Date.now(),t:$("#cp").value.trim(),u:me.name,o:me.uid,ts:Date.now(),l:[],cm:[],img:url};
+  const it={id:"p"+Date.now(),t:$("#cp").value.trim(),u:me.name,o:me.uid,ts:Date.now(),l:[],cm:[],img:url};f=await bakePhoto(f,PFX);it.img=URL.createObjectURL(f);PFX="";
   try{const D=await claude.use("db");const A=await claude.use("assets");if(A){const r=await A.upload(f);it.img=r.url}if(D&&me.uid)await D.collection("posts").doc(it.id).set(it)}catch(e){}
-  PS.unshift(it);social();
+  PS.unshift(it);notify("*","posted a photo in Social"+(it.t?": "+it.t.slice(0,40):""));social();
  };
 }
 function mixMusic(f,song,prog){
@@ -2061,10 +2130,10 @@ function mixMusic(f,song,prog){
 function postForm(f,note){
  stopCam();
  const url=URL.createObjectURL(f);
- openFull(`<div style="position:relative;height:100%;background:#000;color:#fff"><video id="pvv" src="${url}" autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><button id="pvt" aria-label="Play or pause" style="position:absolute;inset:0;width:100%;background:none"></button><div style="position:absolute;left:0;right:0;bottom:0;padding:40px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:8px"><button class="btn ghost" id="pmu" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption" style="margin:0"><p class="note" id="st" style="margin:0;color:#fff">${note?esc(note):""}</p><div style="display:flex;gap:8px"><button class="btn ghost" id="bk" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button><button class="btn" id="go" style="margin:0;flex:2">Post</button></div></div></div>`,true);
+ openFull(`<div style="position:relative;height:100%;background:#000;color:#fff"><video id="pvv" src="${url}" autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><button id="pvt" aria-label="Play or pause" style="position:absolute;inset:0;width:100%;background:none"></button><div style="position:absolute;left:0;right:0;bottom:0;padding:40px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:8px">${fxStrip()}<button class="btn ghost" id="pmu" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption" style="margin:0"><p class="note" id="st" style="margin:0;color:#fff">${note?esc(note):""}</p><div style="display:flex;gap:8px"><button class="btn ghost" id="bk" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button><button class="btn" id="go" style="margin:0;flex:2">Post</button></div></div></div>`,true);
  {const pv=$("#pvv");if(pv){pv.play().catch(()=>{});$("#pvt").onclick=()=>{pv.paused?pv.play().catch(()=>{}):pv.pause()}}}
- $("#bk").onclick=create;
- $("#go").onclick=()=>postVideo(f,$("#cp").value.trim());
+ $("#bk").onclick=create;{const pv=$("#pvv");if(pv)pv.style.filter=PFX;fxWire(pv)}
+ $("#go").onclick=()=>postWithFilter(f,$("#cp").value.trim());
  $("#pmu").onclick=()=>soundPicker(()=>{
   if(!SND)return postForm(f,note);
   const sd=SND;SND=null;
