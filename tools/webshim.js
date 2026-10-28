@@ -4,7 +4,7 @@
  if(window.top!==window.self){try{window.top.location=window.self.location}catch(e){document.documentElement.innerHTML=""}}
  var CFG=__FIREBASE_CONFIG__;
  var V="10.14.1",fb=null,fails=0,lockUntil=0;
- function lib(){if(!fb)fb=Promise.all([import("https://www.gstatic.com/firebasejs/"+V+"/firebase-app.js"),import("https://www.gstatic.com/firebasejs/"+V+"/firebase-auth.js")]).then(function(m){var app=m[0].initializeApp(CFG);return{A:m[1],auth:m[1].getAuth(app)}});return fb}
+ function lib(){if(!fb)fb=Promise.all([import("https://www.gstatic.com/firebasejs/"+V+"/firebase-app.js"),import("https://www.gstatic.com/firebasejs/"+V+"/firebase-auth.js")]).then(function(m){var app=m[0].initializeApp(CFG);var au=m[1].getAuth(app);m[1].onAuthStateChanged(au,function(u){var x=usr(u);window.__wlUser=x;try{if(x){me.uid=x.uid;if(me.name==="you")me.name=x.name||"you";var b=[].slice.call(document.querySelectorAll("button")).find(function(e){return/^Sign in or create account$/.test(e.textContent.trim())});if(b)b.textContent="Signed in \u00b7 Log out"}}catch(e){}});return{A:m[1],auth:au}});return fb}
  function usr(u){return u?{uid:u.uid,email:u.email||u.phoneNumber||"",name:u.displayName||((u.email||"").split("@")[0])||"you"}:null}
  function human(e){var c=(e&&e.code)||"";
   if(c==="auth/email-already-in-use")return"That email already has an account. Log in instead.";
