@@ -70,8 +70,8 @@ for row in world+sports:
 print("with photos",sum(1 for r in world+sports if r[5]),"of",len(world+sports))
 
 # ---- preview videos from official news channels (free YouTube feeds, no key) ----
-CH_W=[("Al Jazeera English","UCNye-wNBqNL5ZzHSJj3l8Bg"),("BBC News","UC16niRr50-MSBwiO3YDb3RA"),("DW News","UCknLrEdhRCp1aegoMqRaCZg"),("Sky News","UCoMdktPbSTixAyNGwb-UYkQ"),("FRANCE 24 English","UCQfwfsi5VrQ8yKZ-UWmAEFg")]
-CH_S=[("Sky Sports","UCNAf1k0yIjyGu3k9BwAg3lg"),("ESPN","UCiWLfSweyRNmLpgEHekhoAg"),("NBA","UCWJ2lWNubArHWmf3FIHbfcQ"),("NFL","UCDVYQ4Zhbm3S2dlz7P1GBDg"),("BBC Sport","UCW6-BQWQ4_Qgp4RwNMPPtHw")]
+CH_W=[("Al Jazeera English","UCNye-wNBqNL5ZzHSJj3l8Bg"),("DW News","UCknLrEdhRCp1aegoMqRaCZg"),("FRANCE 24 English","UCQfwfsi5VrQ8yKZ-UWmAEFg"),("BBC News","UC16niRr50-MSBwiO3YDb3RA")]
+CH_S=[("ESPN","UCiWLfSweyRNmLpgEHekhoAg"),("NBA","UCWJ2lWNubArHWmf3FIHbfcQ"),("NFL","UCDVYQ4Zhbm3S2dlz7P1GBDg")]
 STOP=set("with from that this have will after about their over into says said amid more than what when where were been they them also"
  " would could should news live latest report reports new year".split())
 def toks(t):return {w for w in re.findall(r"[a-z0-9]{4,}",t.lower()) if w not in STOP}
@@ -87,7 +87,7 @@ def yt(chs):
                 if re.fullmatch(r"[\w-]{11}",vid) and "#shorts" not in title.lower():out.append((vid,html.unescape(title),name))
         except Exception as ex:print("skip yt",name,ex)
     return out
-def attach(rows,vids):
+def attach(rows,vids,fallback=True):
     n=0
     if not vids:return 0
     for k,row in enumerate(rows):
@@ -96,11 +96,11 @@ def attach(rows,vids):
             sc=len(a&toks(t))
             if sc>bs:bs=sc;best=(vid,t,nm)
         if best and bs>=2:row+= [best[0],best[2]+": "+best[1]];n+=1
-        else:
+        elif fallback:
             vid,t,nm=vids[k%len(vids)];row+=[vid,"Latest from "+nm+": "+t]
     return n
 vw=yt(CH_W);vs=yt(CH_S)
-mw=attach(world,vw);ms=attach(sports,vs)
+mw=attach(world,vw);ms=attach(sports,vs,False)
 print("::notice title=WorldLink news::world %d sports %d, photos %d, matched videos %d/%d, channel videos %d/%d"%(len(world),len(sports),sum(1 for r in world+sports if r[5]),mw,ms,len(vw),len(vs)))
 print("world",len(world),"sports",len(sports))
 if len(world)<8 or len(sports)<6:
