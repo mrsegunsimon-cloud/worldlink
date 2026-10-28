@@ -1,6 +1,6 @@
 /* Web version bridge: same WLAuth messages as the Android app, answered with the Firebase web SDK and the browser. */
 (function(){
- if(window.WLAuth)return;
+ if(window.WLAuth)return;window.__wlWeb=true;
  if(window.top!==window.self){try{window.top.location=window.self.location}catch(e){document.documentElement.innerHTML=""}}
  var CFG=__FIREBASE_CONFIG__;
  var V="10.14.1",fb=null,fails=0,lockUntil=0;

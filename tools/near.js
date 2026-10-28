@@ -31,7 +31,7 @@ async function nominatimRows(key,loc,rad){
 async function getLoc(){
  if(window.WLAuth){const r=await WLN("location");if(r.error)throw new Error(r.error);return{lat:r.lat,lng:r.lng,label:"your location"}}
  return new Promise((ok,no)=>{if(!navigator.geolocation)return no(new Error("Location is not available here."));navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude,label:"your location"}),()=>no(new Error("Location was not allowed.")),{timeout:15000})})}
-function openUrl(u){if(window.WLAuth)WLN("open",{url:u});else window.open(u,"_blank","noopener")}
+function openUrl(u){if(window.WLAuth&&!window.__wlWeb)WLN("open",{url:u});else if(typeof openExt==="function")openExt(u);else window.open(u,"_blank","noopener")}
 const npDist=(a,b,c,d)=>{const R=6371,t=x=>x*Math.PI/180,dl=t(c-a),dg=t(d-b),h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
 const npFmt=k=>k<1?Math.round(k*100)*10+" m":(k<10?k.toFixed(1):Math.round(k))+" km";
 async function nearList(key,loc){
@@ -107,6 +107,38 @@ async function beachData(){
  window.__bd=null;
  try{window.__bd=JSON.parse(await netGet("https://mrsegunsimon-cloud.github.io/worldlink/beaches.json?t="+Date.now(),25))}catch(e){window.__bd=null}
  return window.__bd}
+
+const BDO=[[/swim/i,"Swimming"],[/surf/i,"Surfing"],[/snorkel|div(e|ing)\b/i,"Snorkelling and diving"],[/event|party|parties|music|\bdj\b|concert|festival/i,"Parties and events"],[/restaurant|\bbar\b|food|drink|cafe|café/i,"Food and drinks"],[/horse/i,"Horse riding"],[/jet ?ski|boat|kayak|paddle|water ?sport|sail/i,"Water sports and boat rides"],[/sunset|sunrise/i,"Watching the sunset"],[/fishing/i,"Fishing"],[/camp/i,"Camping"],[/walk|hike|trail/i,"Walking"],[/volleyball|football|games?\b/i,"Beach games"],[/picnic|relax|sunbath/i,"Picnics and relaxing"],[/resort|hotel|lodg/i,"Stay nearby"]];
+async function beachPhotos(r){
+ const u="https://commons.wikimedia.org/w/api.php?action=query&generator=geosearch&ggscoord="+r.la+"%7C"+r.lo+"&ggsradius=3000&ggsnamespace=6&ggslimit=40&prop=imageinfo&iiprop=url%7Cmime&iiurlwidth=500&format=json&origin=*";
+ const j=JSON.parse(await netGet(u,15));
+ const P=Object.values((j.query&&j.query.pages)||{}).filter(p=>p.imageinfo&&p.imageinfo[0]&&/^image\/(jpeg|png)$/.test(p.imageinfo[0].mime)&&/^https:\/\//.test(p.imageinfo[0].thumburl||""));
+ const tk=r.n.toLowerCase().replace(/beach|resort|bay/g,"").split(/\W+/).filter(x=>x.length>3);
+ P.forEach(p=>{const ti=p.title.toLowerCase();p.sc=tk.reduce((n,x)=>n+(ti.includes(x)?1:0),0)});
+ P.sort((a,b)=>b.sc-a.sc);
+ return {imgs:P.slice(0,6).map(p=>({u:p.imageinfo[0].thumburl,full:p.imageinfo[0].url,t:p.title.replace(/^File:/,"")})),named:P.some(p=>p.sc>0)}}
+function beachLight(u,t){
+ const o=document.createElement("div");o.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:grid;place-items:center;padding:12px";
+ o.innerHTML=`<img src="${esc(u)}" alt="" referrerpolicy="no-referrer" style="max-width:100%;max-height:82vh;border-radius:10px"><div style="color:#fff;font-size:12px;margin-top:8px;text-align:center">${esc(t)}</div><button style="position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:20px">✕</button>`;
+ o.onclick=()=>o.remove();document.body.appendChild(o)}
+async function beachExtra(r,cname,about){
+ try{
+  const ph=await beachPhotos(r);const b=$("#bph");if(!b)return;
+  b.innerHTML=ph.imgs.length?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">${ph.imgs.map((x,i)=>`<button data-bi="${i}" style="padding:0;border-radius:8px;overflow:hidden;aspect-ratio:1/1;background:#222"><img src="${esc(x.u)}" alt="${esc(x.t)}" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover"></button>`).join("")}</div><p class="note" style="margin:4px 0 0">${ph.named?"Photos":"Photos taken near this beach"} from Wikimedia Commons. Tap a photo to enlarge.</p>`:'<p class="mute" style="margin:0">No photos found for this beach yet.</p>';
+  b.querySelectorAll("[data-bi]").forEach(x=>x.onclick=()=>{const q=ph.imgs[+x.dataset.bi];beachLight(q.u,q.t)});
+ }catch(e){const b=$("#bph");if(b)b.innerHTML='<p class="mute" style="margin:0">Photos could not load. Check your connection.</p>'}
+ let text=about;
+ try{
+  const first=r.n.toLowerCase().replace(/beach|resort|bay/g,"").split(/\W+/).filter(x=>x.length>3)[0]||r.n.toLowerCase();
+  const u="https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch="+encodeURIComponent(r.n+" "+cname)+"&gsrlimit=1&prop=extracts%7Cinfo&inprop=url&exintro=1&explaintext=1&exchars=700&format=json&origin=*";
+  const j=JSON.parse(await netGet(u,12));const p=Object.values((j.query&&j.query.pages)||{})[0];
+  if(p&&p.extract&&p.title.toLowerCase().includes(first)){
+   text=p.extract;const a=$("#bab");if(a&&!BINFO[r.n])a.textContent=p.extract;
+   const sr=$("#bsrc");if(sr&&/^https:\/\//.test(p.fullurl||""))sr.innerHTML=`<a href="${esc(p.fullurl)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--acc)">Read more on Wikipedia</a>`}
+ }catch(e){}
+ const todo=BDO.filter(x=>x[0].test(text+" "+about)).map(x=>x[1]);
+ const th=$("#bth");if(th&&todo.length)th.innerHTML=`<h3 style="margin:14px 0 4px">What you can do here</h3><div style="display:flex;flex-wrap:wrap;gap:6px">${todo.map(x=>`<span style="border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px">${esc(x)}</span>`).join("")}</div><p class="note" style="margin:4px 0 0">Based on the description of this beach.</p>`;
+}
 async function beachCountry(cc,name){
  const head=s=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><button id="npb" style="font-size:22px;padding:4px 10px">←</button><div><b style="font-size:18px">${bFlag(cc)} Beaches in ${esc(name)}</b><div class="mute" style="font-size:13px">${s}</div></div></div>`;
  open(head("Loading the list…")+'<p class="mute" style="padding:20px 0">Please wait…</p><button class="btn ghost" id="x">Close</button>');$("#npb").onclick=()=>beachHome();
@@ -137,16 +169,22 @@ async function beachCountry(cc,name){
 function beachDetail(r,cc,name){
  const s=bAvg(r.key),t=r.t||{};
  const about=BINFO[r.n]||t.description||"A beach listed on the map. Check sea conditions, safety and any entry fee locally before you go.";
- const facts=[["Access",t.access],["Fee",t.fee],["Surface",t.surface],["Lifeguard",t.lifeguard],["Toilets",t.toilets],["Opening hours",t.opening_hours],["Website",t.website||t["contact:website"]],["Phone",t.phone||t["contact:phone"]]].filter(x=>x[1]);
+ const fee=t.fee?(/^yes$/i.test(t.fee)?"There is an entry fee. Ask at the gate for the price.":/^no$/i.test(t.fee)?"Free entry.":t.fee):(/fee|ticket|paid|entry/i.test(about)?"An entry fee is mentioned in the description above. Ask at the gate for today's price.":"Not listed. Ask at the gate or check the beach's own page before you go.");
+ const facts=[["Access",t.access],["Surface",t.surface],["Lifeguard",t.lifeguard],["Toilets",t.toilets],["Opening hours",t.opening_hours],["Website",t.website||t["contact:website"]],["Phone",t.phone||t["contact:phone"]]].filter(x=>x[1]);
  open(`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><button id="npb" style="font-size:22px;padding:4px 10px">←</button><div><b style="font-size:20px">🏖️ ${esc(r.n)}</b><div class="mute" style="font-size:13px">${bFlag(cc)} ${esc(name)}${r.area?" · "+esc(r.area):""}</div></div></div>
+ <div id="bph" style="margin:8px 0"><p class="mute" style="margin:0">Loading photos…</p></div>
  <div style="font-size:16px;margin:6px 0" id="bst">${bStarTxt(s.avg,s.n)}</div>
  <div style="display:flex;gap:6px;align-items:center;margin:6px 0"><span class="mute" style="font-size:13px">${s.me?"Your rating":"Rate it"}:</span>${[1,2,3,4,5].map(i=>`<button data-rt="${i}" aria-label="${i} star" style="font-size:28px;color:${i<=s.me?"#F5B301":"var(--mute)"};padding:0 2px">${i<=s.me?"★":"☆"}</button>`).join("")}</div>
- <h3 style="margin:14px 0 4px">About</h3><p style="margin:0">${esc(about)}</p>
+ <p class="note" style="margin:0 0 6px">Stars come from WorldLink visitors. Tap a star after you visit.</p>
+ <h3 style="margin:14px 0 4px">About</h3><p style="margin:0" id="bab">${esc(about)}</p><div id="bsrc"></div>
+ <div id="bth"></div>
+ <h3 style="margin:14px 0 4px">Gate fee</h3><p style="margin:0">${esc(fee)}</p>
  ${facts.length?`<h3 style="margin:14px 0 4px">Details</h3>${facts.map(f=>`<div style="padding:6px 0;border-bottom:1px solid var(--line)"><span class="mute">${f[0]}:</span> ${esc(String(f[1]))}</div>`).join("")}`:""}
  <h3 style="margin:14px 0 4px">Location</h3><p class="mute" style="margin:0">${r.la.toFixed(5)}, ${r.lo.toFixed(5)}${r.d!=null?" · "+npFmt(r.d)+" from you":""}</p>
- <button class="btn" id="bdr" style="margin-top:12px">Directions</button><button class="btn ghost" id="bmp">Open in Maps</button><button class="btn ghost" id="x">Close</button>`);
+ <button class="btn" id="bdr" style="margin-top:12px">Get directions</button><p class="note" style="margin:4px 0 0">Opens Google Maps with the route from where you are.</p><button class="btn ghost" id="bmp">See it on the map</button><button class="btn ghost" id="x">Close</button>`);
+ beachExtra(r,name,about);
  $("#npb").onclick=()=>beachCountry(cc,name);
- $("#bdr").onclick=()=>openUrl("https://www.google.com/maps/dir/?api=1&destination="+r.la+","+r.lo);
+ $("#bdr").onclick=()=>openUrl("https://www.google.com/maps/dir/?api=1&destination="+r.la+","+r.lo+"&travelmode=driving");
  $("#bmp").onclick=()=>openUrl("https://www.google.com/maps/search/?api=1&query="+r.la+","+r.lo);
  $("#panel").querySelectorAll("[data-rt]").forEach(b=>b.onclick=()=>{const v=+b.dataset.rt,o=bRate(),x=o[r.key]||{s:0,n:0,me:0};if(x.me){x.s-=x.me}else x.n+=1;x.s+=v;x.me=v;o[r.key]=x;bSave(o);beachDetail(r,cc,name)});
 }
