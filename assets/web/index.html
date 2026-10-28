@@ -1868,7 +1868,7 @@ async function loadWallet(){if(!me.wl){me.wl={coins:0,cashed:0,vc:500};try{const
  me.wl.fv=0;try{const D=await claude.use("db");if(D&&me.uid){const g=await D.collection("gifts").get();me.wl.fv=g.docs.map(d=>d.data()).filter(d=>d&&d.to===me.uid&&d.from!==me.uid).reduce((n,d)=>n+(d.c||0),0)}}catch(e){}}
 const PSK="pk_test_1ad0688b5e46c91db88d4cd865d8846a75ce5b74",PACKS=[[100,500],[250,1000],[600,2000],[1500,5000]];
 function psLoad(){return new Promise((ok,no)=>{if(window.PaystackPop)return ok();const sc=document.createElement("script");sc.src="https://js.paystack.co/v1/inline.js";sc.onload=ok;sc.onerror=()=>no(new Error("Could not load the payment page. Check your internet."));document.head.appendChild(sc)})}
-const PAYSRV=false;
+const PAYSRV=true;
 async function claimCredits(){
  try{
   if(!me.uid)return 0;await loadWallet();const pend=(me.wl.pend||[]).slice();if(!pend.length)return 0;

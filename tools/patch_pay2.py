@@ -6,7 +6,7 @@ if 'claimCredits' in s:
 def rep(a,b):
     global s
     assert s.count(a)==1,(s.count(a),a[:60]);s=s.replace(a,b)
-fn='''const PAYSRV=false;
+fn='''const PAYSRV=true;
 async function claimCredits(){
  try{
   if(!me.uid)return 0;await loadWallet();const pend=(me.wl.pend||[]).slice();if(!pend.length)return 0;
