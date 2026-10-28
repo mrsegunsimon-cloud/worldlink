@@ -27,6 +27,7 @@ jobs:
           python3 tools/make_web.py assets/web/index.html assets/firebase_config.json site/index.html
           python3 tools/fetch_news.py site/news.json || true
           python3 tools/fetch_sports.py site/sports.json || true
+          python3 tools/fetch_music.py site/music.json || true
           touch site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
