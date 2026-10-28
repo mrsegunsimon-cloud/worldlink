@@ -19,7 +19,7 @@ def score(c):
     try:return int(float(c.get("score")))
     except Exception:return 0
 def games(code):
-    j=get("https://site.api.espn.com/apis/site/v2/sports/%s/scoreboard?dates=%s-%s&limit=300"%(code,d1,d2))
+    j=get("https://site.api.espn.com/apis/site/v2/sports/%s/scoreboard?dates=%s-%s"%(code,d1,d2))
     out=[]
     for ev in (j or {}).get("events",[]):
         for comp in ev.get("competitions",[]) or []:
