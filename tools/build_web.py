@@ -89,9 +89,10 @@ _cfg=_json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
 _sbp=_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','assets','supabase_config.json')
 _sb=_json.load(open(_sbp)) if _os.path.exists(_sbp) else {}
 CLOUD='<script>'+open(__file__.replace('build_web.py','cloud.js'),encoding='utf8').read().replace('__PROJECT__',_cfg['projectId']).replace('__SBURL__',_sb.get('url','').rstrip('/')).replace('__SBKEY__',_sb.get('anonKey','')).replace('__BUCKET__',_cfg.get('storageBucket') or _cfg['projectId']+'.firebasestorage.app')+'</script>'
+GUARD='<script>'+open(__file__.replace('build_web.py','guard.js'),encoding='utf8').read()+'</script>'
 GATE='<script>'+open(__file__.replace('build_web.py','gate.js'),encoding='utf8').read()+'</script>'
 i=s.rfind('</body>')
-s=s[:i]+CLOUD+RESTORE+GATE+s[i:]
+s=s[:i]+CLOUD+RESTORE+GATE+GUARD+s[i:]
 
 # Flutter's SafeArea already keeps the page clear of the status and navigation bars,
 # so the page must not add its own safe-area padding on top (that doubled the gaps).
