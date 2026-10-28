@@ -7,8 +7,8 @@ def get(url):
         return json.loads(urllib.request.urlopen(urllib.request.Request(url,headers=UA),timeout=25).read())
     except Exception as e:
         print("::notice title=sports-error::%s -> %s"%(url.split("espn.com")[-1][:70],str(e)[:120]));return None
-LG=[("epl","soccer/eng.1",True),("la","soccer/esp.1",True),("it","soccer/ita.1",True),("de","soccer/ger.1",True),("fr","soccer/fra.1",True),("cl","soccer/uefa.champions",True),
-    ("nba","basketball/nba",False),("nfl","football/nfl",False),("mlb","baseball/mlb",False),("nhl","hockey/nhl",False),("mls","soccer/usa.1",False),("mma","mma/ufc",False)]
+LG=[("epl","soccer/eng.1",True,4328),("la","soccer/esp.1",True,4335),("it","soccer/ita.1",True,4332),("de","soccer/ger.1",True,4331),("fr","soccer/fra.1",True,4334),("cl","soccer/uefa.champions",True,4480),
+    ("nba","basketball/nba",False,4387),("nfl","football/nfl",False,4391),("mlb","baseball/mlb",False,4424),("nhl","hockey/nhl",False,4380),("mls","soccer/usa.1",False,4346),("mma","mma/ufc",False,0)]
 today=datetime.datetime.utcnow().date()
 d1=(today-datetime.timedelta(days=7)).strftime("%Y%m%d");d2=(today+datetime.timedelta(days=7)).strftime("%Y%m%d")
 STATE={"pre":"sch","in":"live","post":"ft"}
@@ -49,10 +49,40 @@ def table(code):
         print("table parse",code,ex);return []
     rows.sort(key=lambda r:r[0] or 99)
     return rows
+
+SDB="https://www.thesportsdb.com/api/v1/json/3/"
+def sdb_games(lid):
+    out=[]
+    for ep,default in (("eventspastleague.php?id=%d"%lid,"ft"),("eventsnextleague.php?id=%d"%lid,"sch")):
+        j=get(SDB+ep)
+        for e in (j or {}).get("events") or []:
+            try:
+                h,a=e.get("strHomeTeam"),e.get("strAwayTeam")
+                if not h or not a:continue
+                hs,as_=e.get("intHomeScore"),e.get("intAwayScore")
+                state="ft" if (default=="ft" and hs is not None) else "sch"
+                ts=e.get("strTimestamp") or ((e.get("dateEvent") or "")+"T"+(e.get("strTime") or "00:00:00"))
+                if ts and not ts.endswith("Z") and "+" not in ts[10:]:ts+="Z"
+                out.append([h,a,int(hs or 0),int(as_ or 0),state,ts])
+            except Exception:continue
+    sch=sorted([g for g in out if g[4]=="sch"],key=lambda g:g[5])[:20]
+    ft=sorted([g for g in out if g[4]=="ft"],key=lambda g:g[5],reverse=True)[:20]
+    return sch+ft
+def sdb_table(lid):
+    y=today.year if today.month>=7 else today.year-1
+    j=get(SDB+"lookuptable.php?l=%d&s=%d-%d"%(lid,y,y+1))
+    rows=[]
+    for e in (j or {}).get("table") or []:
+        try:rows.append([int(e["intRank"]),e["strTeam"],int(e["intWin"]),int(e["intDraw"]),int(e["intLoss"]),int(e["intPoints"])])
+        except Exception:continue
+    rows.sort(key=lambda r:r[0]);return rows
 res={};ng=0
-for key,code,tab in LG:
+for key,code,tab,lid in LG:
     g=games(code);t=table(code) if tab else []
-    print("::notice title=sports::%s games %d table %d"%(key,len(g),len(t)))
+    src="espn"
+    if len(g)<2 and lid:g=sdb_games(lid);src="sportsdb"
+    if tab and len(t)<8 and lid:t=sdb_table(lid)
+    print("::notice title=sports::%s games %d table %d (%s)"%(key,len(g),len(t),src))
     ent={}
     if len(g)>=2:ent["games"]=g;ng+=1
     if len(t)>=8:ent["table"]=t
