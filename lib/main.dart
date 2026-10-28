@@ -243,6 +243,8 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
         final cr = await a.signInWithCredential(
             PhoneAuthProvider.credential(verificationId: id, smsCode: j['code'] as String));
         return _user(cr.user);
+      case 'token':
+        return {'token': await a.currentUser?.getIdToken()};
       case 'logout':
         await a.signOut();
         return {'ok': true};

@@ -25,6 +25,7 @@
    case"signup":{if(!pw(m.password))return{error:"Choose a password of at least 8 characters."};var l=await lib();var c=await l.A.createUserWithEmailAndPassword(l.auth,String(m.email).trim(),m.password);try{await l.A.sendEmailVerification(c.user)}catch(e){}return{user:usr(c.user)}}
    case"login":{if(Date.now()<lockUntil)return{error:"Too many wrong tries. Wait a minute and try again."};var l=await lib();try{var c=await l.A.signInWithEmailAndPassword(l.auth,String(m.email).trim(),m.password);fails=0;return{user:usr(c.user)}}catch(e){if(++fails>=5){lockUntil=Date.now()+60000;fails=0}throw e}}
    case"reset":{var l=await lib();await l.A.sendPasswordResetEmail(l.auth,String(m.email).trim());return{ok:true}}
+   case"token":{var l=await lib();await l.auth.authStateReady();return{token:l.auth.currentUser?await l.auth.currentUser.getIdToken():null}}
    case"logout":{var l=await lib();await l.A.signOut(l.auth);return{ok:true}}
    case"phone_send":case"phone_verify":return{error:"Phone sign-in is only in the Android app for now. Please use your email."};
    case"location":return new Promise(function(ok){if(!navigator.geolocation)return ok({error:"Location is not available here."});navigator.geolocation.getCurrentPosition(function(p){ok({lat:p.coords.latitude,lng:p.coords.longitude})},function(){ok({error:"Location was not allowed."})},{timeout:15000})});

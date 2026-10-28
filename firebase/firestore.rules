@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function ownerOf(d) { return d.get('o', d.get('uid', '')); }
+    function isOwner(d) { return signedIn() && ownerOf(d) == request.auth.uid; }
+    function isMod() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admin/mods)
+        && get(/databases/$(database)/documents/admin/mods).data.list.hasAny([request.auth.uid]);
+    }
+    // Other people may only change likes, comments, member lists and report counts on a post.
+    function onlySocialChange() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['l', 'cm', 'sc', 'm', 'mem', 'rep']);
+    }
+
+    // Private area of each person
+    match /data/users/{uid}/{doc} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Private messages: only the two people in the conversation (ids look like uidA_uidB)
+    match /dms/{id} {
+      allow read, write: if signedIn() && request.auth.uid in id.split('_');
+    }
+
+    // Profiles: everyone signed in can read, only you can change yours
+    match /profiles/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+    match /follows/{uid} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Home videos can be watched by anyone, even without an account
+    match /videos/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if isOwner(resource.data) && request.resource.data.uid == resource.data.uid;
+      allow delete: if isOwner(resource.data) || isMod();
+    }
+
+    // Reports are for moderators only
+    match /reports/{id} {
+      allow create: if signedIn();
+      allow read, update: if isMod();
+    }
+    match /admin/{doc} {
+      allow read: if signedIn();
+      allow write: if false;   // set the first moderator by hand in the Firebase console
+    }
+
+    // Everything else people share: posts, stories, listings, events, groups, chats, music, notices, gifts
+    match /{col}/{id} {
+      allow read: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'notifs', 'gifts'];
+      allow create: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'notifs', 'gifts']
+        && (ownerOf(request.resource.data) == '' || ownerOf(request.resource.data) == request.auth.uid);
+      allow update: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'notifs', 'gifts']
+        && (ownerOf(resource.data) == '' || isOwner(resource.data) || onlySocialChange() || isMod());
+      allow delete: if signedIn() && isOwner(resource.data);
+    }
+  }
+}

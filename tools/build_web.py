@@ -16,13 +16,21 @@ window.__wlGate=true;
   var id=++nid;pend[id]=res;
   WLAuth.postMessage(JSON.stringify(Object.assign({id:id,op:op},data||{})))})};
  window.__wlUser=null;
+ function clone(x){return JSON.parse(JSON.stringify(x))}
  var db={collection:function(n){return{
-  get:async function(){var m=load()[n]||{};return{docs:Object.keys(m).map(function(k){return{id:k,data:function(){return JSON.parse(JSON.stringify(m[k]))}}})}},
+  get:async function(){
+   if(window.WLCloud&&WLCloud.on(n)){try{var L=await WLCloud.list(n);return{docs:L.map(function(d){return{id:d.id,data:function(){return clone(d.data)}}})}}catch(e){}}
+   var m=load()[n]||{};return{docs:Object.keys(m).map(function(k){return{id:k,data:function(){return clone(m[k])}}})}},
   doc:function(id){return{
-   get:async function(){var m=load()[n]||{};return{exists:id in m,data:function(){return JSON.parse(JSON.stringify(m[id]||{}))}}},
-   set:async function(v){var d=load();(d[n]=d[n]||{})[id]=JSON.parse(JSON.stringify(v));save(d);return true}}}}}};
+   get:async function(){
+    if(window.WLCloud&&WLCloud.on(n)){try{var x=await WLCloud.get(n,id);return{exists:!!x,data:function(){return clone(x||{})}}}catch(e){}}
+    var m=load()[n]||{};return{exists:id in m,data:function(){return clone(m[id]||{})}}},
+   set:async function(v){
+    if(window.WLCloud&&window.__wlUser){try{await WLCloud.set(n,id,v);return true}catch(e){}}
+    var d=load();(d[n]=d[n]||{})[id]=clone(v);save(d);return true}}}}}};
  window.claude={use:async function(k){
   if(k==="db")return db;
+  if(k==="assets")return window.WLCloud&&window.__wlUser?{upload:function(f){return WLCloud.upload(f)}}:null;
   if(k==="user")return{id:async function(){var r=await WLN("state");if(r&&r.user){window.__wlUser=r.user;return r.user.uid}return uid}};
   return null}};
 })();
@@ -76,9 +84,12 @@ window.addEventListener("load",function(){setTimeout(function(){
   if(on&&/Profile/.test(on.textContent))profile();
  })},1500)});
 </script>"""
+import json as _json,os as _os
+_cfg=_json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','assets','firebase_config.json')))
+CLOUD='<script>'+open(__file__.replace('build_web.py','cloud.js'),encoding='utf8').read().replace('__PROJECT__',_cfg['projectId']).replace('__BUCKET__',_cfg.get('storageBucket') or _cfg['projectId']+'.firebasestorage.app')+'</script>'
 GATE='<script>'+open(__file__.replace('build_web.py','gate.js'),encoding='utf8').read()+'</script>'
 i=s.rfind('</body>')
-s=s[:i]+RESTORE+GATE+s[i:]
+s=s[:i]+CLOUD+RESTORE+GATE+s[i:]
 
 # Flutter's SafeArea already keeps the page clear of the status and navigation bars,
 # so the page must not add its own safe-area padding on top (that doubled the gaps).
