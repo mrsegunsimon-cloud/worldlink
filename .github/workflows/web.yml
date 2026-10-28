@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths: ['assets/web/**', 'tools/**', 'assets/firebase_config.json', '.github/workflows/web.yml']
   schedule:
-    - cron: '17 */3 * * *'
+    - cron: '7,37 * * * *'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +26,7 @@ jobs:
           mkdir -p site
           python3 tools/make_web.py assets/web/index.html assets/firebase_config.json site/index.html
           python3 tools/fetch_news.py site/news.json || true
+          python3 tools/fetch_sports.py site/sports.json || true
           touch site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }

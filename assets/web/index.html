@@ -474,7 +474,7 @@ function football(t,lg){
  if(lg)curLg=lg;t=t||"scores";if(!LG[curLg][1].length&&LG[curLg][2])t="table";
  const L=LG[curLg],gm=L[1];
  const when=s=>new Date(s).toLocaleString([],{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
- const row=x=>`<div class="cm"><div style="display:flex;align-items:center;gap:8px"><span style="flex:1">${x[0]}</span><b>${x[4]==="sch"||x[6]?"vs":x[2]+" - "+x[3]}</b><span style="flex:1;text-align:right">${x[1]}</span></div><div class="mute" style="font-size:12px">${x[4]==="live"?"Live when this was saved":x[4]==="ft"?"Full time, "+when(x[5]):when(x[5])}${x[6]?". "+x[6]:""}</div></div>`;
+ const row=x=>`<div class="cm"><div style="display:flex;align-items:center;gap:8px"><span style="flex:1">${x[0]}</span><b>${x[4]==="sch"||x[6]?"vs":x[2]+" - "+x[3]}</b><span style="flex:1;text-align:right">${x[1]}</span></div><div class="mute" style="font-size:12px">${x[4]==="live"?(SPAT?"Live now":"Live when this was saved"):x[4]==="ft"?"Full time, "+when(x[5]):when(x[5])}${x[6]?". "+x[6]:""}</div></div>`;
  const sec=(h,k)=>{const a=gm.filter(x=>x[4]===k);return a.length?`<h2 style="margin-top:14px;font-size:16px">${h}</h2>${a.map(row).join("")}`:""};
  const tb=`<div class="cm mute" style="display:flex;font-size:12px"><span style="width:26px">#</span><span style="flex:1">Team</span><span style="width:26px">W</span><span style="width:26px">D</span><span style="width:26px">L</span><span style="width:34px;text-align:right">Pts</span></div>${(L[3]||[]).map(r=>`<div class="cm" style="display:flex"><span style="width:26px">${r[0]}</span><span style="flex:1">${r[1]}</span><span style="width:26px">${r[2]}</span><span style="width:26px">${r[3]}</span><span style="width:26px">${r[4]}</span><b style="width:34px;text-align:right">${r[5]}</b></div>`).join("")}`;
  const body=curLg==="news"?newsHtml():curLg==="watch"?watchHtml():curLg==="rugby"?rugbyHtml():t==="table"&&L[2]?(L[4]?tab2(L):tb):sec("Live","live")+sec("Coming up","sch")+sec("Results","ft");
@@ -483,7 +483,7 @@ function football(t,lg){
  const SPK={epl:"s_epl",la:"s_la",it:"s_it",de:"s_de",fr:"s_fr",cl:"s_cl",rugby:"s_rugby",news:"s_news",watch:"ev_sport"};
  const rail=Object.keys(LG).map(k=>PH[SPK[k]]?`<button data-l="${k}" aria-label="${esc(LG[k][0])}" style="flex:none;width:118px;text-align:left;color:inherit;padding:0"><span style="display:block;position:relative;height:80px;border-radius:12px;overflow:hidden;outline:${k===curLg?"3px solid #FF7A1A":"1px solid var(--line)"};outline-offset:-1px"><img src="${PH[SPK[k]]}" alt="" loading="lazy" style="display:block;width:100%;height:100%;object-fit:cover"></span><span style="display:block;font-size:13px;font-weight:${k===curLg?800:600};margin-top:4px;line-height:1.2">${esc(LG[k][0])}</span></button>`:`<button class="btn${k===curLg?"":" ghost"}" style="margin:0;width:auto;padding:8px 12px;white-space:nowrap;align-self:flex-start" data-l="${k}">${LG[k][0]}</button>`).join("");
  const more=showcase([["s_basket","Basketball","Games, scores and news","https://www.nba.com"],["s_tennis","Tennis","Tournaments and rankings","https://www.atptour.com"],["s_cricket","Cricket","Matches and scorecards","https://www.espncricinfo.com"],["s_f1","Formula 1","Races, drivers and standings","https://www.formula1.com"],["s_golf","Golf","Tours and leaderboards","https://www.pgatour.com"],["s_swim","Swimming","Races and records","https://www.worldaquatics.com"],["s_ath","Athletics","Track, field and road racing","https://worldathletics.org"]]);
- open(banner("⚽","Sports","Football, rugby and more","#0E9F6E","#1E6FFF","ev_sport")+`<div style="display:flex;gap:10px;overflow-x:auto;padding:4px 0 6px">${rail}</div><p class="note" style="margin:8px 0 0">Snapshots saved on Oct 25 and 26, 2026. Live updates need a licensed sports data feed in the full app.</p>${tabs}${body}<h3 style="margin:18px 0 0;font-size:17px">More sports</h3><p class="note" style="margin:2px 0 0">Tap one to see a preview before it opens on its own site.</p>${more}<button class="btn ghost" id="x">Close</button>`);
+ open(banner("⚽","Sports","Football, rugby and more","#0E9F6E","#1E6FFF","ev_sport")+`<div style="display:flex;gap:10px;overflow-x:auto;padding:4px 0 6px">${rail}</div><p class="note" style="margin:8px 0 0">${SPAT?SPAT+" Tennis and cricket scores, and the NBA, NHL and MLS tables, are still saved copies.":"Snapshots saved on Oct 25 and 26, 2026."}</p>${tabs}${body}<h3 style="margin:18px 0 0;font-size:17px">More sports</h3><p class="note" style="margin:2px 0 0">Tap one to see a preview before it opens on its own site.</p>${more}<button class="btn ghost" id="x">Close</button>`);
  $("#panel").querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>football("scores",b.dataset.l));
  bindNews(NEWS,"s",()=>football("scores","news"));
  if(L[2]){$("#s1").onclick=()=>football("scores");$("#s2").onclick=()=>football("table")}
@@ -2090,6 +2090,24 @@ const WN=[
 ["sci","Forecasters use AI to predict hurricanes","Hurricane forecasters are using artificial intelligence more and more in their predictions, NPR reports.","NPR","https://www.npr.org/sections/news/"],
 ["sci","Bots now outnumber people online","NPR reports that automated bots now make up more of the internet’s traffic than humans do.","NPR","https://www.npr.org/sections/news/"]
 ];
+let SPAT="";
+async function liveSports(){
+ try{
+  const r=await WLN("get",{url:"https://mrsegunsimon-cloud.github.io/worldlink/sports.json?t="+Date.now()});
+  if(!r||r.error||!r.body)return;
+  const j=JSON.parse(r.body);if(!j||!j.leagues)return;
+  const okG=g=>Array.isArray(g)&&g.length>=2&&g.every(x=>Array.isArray(x)&&x.length>=6&&typeof x[0]==="string"&&typeof x[1]==="string"&&["sch","live","ft"].includes(x[4]));
+  const okT=t=>Array.isArray(t)&&t.length>=8&&t.every(x=>Array.isArray(x)&&x.length===6&&typeof x[1]==="string");
+  let n=0;
+  Object.keys(j.leagues).forEach(k=>{const L=LG[k],e=j.leagues[k];if(!L||!e)return;
+   if(okG(e.games)){L[1]=e.games;n++}
+   if(["epl","la","it","de","fr","cl"].includes(k)&&okT(e.table)){L[2]=true;L[3]=e.table;L[4]=undefined}});
+  if(!n)return;
+  const d=new Date(j.updated*1000);
+  SPAT="Scores updated "+d.toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+".";
+ }catch(e){}
+}
+setTimeout(liveSports,700);setInterval(liveSports,600000);
 let NEWSAT="";
 async function liveNews(){
  try{
