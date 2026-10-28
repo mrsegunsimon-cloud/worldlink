@@ -7,7 +7,7 @@ fc={"apiKey":c["apiKey"],"authDomain":c["projectId"]+".firebaseapp.com","project
 shim=open(__file__.replace('make_web.py','webshim.js'),encoding='utf8').read().replace('__FIREBASE_CONFIG__',json.dumps(fc))
 csp=("default-src 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; "
  "img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; "
- "connect-src https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'")
+ "connect-src https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com")
 head='<meta http-equiv="Content-Security-Policy" content="%s"><meta name="referrer" content="no-referrer"><script>%s</script>'%(csp,shim)
 assert '<head>' in s
 s=s.replace('<head>','<head>'+head,1)

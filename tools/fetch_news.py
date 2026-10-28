@@ -68,6 +68,40 @@ for row in world+sports:
     if not row[5] and budget>0:
         budget-=1;row[5]=og(row[4])
 print("with photos",sum(1 for r in world+sports if r[5]),"of",len(world+sports))
+
+# ---- preview videos from official news channels (free YouTube feeds, no key) ----
+CH_W=[("Al Jazeera English","UCNye-wNBqNL5ZzHSJj3l8Bg"),("BBC News","UC16niRr50-MSBwiO3YDb3RA"),("DW News","UCknLrEdhRCp1aegoMqRaCZg"),("Sky News","UCoMdktPbSTixAyNGwb-UYkQ"),("FRANCE 24 English","UCQfwfsi5VrQ8yKZ-UWmAEFg")]
+CH_S=[("Sky Sports","UCNAf1k0yIjyGu3k9BwAg3lg"),("ESPN","UCiWLfSweyRNmLpgEHekhoAg"),("NBA","UCWJ2lWNubArHWmf3FIHbfcQ"),("NFL","UCDVYQ4Zhbm3S2dlz7P1GBDg"),("BBC Sport","UCW6-BQWQ4_Qgp4RwNMPPtHw")]
+STOP=set("with from that this have will after about their over into says said amid more than what when where were been they them also"
+ " would could should news live latest report reports new year".split())
+def toks(t):return {w for w in re.findall(r"[a-z0-9]{4,}",t.lower()) if w not in STOP}
+def yt(chs):
+    out=[]
+    for name,cid in chs:
+        try:
+            r=urllib.request.urlopen(urllib.request.Request("https://www.youtube.com/feeds/videos.xml?channel_id="+cid,headers=UA),timeout=25).read()
+            root=ET.fromstring(r)
+            for e in root.iter("{http://www.w3.org/2005/Atom}entry"):
+                vid=e.findtext("{http://www.youtube.com/xml/schemas/2015}videoId") or ""
+                title=e.findtext("{http://www.w3.org/2005/Atom}title") or ""
+                if re.fullmatch(r"[\w-]{11}",vid) and "#shorts" not in title.lower():out.append((vid,html.unescape(title),name))
+        except Exception as ex:print("skip yt",name,ex)
+    return out
+def attach(rows,vids):
+    n=0
+    if not vids:return 0
+    for k,row in enumerate(rows):
+        a=toks(row[1]+" "+row[2]);best=None;bs=0
+        for vid,t,nm in vids:
+            sc=len(a&toks(t))
+            if sc>bs:bs=sc;best=(vid,t,nm)
+        if best and bs>=2:row+= [best[0],best[2]+": "+best[1]];n+=1
+        else:
+            vid,t,nm=vids[k%len(vids)];row+=[vid,"Latest from "+nm+": "+t]
+    return n
+vw=yt(CH_W);vs=yt(CH_S)
+mw=attach(world,vw);ms=attach(sports,vs)
+print("::notice title=WorldLink news::world %d sports %d, photos %d, matched videos %d/%d, channel videos %d/%d"%(len(world),len(sports),sum(1 for r in world+sports if r[5]),mw,ms,len(vw),len(vs)))
 print("world",len(world),"sports",len(sports))
 if len(world)<8 or len(sports)<6:
     print("Too little came back; keeping the previous version.");sys.exit(0)
