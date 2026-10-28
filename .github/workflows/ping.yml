@@ -1,0 +1,13 @@
+name: Ping counter
+on:
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check site and counter
+        run: |
+          S=$(curl -s "https://mrsegunsimon-cloud.github.io/worldlink/?v=99" | grep -c "worldlink.goatcounter.com")
+          echo "::notice title=ping-site::page contains counter: $S"
+          C=$(curl -s -o /dev/null -w "%{http_code}" -A "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile Safari" -e "https://mrsegunsimon-cloud.github.io/worldlink/" "https://worldlink.goatcounter.com/count?p=/ping&t=ping&s=390,844,1")
+          echo "::notice title=ping-count::goatcounter status: $C"
