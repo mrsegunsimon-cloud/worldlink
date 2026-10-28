@@ -7,7 +7,7 @@ def rep(a,b):
     global s
     assert s.count(a)==1,(s.count(a),a[:80])
     s=s.replace(a,b)
-rep('?rel=0&playsinline=1${auto?"&autoplay=1&mute=1&end=45":""}"','?rel=0&playsinline=1${auto?"&autoplay=1&mute=1&end=45&enablejsapi=1":""}"')
+rep('?rel=0&playsinline=1${auto?"&autoplay=1&mute=1&end=45":""}"','?rel=0&playsinline=1${auto?"&autoplay=1&mute=1&end=30&enablejsapi=1":""}"')
 rep(' $("#sb").onclick=back;const u=n[4];',''' if(auto){const f=$("#panel").querySelector("iframe");if(f){
   const h=e=>{if(e.source!==f.contentWindow)return;let d=e.data;if(typeof d==="string"){try{d=JSON.parse(d)}catch(_){return}}
    if(d&&d.event==="onError"){window.removeEventListener("message",h);const bx=f.parentNode;
