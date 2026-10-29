@@ -321,8 +321,8 @@ function profile(tabk){
  tabk=tabk||"v";
  const all=CLIPS.map((c,i)=>i),mineI=all.filter(i=>CLIPS[i].src&&(!CLIPS[i].uid||CLIPS[i].uid===me.uid));
  const idx=tabk==="v"?mineI:tabk==="l"?all.filter(i=>liked[i]):all.filter(i=>saved[i]);
- const lk=mineI.reduce((n,i)=>n+(CLIPS[i].l||0),0);
- const tile=i=>{const c=CLIPS[i];return `<div data-ci="${i}" style="cursor:pointer">${c.src?`<video src="${esc(c.src)}" muted playsinline preload="metadata"></video>`:`<div style="width:100%;height:100%;background:linear-gradient(165deg,${c.g[0]},${c.g[1]});display:grid;place-items:center;font-size:40px">${c.e}</div>`}<span class="vw">▷ ${fmt(c.l||0)}</span></div>`};
+ const lk=mineI.reduce((n,i)=>n+cnt(i),0);
+ const tile=i=>{const c=CLIPS[i];return `<div data-ci="${i}" style="cursor:pointer">${c.src?`<video src="${esc(c.src)}" muted playsinline preload="metadata"></video>`:`<div style="width:100%;height:100%;background:linear-gradient(165deg,${c.g[0]},${c.g[1]});display:grid;place-items:center;font-size:40px">${c.e}</div>`}<span class="vw">♥ ${fmt(cnt(i))} &nbsp; ▷ ${fmt(vcnt(i))}</span></div>`};
  const ic={v:'<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 4h4v16h-4z"/></svg>',s:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg>',l:'<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-8-5.4-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.6-8 11-8 11z"/></svg>'};
  const tb=k=>`<button data-pt="${k}" aria-label="${{v:"Videos",s:"Saved",l:"Liked"}[k]}" style="flex:1;padding:12px 0;display:grid;place-items:center;border-bottom:2px solid ${tabk===k?"var(--ink)":"transparent"};opacity:${tabk===k?1:.5};color:inherit">${ic[k]}</button>`;
  const empty={v:"No videos yet. Tap + to post your first one.",l:"Videos you like will show here.",s:"Videos you save will show here."}[tabk];
@@ -552,14 +552,27 @@ async function chat(p){
 }
 const R={};
 const cnt=i=>CLIPS[i].l+(CLIPS[i].o||0)+(liked[i]?1:0);
+const vcnt=i=>(CLIPS[i].vws||0);
 async function saveR(i){
  const c=CLIPS[i],r=R[c.id]=R[c.id]||{likes:[],comments:[]};
- r.id=c.id;r.likes=(r.likes||[]).filter(u=>u!==me.uid);if(liked[i]&&me.uid)r.likes.push(me.uid);
- try{const D=await claude.use("db");if(D&&me.uid)await D.collection("reactions").doc(c.id).set(r)}catch(e){}
+ try{const D=await claude.use("db");if(D&&me.uid){
+  try{const f=await D.collection("reactions").doc(c.id).get();if(f.exists){const d=f.data()||{};r.likes=d.likes||[];r.views=d.views||r.views||0;if((d.comments||[]).length>=(r.comments||[]).length)r.comments=d.comments||[]}}catch(e){}
+  r.id=c.id;r.likes=(r.likes||[]).filter(u=>u!==me.uid);if(liked[i])r.likes.push(me.uid);
+  c.o=r.likes.filter(u=>u!==me.uid).length;c.vws=r.views||c.vws||0;
+  await D.collection("reactions").doc(c.id).set(r)}}catch(e){}
 }
+const SEEN={};
+async function bumpViews(i){
+ const c=CLIPS[i];if(!c||!c.uid||!me.uid)return;
+ try{const D=await claude.use("db");if(!D)return;
+  let r={likes:[],comments:[]};const f=await D.collection("reactions").doc(c.id).get();if(f.exists)r=Object.assign(r,f.data()||{});
+  r.id=c.id;r.views=(r.views||0)+1;c.vws=r.views;R[c.id]=r;
+  await D.collection("reactions").doc(c.id).set(r)}catch(e){}
+}
+function viewed(i){const c=CLIPS[i];if(!c||SEEN[c.id])return;SEEN[c.id]=1;if(c.uid&&c.uid===me.uid)return;c.vws=(c.vws||0)+1;bumpViews(i)}
 async function loadR(D){
  const rs=await D.collection("reactions").get();
- rs.docs.forEach(d=>{const r=d.data();if(!r||!r.id)return;R[r.id]=r;const i=CLIPS.findIndex(c=>c.id===r.id);if(i<0)return;const c=CLIPS[i],ls=r.likes||[];c.o=ls.filter(u=>u!==me.uid).length;liked[i]=!!me.uid&&ls.includes(me.uid);c.sc=r.comments||[]});
+ rs.docs.forEach(d=>{const r=d.data();if(!r||!r.id)return;R[r.id]=r;const i=CLIPS.findIndex(c=>c.id===r.id);if(i<0)return;const c=CLIPS[i],ls=r.likes||[];c.o=ls.filter(u=>u!==me.uid).length;liked[i]=!!me.uid&&ls.includes(me.uid);c.sc=r.comments||[];c.vws=r.views||0});
 }
 function comments(i){
  const c=CLIPS[i],all=c.cm.map((t,k)=>({n:["amaka","tunde","chioma","ibrahim"][k%4],t})).concat(c.sc||[]);
@@ -2432,7 +2445,7 @@ function quizShow(){
  });
 }
 let io;
-function watch(){if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(!v)return;if(e.isIntersecting)v.play().catch(()=>{});else v.pause()}),{root:$("#feed"),threshold:.6});document.querySelectorAll(".clip").forEach(c=>io.observe(c))}
+function watch(){if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(!v)return;if(e.isIntersecting){v.play().catch(()=>{});clearTimeout(e.target.__vt);e.target.__vt=setTimeout(()=>viewed(+e.target.dataset.i),2000)}else{v.pause();clearTimeout(e.target.__vt)}}),{root:$("#feed"),threshold:.6});document.querySelectorAll(".clip").forEach(c=>io.observe(c))}
 function add(it){CLIPS.push(it);tab(1)}
 function create0(){
  open(`<h2>Post a video</h2><p class="mute">Choose a video from your phone (up to 20 MB).</p><input class="in" id="f" type="file" accept="video/*" aria-label="Choose a video"><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption"><p class="note" id="st"></p><button class="btn" id="go">Post</button><button class="btn ghost" id="x">Cancel</button>`);
