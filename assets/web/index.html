@@ -334,7 +334,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-u</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-v</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -705,14 +705,14 @@ function liveInit(){
 setInterval(liveInit,1500);
 function liveSay(t){const L=$("#lc")||$("#lvc");if(!L)return;const d=document.createElement("div");d.textContent=t;L.appendChild(d);while(L.children.length>6)L.firstChild.remove()}
 function livePop(e,c){const f=document.createElement("div");f.className="pop";f.textContent=e;f.style.left=(25+Math.random()*50)+"%";f.style.top="55%";f.style.fontSize=(c||1)>=200?"150px":(c||1)>=20?"110px":"80px";const L=$("#lf")||$("#lvf");if(L){L.appendChild(f);setTimeout(()=>f.remove(),1100)}}
-async function livePut(on){try{const D=await claude.use("db");if(D&&me.uid&&LIVEH)await D.collection("calls").doc("live-"+me.uid).set({uid:me.uid,name:me.name,title:LIVEH.title,aud:LIVEH.aud,ts:Date.now(),st:on?"on":"off"})}catch(e){}}
+/*wlLive2*/async function livePut(on){try{const D=await claude.use("db");if(!D||!me.uid||!LIVEH)throw new Error("no account");await D.collection("calls").doc("live-"+me.uid).set({uid:me.uid,name:me.name,title:LIVEH.title,aud:LIVEH.aud,ts:Date.now(),st:on?"on":"off"});if(on)liveStatus("✅ You are live. Your followers have been told and a LIVE chip shows on Home.")}catch(e){if(on)liveStatus("⚠️ People cannot see your live yet ("+(e.message||"error")+"). Check your internet and make sure you are signed in.")}}
+function liveStatus(t){const s=$("#st");if(s)s.textContent=t}
 function liveHost(title,aud,say,addGot){
- if(!me.uid||!lrt()||!window.__wlUser)return;liveInit();
+ if(!me.uid||!lrt()||!window.__wlUser){liveStatus("⚠️ Nobody can see this live. "+(!me.uid||!window.__wlUser?"Sign in first, then start again.":"Update the app: close it fully and open worldlink.app again."));return}liveInit();
  LIVEH={title,aud,pcs:{},addGot};wlPause();window.CALLON=true;
  WLCloud.rt.listen("live-"+me.uid);
  const lg=$("#lg");if(lg)lg.style.display="none";
  const sp=[...document.querySelectorAll("#panel span")].find(x=>/watching/.test(x.textContent));LIVEH.cnt=sp;
- const st=$("#st");if(st)st.textContent="";
  livePut(true);LIVEH.hb=setInterval(()=>livePut(true),20000);
  (async()=>{try{if(!FOLLOWS)await loadFollowsAll();(FOLLOWS||[]).filter(f=>f.uid!==me.uid&&(f.list||[]).includes(me.name)).slice(0,100).forEach(f=>notify(f.uid,"is live now: "+title))}catch(e){}})();
  const li=$("#li");if(li)li.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.value.trim()){const t=e.target.value.trim();if(window.modScan&&modScan("chat",{t})){return}WLCloud.rt.send("live-"+me.uid,"chat",{fn:me.name,t})}},true);
@@ -767,7 +767,7 @@ async function watchLive(h){
 /* who is live now: a red LIVE row on Home */
 async function liveScan(){
  try{if(!me.uid||!window.__wlUser||document.hidden)return;const D=await claude.use("db");const q=await D.collection("calls").get();
-  LIVES=q.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x&&/^live-/.test(x.id)&&x.st==="on"&&x.uid!==me.uid&&Date.now()-x.ts<70000);liveBar()}catch(e){}}
+  LIVES=q.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x&&/^live-/.test(x.id)&&x.st==="on"&&x.uid!==me.uid&&Date.now()-x.ts<120000);liveBar()}catch(e){}}
 function liveBar(){
  let el=document.getElementById("livebar");
  const show=LIVES.length&&$("#t1")&&$("#t1").classList.contains("on")&&!$("#sheet").classList.contains("on")&&!window.CALLON;
@@ -776,7 +776,7 @@ function liveBar(){
   el.onclick=e=>{const b=e.target.closest("[data-lv]");if(b){const l=LIVES.find(x=>x.uid===b.dataset.lv);if(l)watchLive({uid:l.uid,name:l.name,title:l.title})}}}
  el.style.display="flex";
  el.innerHTML=LIVES.map(l=>`<button data-lv="${esc(l.uid)}" style="flex:none;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:6px 12px 6px 6px;font-weight:700;font-size:13px"><span style="background:#E5233A;border-radius:999px;padding:3px 8px;font-size:11px">LIVE</span>${esc(l.name)}</button>`).join("")}
-setInterval(liveScan,15000);setTimeout(liveScan,4000);setInterval(()=>{try{liveBar()}catch(e){}},2500);
+setInterval(liveScan,8000);setTimeout(liveScan,2500);setInterval(()=>{try{liveBar()}catch(e){}},2500);
 let RTL=false;
 setInterval(()=>{if(RTL||!me.uid||!window.__wlUser||!window.WLCloud||!WLCloud.rt)return;RTL=true;
  WLCloud.rt.on((topic,ev,p)=>{if(topic!=="wlc-"+me.uid||!p)return;
@@ -1833,7 +1833,7 @@ function badge(){const n=NF.filter(x=>x.ts>me.ns&&!blocked(null,x.from)).length,
 async function notify(to,text){if(!to||to===me.uid)return;try{const D=await claude.use("db");if(!D)return;const id="n"+Date.now()+Math.floor(Math.random()*1e3);await D.collection("notifs").doc(id).set({id,to,from:me.name,text,ts:Date.now()})}catch(e){}}
 /* wlActivity: TikTok-style Activity page (bell and Inbox > Activity open this) */
 let ACT_TAB=0,ACT_ALL=false,ACT_HIDE=[];
-async function notifs(tab){
+async function notifs(tab){try{await liveScan()}catch(e){}
  if(typeof tab==="number")ACT_TAB=tab;else ACT_TAB=0;ACT_ALL=false;
  await loadNF();try{if(typeof PROF!=="undefined"&&!PROF.length)await loadProfs()}catch(e){}
  const seen=me.ns||0;actDraw(seen);
@@ -1858,6 +1858,7 @@ function actDraw(seen){
  else{
   if(!all.length)body='<p class="mute" style="padding:30px 20px;text-align:center">Nothing yet. When someone likes, comments, follows you or messages you, you will see it here.</p>';
   else{
+   if(LIVES.length)body+=`<div style="padding:14px 16px 6px;font-size:17px;font-weight:700">Live now</div>`+LIVES.map(l=>`<div data-lv2="${esc(l.uid)}" role="button" style="display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer"><span style="background:#E5233A;color:#fff;border-radius:999px;padding:4px 10px;font-weight:800;font-size:12px">LIVE</span><b style="flex:1">${esc(l.name)}</b><span class="mute" style="font-size:14px">${esc(l.title||"")}</span></div>`).join("");
    if(pri.length)body+=`<div class="mute" style="padding:14px 16px 6px;font-size:17px;font-weight:700">Priority</div>`+pri.map(n=>row(n,idx(n))).join("");
    if(oth.length){const shown=ACT_ALL?oth:oth.slice(0,5);body+=`<div class="mute" style="padding:14px 16px 6px;font-size:17px;font-weight:700">Earlier</div>`+shown.map(n=>row(n,idx(n))).join("");if(oth.length>5&&!ACT_ALL)body+=`<button id="actva" class="mute" style="display:block;width:100%;padding:14px;font-size:16px;font-weight:700">View all ⌄</button>`}
   }
@@ -1869,6 +1870,7 @@ function actDraw(seen){
  openFull(`<div class="hd" style="gap:0"><button id="actb" aria-label="Back" style="font-size:28px;padding:0 14px">←</button><div style="flex:1;display:flex">${tb(0,"Activity",0)}${tb(1,"New followers",nnew)}</div></div><div class="pgx" style="padding:0 0 30px">${body}</div>`);
  const P=$("#panel");
  $("#actb").onclick=()=>{close()};
+ P.querySelectorAll("[data-lv2]").forEach(el=>el.onclick=()=>{const l=LIVES.find(x=>x.uid===el.dataset.lv2);if(l)watchLive({uid:l.uid,name:l.name,title:l.title})});
  P.querySelectorAll("[data-at]").forEach(b=>b.onclick=()=>{ACT_TAB=+b.dataset.at;actDraw(seen)});
  const va=$("#actva");if(va)va.onclick=()=>{ACT_ALL=true;actDraw(seen)};
  P.querySelectorAll("[data-ax]").forEach(b=>b.onclick=e=>{e.stopPropagation();ACT_HIDE.push(b.dataset.ax);actDraw(seen)});

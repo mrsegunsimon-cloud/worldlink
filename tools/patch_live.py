@@ -94,7 +94,7 @@ async function watchLive(h){
 /* who is live now: a red LIVE row on Home */
 async function liveScan(){
  try{if(!me.uid||!window.__wlUser||document.hidden)return;const D=await claude.use("db");const q=await D.collection("calls").get();
-  LIVES=q.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x&&/^live-/.test(x.id)&&x.st==="on"&&x.uid!==me.uid&&Date.now()-x.ts<70000);liveBar()}catch(e){}}
+  LIVES=q.docs.map(d=>Object.assign({id:d.id},d.data())).filter(x=>x&&/^live-/.test(x.id)&&x.st==="on"&&x.uid!==me.uid&&Date.now()-x.ts<120000);liveBar()}catch(e){}}
 function liveBar(){
  let el=document.getElementById("livebar");
  const show=LIVES.length&&$("#t1")&&$("#t1").classList.contains("on")&&!$("#sheet").classList.contains("on")&&!window.CALLON;
