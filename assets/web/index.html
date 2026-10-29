@@ -1918,7 +1918,7 @@ function stopCam(){clearInterval(rt);if(rec&&rec.state==="recording"){rec.onstop
 function create(){
  stopCam();
  open(`<h2 style="text-align:center;font-size:17px">Create</h2><p class="mute" style="text-align:center;margin:0 0 6px">Videos can be up to 20 MB, about one minute.</p><button class="btn" id="cr" style="background:#FF2D55;color:#fff">● Record with camera</button><button class="btn ghost" id="gl">Go live</button><label class="btn ghost" style="cursor:pointer">Choose a video from phone<input id="cf" type="file" accept="video/*" hidden></label><label class="btn ghost" style="cursor:pointer">📷 Choose a photo from phone<input id="cpi" type="file" accept="image/*" hidden></label><label class="btn ghost" style="cursor:pointer">Open phone camera app<input id="cc" type="file" accept="video/*" capture hidden></label><button class="btn ghost" id="x">Cancel</button>`);
- PFX="";$("#gl").onclick=goLive;
+ PFX="";CAP=null;$("#gl").onclick=goLive;
  $("#cr").onclick=recorder;
  $("#cpi").onchange=e=>{if(e.target.files[0])photoForm(e.target.files[0])};
  $("#cc").onchange=e=>{if(e.target.files[0])postForm(e.target.files[0])};
@@ -2095,8 +2095,8 @@ function fxWire(el){
 }
 function bakePhoto(f,css){
  return new Promise(ok=>{
-  if(!css)return ok(f);
-  try{const im=new Image();im.onerror=()=>ok(f);im.onload=()=>{try{const m=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*m);c.height=Math.round(im.height*m);const x=c.getContext("2d");if(!("filter" in x))return ok(f);x.filter=css;x.drawImage(im,0,0,c.width,c.height);c.toBlob(b=>ok(b?new File([b],"photo.jpg",{type:"image/jpeg"}):f),"image/jpeg",.88)}catch(e){ok(f)}};im.src=URL.createObjectURL(f)}catch(e){ok(f)}
+  if(!css&&!CAP)return ok(f);
+  try{const im=new Image();im.onerror=()=>ok(f);im.onload=()=>{try{const m=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*m);c.height=Math.round(im.height*m);const x=c.getContext("2d");if(css&&!("filter" in x))return ok(f);x.filter=css||"none";x.drawImage(im,0,0,c.width,c.height);x.filter="none";if(CAP)drawCap(x,c.width,c.height,CAP);c.toBlob(b=>ok(b?new File([b],"photo.jpg",{type:"image/jpeg"}):f),"image/jpeg",.88)}catch(e){ok(f)}};im.src=URL.createObjectURL(f)}catch(e){ok(f)}
  });
 }
 function filterVideo(f,css,prog){
@@ -2124,10 +2124,10 @@ function filterVideo(f,css,prog){
  })
 }
 async function postWithFilter(f,cap){
- if(!PFX)return postVideo(f,cap);
- const css=PFX;
+ if(!PFX&&!CAP)return postVideo(f,cap);
+ const css=PFX,tx=CAP;
  open(`<h2>Adding your filter</h2><p class="mute">This takes about as long as the video. Keep this screen open.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
- try{const nf=await filterVideo(f,css,(t,d)=>{const b=$("#mb");if(b&&d)b.style.width=Math.min(100,Math.round(100*t/d))+"%"});PFX="";postFormPost(nf,cap)}
+ try{const nf=await captionVideo(f,css,tx,(t,d)=>{const b=$("#mb");if(b&&d)b.style.width=Math.min(100,Math.round(100*t/d))+"%"});PFX="";CAP=null;postFormPost(nf,cap)}
  catch(e){PFX="";postForm(f,"Could not add the filter: "+(e.message||"try again"))}
 }
 function postFormPost(nf,cap){open('<h2>Posting…</h2><p class="note" id="st"></p><button class="btn" id="go" style="display:none">x</button>');postVideo(nf,cap)}
@@ -2206,18 +2206,18 @@ function photoToVideo(f,song,secs,prog){
 function photoForm(f){
  stopCam();
  const url=URL.createObjectURL(f);
- open(`<h2>Post your photo</h2><img id="pimg" src="${url}" alt="Your photo" style="width:100%;max-height:40vh;object-fit:contain;border-radius:12px;background:#000;filter:${PFX||"none"}">${fxStrip()}<input class="in" id="cp" type="text" maxlength="200" placeholder="Write a caption" aria-label="Caption"><button class="btn ghost" id="pmp" style="margin-top:8px">🎬 Turn into a video with music</button><p class="note" id="st">Photos are shared in Social, up to 5 MB.</p><button class="btn" id="go">Post to Social</button><button class="btn ghost" id="bk">Retake</button>`);
- $("#bk").onclick=recorder;fxWire($("#pimg"));
+ open(`<h2>Post your photo</h2><div id="phost" style="position:relative"><img id="pimg" src="${url}" alt="Your photo" style="width:100%;max-height:40vh;object-fit:contain;border-radius:12px;background:#000;filter:${PFX||"none"};display:block"></div>${fxStrip()}<input class="in" id="cp" type="text" maxlength="200" placeholder="Write a caption" aria-label="Caption"><button class="btn ghost" id="pcp" style="margin-top:8px">Aa ${CAP?"Change text":"Add text"}</button><button class="btn ghost" id="pmp" style="margin-top:8px">🎬 Turn into a video with music</button><p class="note" id="st">Photos are shared in Social, up to 5 MB.</p><button class="btn" id="go">Post to Social</button><button class="btn ghost" id="bk">Retake</button>`);
+ $("#bk").onclick=recorder;fxWire($("#pimg"));$("#pcp").onclick=()=>capEditor(f,true,()=>photoForm(f));capShow($("#pimg"),$("#phost"),"contain");
  $("#pmp").onclick=()=>soundPicker(()=>{
   if(!SND)return photoForm(f);
   const sd=SND;SND=null;
   open(`<h2>Making your video</h2><p class="mute">Putting "${esc(sd.name)}" with your photo for 15 seconds. Keep this screen open.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
-  bakePhoto(f,PFX).then(g=>photoToVideo(g,sd,15,p=>{const b=$("#mb");if(b)b.style.width=Math.round(p*100)+"%"})).then(vf=>postForm(vf,"Photo with music: "+sd.name)).catch(e=>{photoForm(f);const st=$("#st");if(st)st.textContent="Could not add music: "+(e.message||"try again")})
+  bakePhoto(f,PFX).then(g=>{CAP=null;return g}).then(g=>photoToVideo(g,sd,15,p=>{const b=$("#mb");if(b)b.style.width=Math.round(p*100)+"%"})).then(vf=>postForm(vf,"Photo with music: "+sd.name)).catch(e=>{photoForm(f);const st=$("#st");if(st)st.textContent="Could not add music: "+(e.message||"try again")})
  });
  $("#go").onclick=async()=>{
   if(f.size>5*1048576){$("#st").textContent="That photo is over 5 MB. Retake it.";return}
   $("#go").disabled=true;$("#st").textContent="Posting…";
-  const it={id:"p"+Date.now(),t:$("#cp").value.trim(),u:me.name,o:me.uid,ts:Date.now(),l:[],cm:[],img:url};f=await bakePhoto(f,PFX);it.img=URL.createObjectURL(f);PFX="";
+  const it={id:"p"+Date.now(),t:$("#cp").value.trim(),u:me.name,o:me.uid,ts:Date.now(),l:[],cm:[],img:url};f=await bakePhoto(f,PFX);it.img=URL.createObjectURL(f);PFX="";CAP=null;
   try{const D=await claude.use("db");const A=await claude.use("assets");if(A){const r=await A.upload(f);it.img=r.url}if(D&&me.uid)await D.collection("posts").doc(it.id).set(it)}catch(e){}
   PS.unshift(it);notify("*","posted a photo in Social"+(it.t?": "+it.t.slice(0,40):""));social();
  };
@@ -2340,13 +2340,97 @@ function editVideo(f,big){
   catch(err){$("#edn").disabled=false;$("#est").textContent="Could not edit: "+(err.message||"try again")}
  };
 }
+
+/* ===== Text on videos and photos: styles, colours, size, position (burned in when you post) ===== */
+let CAP=null;
+const CAPST=["Classic","Box","Highlight","Neon","Outline","Handwritten","Typewriter"],CAPCOL=["#ffffff","#FFD60A","#FF2D55","#2DE1FC","#34C759","#FF9F0A"];
+function drawCap(x,W,H,c){
+ const t=(c&&c.t||"").trim();if(!t)return;
+ const st=c.st||0,fs=Math.max(12,Math.round(W*(c.sz||.07)));
+ const fam=st===5?'"Brush Script MT","Segoe Script","Snell Roundhand",cursive':st===6?'"Courier New",Courier,monospace':'system-ui,"Segoe UI",Roboto,Arial,sans-serif';
+ x.save();x.font=(st===5?"italic 700 ":"800 ")+fs+"px "+fam;x.textAlign="center";x.textBaseline="middle";x.lineJoin="round";
+ const maxw=W*.84,src=st===4?t.toUpperCase():t,lines=[];
+ src.split("\n").forEach(par=>{let cur="";par.split(" ").forEach(w=>{const tr=cur?cur+" "+w:w;if(x.measureText(tr).width>maxw&&cur){lines.push(cur);cur=w}else cur=tr});lines.push(cur)});
+ const lh=fs*1.28,h=lines.length*lh,cy=Math.min(H-h/2-fs*.3,Math.max(h/2+fs*.3,H*(c.y==null?.8:c.y))),top=cy-h/2,col=c.c||"#fff";
+ const box=(cx,cyy,w,hh,fill)=>{x.save();x.shadowColor="transparent";x.fillStyle=fill;const r=fs*.28,l=cx-w/2-fs*.35,tp=cyy-hh/2,ww=w+fs*.7;x.beginPath();if(x.roundRect)x.roundRect(l,tp,ww,hh,r);else x.rect(l,tp,ww,hh);x.fill();x.restore()};
+ lines.forEach((ln,i)=>{
+  const y=top+lh*i+lh/2,w=x.measureText(ln).width,cx=W/2;
+  if(st===1)box(cx,y,w,lh*.96,"rgba(0,0,0,.68)");
+  if(st===2)box(cx,y,w,lh*.96,col);
+  if(st===6)box(cx,y,w,lh*.96,"rgba(0,0,0,.6)");
+  x.shadowColor="transparent";x.shadowBlur=0;
+  if(st===0||st===5){x.shadowColor="rgba(0,0,0,.85)";x.shadowBlur=fs*.22;x.shadowOffsetY=fs*.04;x.fillStyle=col;x.fillText(ln,cx,y)}
+  else if(st===1||st===6){x.fillStyle=col;x.fillText(ln,cx,y)}
+  else if(st===2){x.fillStyle="#111";x.fillText(ln,cx,y)}
+  else if(st===3){x.shadowColor=col;x.shadowBlur=fs*.7;x.fillStyle="#fff";x.fillText(ln,cx,y);x.shadowBlur=fs*.3;x.fillStyle=col;x.globalAlpha=.55;x.fillText(ln,cx,y);x.globalAlpha=1}
+  else if(st===4){x.strokeStyle="#000";x.lineWidth=fs*.2;x.strokeText(ln,cx,y);x.fillStyle=col;x.fillText(ln,cx,y)}
+ });
+ x.restore();
+}
+function capLayer(host,vw,vh,fit,cap){
+ if(!host)return;let cv=host.querySelector("canvas.capl");
+ if(!cv){cv=document.createElement("canvas");cv.className="capl";cv.setAttribute("aria-hidden","true");cv.style.cssText="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none";host.appendChild(cv)}
+ const r=host.getBoundingClientRect(),d=window.devicePixelRatio||1;cv.width=Math.max(1,Math.round(r.width*d));cv.height=Math.max(1,Math.round(r.height*d));
+ const x=cv.getContext("2d");x.clearRect(0,0,cv.width,cv.height);
+ if(!cap||!vw||!vh)return;
+ const k=(fit==="cover"?Math.max:Math.min)(cv.width/vw,cv.height/vh);x.setTransform(k,0,0,k,(cv.width-vw*k)/2,(cv.height-vh*k)/2);drawCap(x,vw,vh,cap);
+}
+function capShow(media,host,fit){
+ if(!CAP||!media)return;
+ const go=()=>capLayer(host,media.videoWidth||media.naturalWidth,media.videoHeight||media.naturalHeight,fit,CAP);
+ if(media.videoWidth||media.naturalWidth)go();
+ media.addEventListener(media.tagName==="VIDEO"?"loadedmetadata":"load",go);
+}
+function capEditor(f,isImg,back){
+ const url=URL.createObjectURL(f),c0=CAP||{t:"",st:0,c:CAPCOL[0],sz:.07,y:.8};let c=Object.assign({},c0);
+ const media=isImg?`<img id="cem" src="${url}" alt="" style="width:100%;height:100%;object-fit:contain;display:block">`:`<video id="cem" src="${url}" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:contain;display:block"></video>`;
+ const chips=(attr,arr,sel,fn)=>arr.map((a,k)=>`<button ${attr}="${k}" style="flex:none;padding:7px 12px;border-radius:999px;font-weight:700;font-size:13px;background:${sel(k)?"#fff":"rgba(255,255,255,.18)"};color:${sel(k)?"#000":"#fff"}">${fn(a)}</button>`).join("");
+ openFull(`<div style="height:100%;overflow-y:auto;background:#000;color:#fff;padding:14px 16px calc(16px + env(safe-area-inset-bottom))"><h2 style="margin:0 0 10px;font-size:17px;text-align:center">Add text</h2><div id="cst" style="position:relative;margin:0 auto;width:100%;height:42vh;background:#111;border-radius:12px;overflow:hidden">${media}</div><textarea id="ctx" class="in" rows="2" maxlength="140" placeholder="Type your text" aria-label="Text on your video" style="margin:10px 0 0;width:100%;box-sizing:border-box"></textarea><div style="font-size:13px;margin-top:8px">Style</div><div id="csty" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0">${chips("data-cs",CAPST,k=>k===c.st,a=>a)}</div><div style="font-size:13px;margin-top:4px">Colour</div><div id="ccol" style="display:flex;gap:10px;padding:6px 0">${CAPCOL.map((k,i)=>`<button data-cc="${i}" aria-label="Colour ${i+1}" style="flex:none;width:34px;height:34px;border-radius:50%;background:${k};border:3px solid ${k===c.c?"#fff":"transparent"};outline:1px solid rgba(255,255,255,.4)"></button>`).join("")}</div><label style="display:block;font-size:13px">Size<input id="csz" type="range" min="4" max="14" step="0.5" value="${Math.round(c.sz*100*2)/2}" style="width:100%"></label><label style="display:block;font-size:13px">Up or down<input id="cy" type="range" min="8" max="92" value="${Math.round(c.y*100)}" style="width:100%"></label><div style="display:flex;gap:8px;margin-top:10px"><button class="btn ghost" id="cx" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button>${CAP?'<button class="btn ghost" id="crm" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Remove</button>':""}<button class="btn" id="cdn" style="margin:0;flex:2">Done</button></div></div>`,true);
+ const T=$("#ctx"),em=$("#cem"),stg=$("#cst");T.value=c.t;
+ const size=()=>{const vw=em.videoWidth||em.naturalWidth,vh=em.videoHeight||em.naturalHeight;if(!vw)return;const w=Math.min(stg.parentNode.clientWidth-32,innerHeight*.42*vw/vh);stg.style.width=w+"px";stg.style.height=(w*vh/vw)+"px";stg.style.height=Math.round(w*vh/vw)+"px"};
+ const draw=()=>{const vw=em.videoWidth||em.naturalWidth,vh=em.videoHeight||em.naturalHeight;capLayer(stg,vw,vh,"contain",c.t.trim()?c:null)};
+ const ready=()=>{size();draw()};em.addEventListener(isImg?"load":"loadedmetadata",ready);if(em.videoWidth||em.naturalWidth)ready();
+ T.oninput=()=>{c.t=T.value;draw()};
+ $("#csty").onclick=e=>{const b=e.target.closest("[data-cs]");if(!b)return;c.st=+b.dataset.cs;$("#csty").querySelectorAll("button").forEach(x=>{const on=x===b;x.style.background=on?"#fff":"rgba(255,255,255,.18)";x.style.color=on?"#000":"#fff"});draw()};
+ $("#ccol").onclick=e=>{const b=e.target.closest("[data-cc]");if(!b)return;c.c=CAPCOL[+b.dataset.cc];$("#ccol").querySelectorAll("button").forEach(x=>x.style.borderColor=x===b?"#fff":"transparent");draw()};
+ $("#csz").oninput=e=>{c.sz=+e.target.value/100;draw()};
+ $("#cy").oninput=e=>{c.y=+e.target.value/100;draw()};
+ $("#cx").onclick=back;
+ if($("#crm"))$("#crm").onclick=()=>{CAP=null;back()};
+ $("#cdn").onclick=()=>{CAP=c.t.trim()?c:null;back()};
+}
+function captionVideo(f,css,cap,prog){
+ return new Promise((ok,no)=>{
+  try{
+   if(!window.MediaRecorder)return no(new Error("This phone cannot add filters."));
+   const v=document.createElement("video");v.src=URL.createObjectURL(f);v.playsInline=true;v.preload="auto";v.onerror=()=>no(new Error("The video could not be read."));
+   v.onloadedmetadata=async()=>{
+    try{
+     const k=Math.min(1,960/Math.max(v.videoWidth,v.videoHeight)),W=Math.round(v.videoWidth*k)||720,H=Math.round(v.videoHeight*k)||1280,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+     if(css&&!("filter" in x))return no(new Error("Filters on videos need Chrome or the Android app."));
+     const AC=window.AudioContext||window.webkitAudioContext;let ac=null,tracks=[];
+     if(AC){try{ac=new AC();const d=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(d);tracks=d.stream.getAudioTracks()}catch(e){ac=null}}
+     const out=new MediaStream([...c.captureStream(25).getVideoTracks(),...tracks]);
+     const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
+     const rc=new MediaRecorder(out,mt?{mimeType:mt,videoBitsPerSecond:1500000,audioBitsPerSecond:128000}:{}),ch=[];
+     rc.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+     let run=true;const draw=()=>{if(!run)return;x.filter=css||"none";x.drawImage(v,0,0,W,H);x.filter="none";if(cap)drawCap(x,W,H,cap);if(prog)prog(v.currentTime,v.duration);requestAnimationFrame(draw)};
+     rc.onstop=()=>{run=false;try{ac&&ac.close()}catch(e){}const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"filtered."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+     v.onended=()=>{if(rc.state==="recording")rc.stop()};
+     rc.start();draw();await v.play()
+    }catch(e){no(e)}
+   };
+  }catch(e){no(e)}
+ })
+}
 function postForm(f,note){
  stopCam();
  const url=URL.createObjectURL(f);
- openFull(`<div style="position:relative;height:100%;background:#000;color:#fff"><video id="pvv" src="${url}" autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><button id="pvt" aria-label="Play or pause" style="position:absolute;inset:0;width:100%;background:none"></button><div style="position:absolute;left:0;right:0;bottom:0;padding:40px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:8px">${fxStrip()}<button class="btn ghost" id="ved" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">✂ Trim, crop &amp; shape</button><button class="btn ghost" id="pmu" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption" style="margin:0"><p class="note" id="st" style="margin:0;color:#fff">${note?esc(note):""}</p><div style="display:flex;gap:8px"><button class="btn ghost" id="bk" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button><button class="btn" id="go" style="margin:0;flex:2">Post</button></div></div></div>`,true);
+ openFull(`<div style="position:relative;height:100%;background:#000;color:#fff"><video id="pvv" src="${url}" autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video><button id="pvt" aria-label="Play or pause" style="position:absolute;inset:0;width:100%;background:none"></button><div style="position:absolute;left:0;right:0;bottom:0;padding:40px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.85));display:flex;flex-direction:column;gap:8px">${fxStrip()}<button class="btn ghost" id="vcp" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">Aa ${CAP?"Change text":"Add text"}</button><button class="btn ghost" id="ved" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">✂ Trim, crop &amp; shape</button><button class="btn ghost" id="pmu" style="margin:0;color:#fff;border-color:rgba(255,255,255,.5)">♪ ${note?"Change music":"Add music"}</button><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption" style="margin:0"><p class="note" id="st" style="margin:0;color:#fff">${note?esc(note):""}</p><div style="display:flex;gap:8px"><button class="btn ghost" id="bk" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button><button class="btn" id="go" style="margin:0;flex:2">Post</button></div></div></div>`,true);
  {const pv=$("#pvv");if(pv){pv.play().catch(()=>{});$("#pvt").onclick=()=>{pv.paused?pv.play().catch(()=>{}):pv.pause()}}}
  $("#bk").onclick=create;{const pv=$("#pvv");if(pv)pv.style.filter=PFX;fxWire(pv)}
  $("#ved").onclick=()=>editVideo(f);
+ $("#vcp").onclick=()=>capEditor(f,false,()=>postForm(f,note));{const pv=$("#pvv");if(pv)capShow(pv,pv.parentNode,"cover")}
  $("#go").onclick=()=>postWithFilter(f,$("#cp").value.trim());
  $("#pmu").onclick=()=>soundPicker(()=>{
   if(!SND)return postForm(f,note);
