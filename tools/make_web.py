@@ -13,7 +13,7 @@ assert '<head>' in s
 s=s.replace('<head>','<head>'+head,1)
 # Move big embedded songs, pictures and videos out of the page so it downloads fast
 import re,os,base64,hashlib
-BASE=os.environ.get('WL_BASE','https://mrsegunsimon-cloud.github.io/worldlink/')
+BASE=os.environ.get('WL_BASE','https://worldlink.app/')
 EXT={'audio/mpeg':'mp3','image/jpeg':'jpg','video/mp4':'mp4','image/png':'png','audio/wav':'wav','image/webp':'webp'}
 md=os.path.join(os.path.dirname(os.path.abspath(dst)),'m');made={}
 def mv(m):

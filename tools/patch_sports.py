@@ -12,7 +12,7 @@ rep('x[4]==="live"?"Live when this was saved":x[4]==="ft"?"Full time, "+when(x[5
 fn='''let SPAT="";
 async function liveSports(){
  try{
-  const r=await WLN("get",{url:"https://mrsegunsimon-cloud.github.io/worldlink/sports.json?t="+Date.now()});
+  const r=await WLN("get",{url:"https://worldlink.app/sports.json?t="+Date.now()});
   if(!r||r.error||!r.body)return;
   const j=JSON.parse(r.body);if(!j||!j.leagues)return;
   const okG=g=>Array.isArray(g)&&g.length>=2&&g.every(x=>Array.isArray(x)&&x.length>=6&&typeof x[0]==="string"&&typeof x[1]==="string"&&["sch","live","ft"].includes(x[4]));

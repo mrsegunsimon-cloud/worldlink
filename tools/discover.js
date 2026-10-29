@@ -1,6 +1,6 @@
 /* Discover: free full songs (Audius), 30-second previews of any hit (Apple iTunes), official music videos (YouTube embeds) */
 var DSA=null,DSK="",DSU={},DSV=null;
-const DS_SITE="https://mrsegunsimon-cloud.github.io/worldlink/";
+const DS_SITE="https://worldlink.app/";
 async function dsGet(u){if(typeof WLN!=="function")return null;const r=await WLN("get",{url:u,timeout:20});if(!r||r.error||!r.body)return null;try{return JSON.parse(r.body)}catch(e){return null}}
 const dsOk=u=>typeof u==="string"&&/^https:\/\//.test(u);
 setInterval(()=>{const sh=document.getElementById("sheet");if(DSA&&!DSA.paused&&!(sh&&sh.classList.contains("on")))DSA.pause()},500);

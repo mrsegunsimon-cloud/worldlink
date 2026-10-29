@@ -187,8 +187,8 @@ const fmt=n=>n>=1e3?(n/1e3).toFixed(n>=1e4?0:1).replace(/\.0$/,"")+"K":""+n;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const blocked=(u,n)=>{try{return me.b.some(x=>(u&&x.u===u)||x.n===n)}catch(e){return false}};
 const mk=n=>(n===0?CLIPS.map((_,i)=>i).filter(i=>me.f.includes(CLIPS[i].u)):CLIPS.map((_,i)=>i).filter(i=>i>=5).reverse().concat([0,1,2,3,4])).filter(i=>!blocked(CLIPS[i].uid,CLIPS[i].u));
-/*learn*/(function(){const B="https://mrsegunsimon-cloud.github.io/worldlink/starter/";[["lang0", "Yoruba: E ku aaro = Good morning"], ["lang1", "Swahili: Habari yako = How are you"], ["lang2", "Hausa: Sannu = Hello"], ["lang3", "French: Bonjour = Hello"], ["lang4", "Spanish: Buenos dias = Good morning"], ["lang5", "Portuguese: Obrigado = Thank you"], ["lang6", "Japanese: Konnichiwa = Hello"], ["lang7", "Hindi: Namaste = Greetings"], ["tip0", "Study tip 1: Study 25 minutes Rest 5 minutes, Repeat 4 times"], ["tip1", "Study tip 2: Put your phone in another room, Focus doubles"], ["tip2", "Study tip 3: Teach what you learn to a friend, You remember more"], ["tip3", "Study tip 4: Sleep 7-8 hours Your brain saves, what you studied"], ["tip4", "Study tip 5: Write 3 questions after every lesson, Test yourself"], ["tip5", "Study tip 6: Drink water Short walk, Fresh mind"], ["tip6", "Study tip 7: Start with the hardest subject, while you are fresh"], ["tip7", "Study tip 8: Plan tomorrow tonight in 5 minutes, Less stress"], ["fact0", "World fact 1: Africa has 54 countries, More than any continent"], ["fact1", "World fact 2: Brazil has the Amazon forest, Over 20% of Earth's oxygen cycle"], ["fact2", "World fact 3: Japan has over 6,800 islands, Only 14 are big"], ["fact3", "World fact 4: Nigeria is Africa's most populous, over 200 million people"], ["fact4", "World fact 5: The Pacific Ocean is bigger than, all land combined"], ["fact5", "World fact 6: Iceland has no mosquitoes, and lots of volcanoes"], ["fact6", "World fact 7: Canada has the longest coastline, on Earth"], ["fact7", "World fact 8: India has over 20 official, languages"]].reverse().forEach(([k,c])=>CLIPS.push({u:"WorldLink Learn (made by WorldLink)",c:c+" 📚 #learn",m:"Music: Tanner Helland (CC BY 4.0)",l:0,g:["#0f766e","#1d4ed8"],e:"📚",cm:[],uid:"worldlink-learn",id:"wllearn-"+k,src:B+k+".mp4"}))})();
-/*starter*/(function(){const B="https://mrsegunsimon-cloud.github.io/worldlink/starter/";[["welcome","Welcome to WorldLink! Share your day with the world 🌍 #welcome"],["howpost","How to post your first video: tap + , record, add a caption, post 🎬 #howto"],["explore","Explore live news, sports, music and beaches in one app ⚽🏖️🎵 #explore"],["safe","Your videos are yours - delete any time from your Profile 🔒 #privacy"],["music","Free songs and music videos in Discover 🎶 #music"],["invite","Be an early creator - invite 3 friends and earn free coins 🎁 #invite"]].reverse().forEach(([k,c])=>CLIPS.push({u:"WorldLink Team ✔ (official)",c:c+" · Official WorldLink video",m:"Music: Tanner Helland (CC BY 4.0)",l:0,g:["#0f766e","#1d4ed8"],e:"🌍",cm:[],uid:"worldlink-team",id:"wlteam-"+k,src:B+k+".mp4"}))})();
+/*learn*/(function(){const B="https://worldlink.app/starter/";[["lang0", "Yoruba: E ku aaro = Good morning"], ["lang1", "Swahili: Habari yako = How are you"], ["lang2", "Hausa: Sannu = Hello"], ["lang3", "French: Bonjour = Hello"], ["lang4", "Spanish: Buenos dias = Good morning"], ["lang5", "Portuguese: Obrigado = Thank you"], ["lang6", "Japanese: Konnichiwa = Hello"], ["lang7", "Hindi: Namaste = Greetings"], ["tip0", "Study tip 1: Study 25 minutes Rest 5 minutes, Repeat 4 times"], ["tip1", "Study tip 2: Put your phone in another room, Focus doubles"], ["tip2", "Study tip 3: Teach what you learn to a friend, You remember more"], ["tip3", "Study tip 4: Sleep 7-8 hours Your brain saves, what you studied"], ["tip4", "Study tip 5: Write 3 questions after every lesson, Test yourself"], ["tip5", "Study tip 6: Drink water Short walk, Fresh mind"], ["tip6", "Study tip 7: Start with the hardest subject, while you are fresh"], ["tip7", "Study tip 8: Plan tomorrow tonight in 5 minutes, Less stress"], ["fact0", "World fact 1: Africa has 54 countries, More than any continent"], ["fact1", "World fact 2: Brazil has the Amazon forest, Over 20% of Earth's oxygen cycle"], ["fact2", "World fact 3: Japan has over 6,800 islands, Only 14 are big"], ["fact3", "World fact 4: Nigeria is Africa's most populous, over 200 million people"], ["fact4", "World fact 5: The Pacific Ocean is bigger than, all land combined"], ["fact5", "World fact 6: Iceland has no mosquitoes, and lots of volcanoes"], ["fact6", "World fact 7: Canada has the longest coastline, on Earth"], ["fact7", "World fact 8: India has over 20 official, languages"]].reverse().forEach(([k,c])=>CLIPS.push({u:"WorldLink Learn (made by WorldLink)",c:c+" 📚 #learn",m:"Music: Tanner Helland (CC BY 4.0)",l:0,g:["#0f766e","#1d4ed8"],e:"📚",cm:[],uid:"worldlink-learn",id:"wllearn-"+k,src:B+k+".mp4"}))})();
+/*starter*/(function(){const B="https://worldlink.app/starter/";[["welcome","Welcome to WorldLink! Share your day with the world 🌍 #welcome"],["howpost","How to post your first video: tap + , record, add a caption, post 🎬 #howto"],["explore","Explore live news, sports, music and beaches in one app ⚽🏖️🎵 #explore"],["safe","Your videos are yours - delete any time from your Profile 🔒 #privacy"],["music","Free songs and music videos in Discover 🎶 #music"],["invite","Be an early creator - invite 3 friends and earn free coins 🎁 #invite"]].reverse().forEach(([k,c])=>CLIPS.push({u:"WorldLink Team ✔ (official)",c:c+" · Official WorldLink video",m:"Music: Tanner Helland (CC BY 4.0)",l:0,g:["#0f766e","#1d4ed8"],e:"🌍",cm:[],uid:"worldlink-team",id:"wlteam-"+k,src:B+k+".mp4"}))})();
 let order=mk(1),liked={},saved={};const sv0=i=>(CLIPS[i].l>>3)+(saved[i]?1:0);CLIPS.forEach((c,i)=>{c.id=c.id||"s"+i});
 function build(){
  $("#feed").innerHTML=!order.length?'<div class="clip" style="display:grid;place-items:center;text-align:center;padding:30px;background:#111"><div><h2>Nothing here yet</h2><p>Follow people in Friends to see their videos here.</p></div></div>':order.map(i=>{const c=CLIPS[i];return `<section class="clip" data-i="${i}" style="background:linear-gradient(165deg,${c.g[0]},${c.g[1]})">
@@ -402,7 +402,7 @@ function editProfile(){
 }
 const PEOPLE=[["maya.ortiz","Lemon trees and good neighbors"],["sam.lee","Community organizer"],["goalhub","Football highlights"],["campus.daily","Study tips"],["dj.kemi","Music producer"]];
 function inviteFriends(){
- const url="https://mrsegunsimon-cloud.github.io/worldlink/"+(me.name&&me.name!=="you"?"?ref="+encodeURIComponent(me.name):""),txt="Join me on WorldLink - videos, photos, news, sports, music and beaches from all over the world. Be one of the first creators and get a Founding Creator badge + free coins 🌍";
+ const url="https://worldlink.app/"+(me.name&&me.name!=="you"?"?ref="+encodeURIComponent(me.name):""),txt="Join me on WorldLink - videos, photos, news, sports, music and beaches from all over the world. Be one of the first creators and get a Founding Creator badge + free coins 🌍";
  if(navigator.share){navigator.share({title:"WorldLink",text:txt,url}).catch(()=>{});return}
  open(`<h2>Invite friends</h2><p class="mute">Copy this message and send it on WhatsApp, Instagram or Telegram.</p><textarea class="in" id="ivt" rows="5" readonly>${esc(txt+" "+url)}</textarea><button class="btn" id="ivc">Copy message</button><button class="btn ghost" id="x">Close</button>`);
  $("#ivc").onclick=async()=>{try{await navigator.clipboard.writeText($("#ivt").value);$("#ivc").textContent="Copied ✓"}catch(e){$("#ivt").select();$("#ivc").textContent="Select and copy the text"}};
@@ -1211,7 +1211,7 @@ function beachHome(pin){
 async function beachData(){
  if(window.__bd!==undefined)return window.__bd;
  window.__bd=null;
- try{window.__bd=JSON.parse(await netGet("https://mrsegunsimon-cloud.github.io/worldlink/beaches.json?t="+Date.now(),25))}catch(e){window.__bd=null}
+ try{window.__bd=JSON.parse(await netGet("https://worldlink.app/beaches.json?t="+Date.now(),25))}catch(e){window.__bd=null}
  return window.__bd}
 
 const BDO=[[/swim/i,"Swimming"],[/surf/i,"Surfing"],[/snorkel|div(e|ing)\b/i,"Snorkelling and diving"],[/event|party|parties|music|\bdj\b|concert|festival/i,"Parties and events"],[/restaurant|\bbar\b|food|drink|cafe|café/i,"Food and drinks"],[/horse/i,"Horse riding"],[/jet ?ski|boat|kayak|paddle|water ?sport|sail/i,"Water sports and boat rides"],[/sunset|sunrise/i,"Watching the sunset"],[/fishing/i,"Fishing"],[/camp/i,"Camping"],[/walk|hike|trail/i,"Walking"],[/volleyball|football|games?\b/i,"Beach games"],[/picnic|relax|sunbath/i,"Picnics and relaxing"],[/resort|hotel|lodg/i,"Stay nearby"]];
@@ -1628,7 +1628,7 @@ function openVideo(i){
 
 /* Discover: free full songs (Audius), 30-second previews of any hit (Apple iTunes), official music videos (YouTube embeds) */
 var DSA=null,DSK="",DSU={},DSV=null;
-const DS_SITE="https://mrsegunsimon-cloud.github.io/worldlink/";
+const DS_SITE="https://worldlink.app/";
 async function dsGet(u){if(typeof WLN!=="function")return null;const r=await WLN("get",{url:u,timeout:20});if(!r||r.error||!r.body)return null;try{return JSON.parse(r.body)}catch(e){return null}}
 const dsOk=u=>typeof u==="string"&&/^https:\/\//.test(u);
 setInterval(()=>{const sh=document.getElementById("sheet");if(DSA&&!DSA.paused&&!(sh&&sh.classList.contains("on")))DSA.pause()},500);
@@ -2345,7 +2345,7 @@ const WN=[
 let SPAT="";
 async function liveSports(){
  try{
-  const r=await WLN("get",{url:"https://mrsegunsimon-cloud.github.io/worldlink/sports.json?t="+Date.now()});
+  const r=await WLN("get",{url:"https://worldlink.app/sports.json?t="+Date.now()});
   if(!r||r.error||!r.body)return;
   const j=JSON.parse(r.body);if(!j||!j.leagues)return;
   const okG=g=>Array.isArray(g)&&g.length>=2&&g.every(x=>Array.isArray(x)&&x.length>=6&&typeof x[0]==="string"&&typeof x[1]==="string"&&["sch","live","ft"].includes(x[4]));
@@ -2363,7 +2363,7 @@ setTimeout(liveSports,700);setInterval(liveSports,600000);
 let NEWSAT="";
 async function liveNews(){
  try{
-  const r=await WLN("get",{url:"https://mrsegunsimon-cloud.github.io/worldlink/news.json?t="+Date.now()});
+  const r=await WLN("get",{url:"https://worldlink.app/news.json?t="+Date.now()});
   if(!r||r.error||!r.body)return;
   const j=JSON.parse(r.body);
   const ok=a=>Array.isArray(a)&&a.every(x=>Array.isArray(x)&&x.length>=5&&typeof x[1]==="string"&&/^https:\/\//.test(x[4]));

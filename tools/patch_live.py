@@ -12,7 +12,7 @@ rep('Top sports stories from October 25 and 26, 2026. Tap a story to open it.','
 fn='''let NEWSAT="";
 async function liveNews(){
  try{
-  const r=await WLN("get",{url:"https://mrsegunsimon-cloud.github.io/worldlink/news.json?t="+Date.now()});
+  const r=await WLN("get",{url:"https://worldlink.app/news.json?t="+Date.now()});
   if(!r||r.error||!r.body)return;
   const j=JSON.parse(r.body);
   const ok=a=>Array.isArray(a)&&a.every(x=>Array.isArray(x)&&x.length>=5&&typeof x[1]==="string"&&/^https:\\/\\//.test(x[4]));

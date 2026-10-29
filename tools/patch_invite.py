@@ -7,7 +7,7 @@ def rep(a,b):
     global s
     assert s.count(a)==1,(s.count(a),a[:60]);s=s.replace(a,b)
 fn='''function inviteFriends(){
- const url="https://mrsegunsimon-cloud.github.io/worldlink/"+(me.name&&me.name!=="you"?"?ref="+encodeURIComponent(me.name):""),txt="Join me on WorldLink - videos, photos, news, sports, music and beaches from all over the world. Be one of the first creators and get a Founding Creator badge + free coins 🌍";
+ const url="https://worldlink.app/"+(me.name&&me.name!=="you"?"?ref="+encodeURIComponent(me.name):""),txt="Join me on WorldLink - videos, photos, news, sports, music and beaches from all over the world. Be one of the first creators and get a Founding Creator badge + free coins 🌍";
  if(navigator.share){navigator.share({title:"WorldLink",text:txt,url}).catch(()=>{});return}
  open(`<h2>Invite friends</h2><p class="mute">Copy this message and send it on WhatsApp, Instagram or Telegram.</p><textarea class="in" id="ivt" rows="5" readonly>${esc(txt+" "+url)}</textarea><button class="btn" id="ivc">Copy message</button><button class="btn ghost" id="x">Close</button>`);
  $("#ivc").onclick=async()=>{try{await navigator.clipboard.writeText($("#ivt").value);$("#ivc").textContent="Copied ✓"}catch(e){$("#ivt").select();$("#ivc").textContent="Select and copy the text"}};

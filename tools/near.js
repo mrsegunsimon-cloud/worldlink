@@ -105,7 +105,7 @@ function beachHome(pin){
 async function beachData(){
  if(window.__bd!==undefined)return window.__bd;
  window.__bd=null;
- try{window.__bd=JSON.parse(await netGet("https://mrsegunsimon-cloud.github.io/worldlink/beaches.json?t="+Date.now(),25))}catch(e){window.__bd=null}
+ try{window.__bd=JSON.parse(await netGet("https://worldlink.app/beaches.json?t="+Date.now(),25))}catch(e){window.__bd=null}
  return window.__bd}
 
 const BDO=[[/swim/i,"Swimming"],[/surf/i,"Surfing"],[/snorkel|div(e|ing)\b/i,"Snorkelling and diving"],[/event|party|parties|music|\bdj\b|concert|festival/i,"Parties and events"],[/restaurant|\bbar\b|food|drink|cafe|café/i,"Food and drinks"],[/horse/i,"Horse riding"],[/jet ?ski|boat|kayak|paddle|water ?sport|sail/i,"Water sports and boat rides"],[/sunset|sunrise/i,"Watching the sunset"],[/fishing/i,"Fishing"],[/camp/i,"Camping"],[/walk|hike|trail/i,"Walking"],[/volleyball|football|games?\b/i,"Beach games"],[/picnic|relax|sunbath/i,"Picnics and relaxing"],[/resort|hotel|lodg/i,"Stay nearby"]];
