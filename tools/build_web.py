@@ -30,7 +30,7 @@ window.__wlGate=true;
     var d=load();(d[n]=d[n]||{})[id]=clone(v);save(d);return true}}}}}};
  window.claude={use:async function(k){
   if(k==="db")return db;
-  if(k==="assets")return window.WLCloud&&window.__wlUser?{upload:function(f){return WLCloud.upload(f)}}:null;
+  if(k==="assets")return window.WLCloud&&window.__wlUser?{upload:function(f,p){return WLCloud.upload(f,p)}}:null;
   if(k==="user")return{id:async function(){var r=await WLN("state");if(r&&r.user){window.__wlUser=r.user;return r.user.uid}return uid}};
   return null}};
 })();

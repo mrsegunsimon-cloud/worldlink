@@ -42,14 +42,18 @@
    return out},
   get:async function(col,id){var j=await call("GET",col+"/"+encodeURIComponent(id),null,!!window.__wlUser);return j?decDoc(j):null},
   set:async function(col,id,v){var f={};for(var k in v)if(v[k]!==undefined)f[k]=enc(v[k]);await call("PATCH",col+"/"+encodeURIComponent(id),{fields:f},true)},
-  upload:async function(file){
+  upload:async function(file,onp){
    var t=await tok();if(!t||!window.__wlUser)throw new Error("Sign in first");
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
    var name="u/"+window.__wlUser.uid+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+"."+ext;
    function sbh(f){var h={"apikey":SB.key,"Content-Type":f.type||"application/octet-stream","x-upsert":"false"};if(SB.key.indexOf("sb_")!==0)h.Authorization="Bearer "+SB.key;return h}
    if(SB.url){
-    var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:sbh(file),body:file});
-    if(!r2.ok)throw new Error("upload "+r2.status);
+    if(onp&&window.XMLHttpRequest){
+     await new Promise(function(ok,no){var x=new XMLHttpRequest();x.open("POST",SB.url+"/storage/v1/object/media/"+name);var h=sbh(file);for(var k in h)x.setRequestHeader(k,h[k]);
+      x.upload.onprogress=function(e){if(e.lengthComputable)try{onp(e.loaded/e.total)}catch(_){}};
+      x.onload=function(){x.status>=200&&x.status<300?ok():no(new Error("upload "+x.status))};x.onerror=function(){no(new Error("upload failed"))};x.send(file)})}
+    else{var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:sbh(file),body:file});
+    if(!r2.ok)throw new Error("upload "+r2.status)}
     return{url:SB.url+"/storage/v1/object/public/media/"+name}}
    var r=await fetch("https://firebasestorage.googleapis.com/v0/b/"+B+"/o?name="+encodeURIComponent(name),{method:"POST",headers:{"Authorization":"Firebase "+t,"Content-Type":file.type||"application/octet-stream"},body:file});
    if(!r.ok)throw new Error("upload "+r.status);

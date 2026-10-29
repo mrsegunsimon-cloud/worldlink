@@ -27,7 +27,7 @@ window.__wlGate=true;
     var d=load();(d[n]=d[n]||{})[id]=clone(v);save(d);return true}}}}}};
  window.claude={use:async function(k){
   if(k==="db")return db;
-  if(k==="assets")return window.WLCloud&&window.__wlUser?{upload:function(f){return WLCloud.upload(f)}}:null;
+  if(k==="assets")return window.WLCloud&&window.__wlUser?{upload:function(f,p){return WLCloud.upload(f,p)}}:null;
   if(k==="user")return{id:async function(){var r=await WLN("state");if(r&&r.user){window.__wlUser=r.user;return r.user.uid}return uid}};
   return null}};
 })();
@@ -319,7 +319,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-d</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -2460,6 +2460,42 @@ function captionVideo(f,css,cap,prog){
   }catch(e){no(e)}
  })
 }
+
+/* ===== Background posting: tap Post, keep using the app; a progress circle at the top shows the upload ===== */
+let BGB=false;
+function bgRing(p,state,txt){
+ let el=$("#bgr");
+ if(!el){el=document.createElement("div");el.id="bgr";el.setAttribute("role","status");el.style.cssText="position:fixed;left:50%;top:calc(0px + 62px);transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:8px;background:rgba(10,14,30,.92);color:#fff;border-radius:999px;padding:6px 14px 6px 6px;box-shadow:0 4px 16px rgba(0,0,0,.4);font:700 13px system-ui,sans-serif";document.body.appendChild(el)}
+ clearTimeout(el.__t);
+ const C=2*Math.PI*16,pc=Math.max(0,Math.min(1,p||0)),col=state==="err"?"#E5233A":state==="ok"?"#34C759":"#FF7A1A";
+ const mid=state==="err"?"!":state==="ok"?"✓":Math.round(pc*100)+"%";
+ el.innerHTML=`<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-(state?1:pc))}" transform="rotate(-90 20 20)"${state?"":' style="transition:stroke-dashoffset .3s"'}/><text x="20" y="24.5" text-anchor="middle" font-size="${state?15:11}" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">${mid}</text></svg><span>${esc(txt||"")}</span>`;
+ el.style.display="flex";
+ if(state==="ok")el.__t=setTimeout(()=>{el.style.display="none"},2600);
+ return el;
+}
+async function bgPost(f,cap){
+ if(BGB){bgRing(0,"err","Another video is still uploading");return}
+ const css=PFX,tx=CAP;PFX="";CAP=null;BGB=true;
+ close();
+ const fail=(msg,retry)=>{BGB=false;const el=bgRing(0,"err",msg);el.onclick=()=>{el.onclick=null;el.style.display="none";retry&&retry()}};
+ const run=async src=>{
+  try{
+   let nf=src;const burn=!!(css||tx);
+   if(burn){bgRing(0,"","Adding your edits");nf=await captionVideo(src,css,tx,(t,d)=>bgRing(d?.45*t/d:0,"","Adding your edits"))}
+   if(nf.size>20*1048576)return fail("Video is over 20 MB. Tap to trim it",()=>{secFull=true;editVideo(nf,true)});
+   bgRing(burn?.45:0,"","Uploading");
+   const it={id:"v"+Date.now(),u:me.name,uid:me.uid,c:cap||"My first WorldLink video",m:"Original sound - "+me.name,l:0,g:["#222","#444"],e:"🎬",cm:[],src:URL.createObjectURL(nf)};
+   let saved=false;
+   try{const A=await claude.use("assets"),D=await claude.use("db");
+    if(A&&D){const r=await A.upload(nf,q=>bgRing((burn?.45:0)+q*(burn?.55:1),"","Uploading"));it.src=r.url;await D.collection("videos").doc(it.id).set({id:it.id,url:r.url,c:it.c,u:me.name,uid:me.uid||null,ts:Date.now()});saved=true}}
+   catch(e){if(me.uid)return fail("Upload failed. Tap to try again",()=>run(nf))}
+   add(it);BGB=false;
+   bgRing(1,"ok",saved?"Posted":"Posted on this screen only");
+  }catch(e){fail("Could not finish. Tap to try again",()=>run(src))}
+ };
+ run(f);
+}
 function postForm(f,note){
  stopCam();
  const url=URL.createObjectURL(f);
@@ -2468,7 +2504,7 @@ function postForm(f,note){
  $("#bk").onclick=create;{const pv=$("#pvv");if(pv)pv.style.filter=PFX;fxWire(pv)}
  $("#ved").onclick=()=>editVideo(f);
  $("#vcp").onclick=()=>capEditor(f,false,()=>postForm(f,note));{const pv=$("#pvv");if(pv)capShow(pv,pv.parentNode,"cover")}
- $("#go").onclick=()=>postWithFilter(f,$("#cp").value.trim());
+ $("#go").onclick=()=>{if(f.size>20*1048576&&!(PFX||CAP)){postVideo(f,$("#cp").value.trim());return}bgPost(f,$("#cp").value.trim())};
  $("#pmu").onclick=()=>soundPicker(()=>{
   if(!SND)return postForm(f,note);
   const sd=SND;SND=null;
@@ -2784,14 +2820,18 @@ build();
    return out},
   get:async function(col,id){var j=await call("GET",col+"/"+encodeURIComponent(id),null,!!window.__wlUser);return j?decDoc(j):null},
   set:async function(col,id,v){var f={};for(var k in v)if(v[k]!==undefined)f[k]=enc(v[k]);await call("PATCH",col+"/"+encodeURIComponent(id),{fields:f},true)},
-  upload:async function(file){
+  upload:async function(file,onp){
    var t=await tok();if(!t||!window.__wlUser)throw new Error("Sign in first");
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
    var name="u/"+window.__wlUser.uid+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+"."+ext;
    function sbh(f){var h={"apikey":SB.key,"Content-Type":f.type||"application/octet-stream","x-upsert":"false"};if(SB.key.indexOf("sb_")!==0)h.Authorization="Bearer "+SB.key;return h}
    if(SB.url){
-    var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:sbh(file),body:file});
-    if(!r2.ok)throw new Error("upload "+r2.status);
+    if(onp&&window.XMLHttpRequest){
+     await new Promise(function(ok,no){var x=new XMLHttpRequest();x.open("POST",SB.url+"/storage/v1/object/media/"+name);var h=sbh(file);for(var k in h)x.setRequestHeader(k,h[k]);
+      x.upload.onprogress=function(e){if(e.lengthComputable)try{onp(e.loaded/e.total)}catch(_){}};
+      x.onload=function(){x.status>=200&&x.status<300?ok():no(new Error("upload "+x.status))};x.onerror=function(){no(new Error("upload failed"))};x.send(file)})}
+    else{var r2=await fetch(SB.url+"/storage/v1/object/media/"+name,{method:"POST",headers:sbh(file),body:file});
+    if(!r2.ok)throw new Error("upload "+r2.status)}
     return{url:SB.url+"/storage/v1/object/public/media/"+name}}
    var r=await fetch("https://firebasestorage.googleapis.com/v0/b/"+B+"/o?name="+encodeURIComponent(name),{method:"POST",headers:{"Authorization":"Firebase "+t,"Content-Type":file.type||"application/octet-stream"},body:file});
    if(!r.ok)throw new Error("upload "+r.status);
