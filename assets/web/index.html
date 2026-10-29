@@ -334,7 +334,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-v</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-w</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -777,6 +777,24 @@ function liveBar(){
  el.style.display="flex";
  el.innerHTML=LIVES.map(l=>`<button data-lv="${esc(l.uid)}" style="flex:none;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);color:#fff;border-radius:999px;padding:6px 12px 6px 6px;font-weight:700;font-size:13px"><span style="background:#E5233A;border-radius:999px;padding:3px 8px;font-size:11px">LIVE</span>${esc(l.name)}</button>`).join("")}
 setInterval(liveScan,8000);setTimeout(liveScan,2500);setInterval(()=>{try{liveBar()}catch(e){}},2500);
+/* wlPush: phone alerts when the app is closed (website, Chrome) */
+const VAPID_PUB="BMGhFI0Jh4o69Cesc3iH5iUIDkxkovHKZ1dFXhDn-NYm61_TKSWg65tvku8OAY6j7klZhDJnQHOPZ_ewI4g9HdM";
+const b64u=t=>{const p="=".repeat((4-t.length%4)%4),b=(t+p).replace(/-/g,"+").replace(/_/g,"/"),r=atob(b),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o};
+const pushOK=()=>!!(window.WLCloud&&WLCloud.fn&&"serviceWorker"in navigator&&"PushManager"in window&&"Notification"in window&&window.__wlUser);
+async function pushSub(ask){
+ try{
+  if(!pushOK())return"unsupported";
+  if(Notification.permission==="denied")return"denied";
+  if(Notification.permission!=="granted"){if(!ask)return"off";const r=await Notification.requestPermission();if(r!=="granted")return"denied"}
+  const reg=await navigator.serviceWorker.ready;
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+  const r=await WLCloud.fn("push-alerts",{a:"sub",sub:sub.toJSON()});
+  return r&&r.ok?"on":"error"
+ }catch(e){return"error"}
+}
+function pushTo(uid,title,body,tag){try{if(uid&&window.WLCloud&&WLCloud.fn&&window.__wlUser)WLCloud.fn("push-alerts",{a:"send",to:uid,t:title,b:body,tag:tag||"wl"}).catch(()=>{})}catch(e){}}
+setInterval(()=>{if(!window.__wlPS&&pushOK()&&Notification.permission==="granted"){window.__wlPS=1;pushSub(false).then(r=>{window.__pushState=r})}},4000);
 let RTL=false;
 setInterval(()=>{if(RTL||!me.uid||!window.__wlUser||!window.WLCloud||!WLCloud.rt)return;RTL=true;
  WLCloud.rt.on((topic,ev,p)=>{if(topic!=="wlc-"+me.uid||!p)return;
@@ -835,7 +853,7 @@ async function startCall(p,video,uid){
  try{
   cPeer(video);const off=await PC.createOffer();await PC.setLocalDescription(off);await iceDone(PC);
   const ts=Date.now();CDOC={id:uid,from:me.uid,fn:me.name,v:!!video,ts};
-  /*wlRtCalls*/rtSendTo(uid,"ring",{from:me.uid,fn:me.name,v:!!video,ts,offer:PC.localDescription.sdp});
+  /*wlRtCalls*/pushTo(uid,"📞 "+me.name,video?"Incoming video call":"Incoming voice call","call");rtSendTo(uid,"ring",{from:me.uid,fn:me.name,v:!!video,ts,offer:PC.localDescription.sdp});
   cPut(uid,{from:me.uid,fn:me.name,v:!!video,st:"ring",ts,offer:PC.localDescription.sdp});
   cSay("Ringing…");
   CTMO=setTimeout(()=>{cSay("No answer");setTimeout(()=>endCall("noanswer"),1500)},45000);
@@ -1830,7 +1848,7 @@ $("#story").onclick=async e=>{
 let NF=[];
 async function loadNF(){try{const D=await claude.use("db"),U=await claude.use("user");if(!D||!U)return;const id=await U.id();/*wlNotifPriv*/let rows;if(window.WLCloud&&window.WLCloud.byField&&window.__wlUser){const [x,y]=await Promise.all([WLCloud.byField("notifs","to",id),WLCloud.byField("notifs","to","*")]);rows=x.concat(y).map(r=>r.data)}else{const s=await D.collection("notifs").get();rows=s.docs.map(d=>d.data())}NF=rows.filter(n=>n&&(n.to===id||(n.to==="*"&&n.from!==me.name&&Date.now()-n.ts<12096e5))).sort((a,b)=>b.ts-a.ts);const z=await D.collection("data/users/"+id).doc("notifseen").get();me.ns=z.exists?(z.data().ts||0):0;badge()}catch(e){}}
 function badge(){const n=NF.filter(x=>x.ts>me.ns&&!blocked(null,x.from)).length,b=$("#bd");b.textContent=n>9?"9+":n;b.style.display=n?"block":"none";const nb=$("#nbi");if(nb){nb.textContent=n>9?"9+":n;nb.style.display=n?"block":"none"}}
-async function notify(to,text){if(!to||to===me.uid)return;try{const D=await claude.use("db");if(!D)return;const id="n"+Date.now()+Math.floor(Math.random()*1e3);await D.collection("notifs").doc(id).set({id,to,from:me.name,text,ts:Date.now()})}catch(e){}}
+async function notify(to,text){if(!to||to===me.uid)return;try{const D=await claude.use("db");if(!D)return;const id="n"+Date.now()+Math.floor(Math.random()*1e3);await D.collection("notifs").doc(id).set({id,to,from:me.name,text,ts:Date.now()});pushTo(to,"@"+me.name,text,"n")}catch(e){}}
 /* wlActivity: TikTok-style Activity page (bell and Inbox > Activity open this) */
 let ACT_TAB=0,ACT_ALL=false,ACT_HIDE=[];
 async function notifs(tab){try{await liveScan()}catch(e){}
@@ -1853,7 +1871,7 @@ function actDraw(seen){
  const row=(n,k)=>`<div data-nt="${k}" role="button" tabindex="0" style="display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;${n.ts>seen?"background:rgba(37,199,240,.10)":""}"><span style="width:8px;flex:none">${n.ts>seen?'<i style="display:block;width:8px;height:8px;border-radius:50%;background:#25C7F0"></i>':""}</span><span data-pn="${esc(n.from)}">${av(n.from)}</span><div style="flex:1;min-width:0;font-size:16px;line-height:1.3"><b>${esc(n.from)}</b> ${esc(n.text)} <span class="mute" style="font-size:14px">${ago(n.ts)}</span></div>${isFol(n)?fbtn(n.from,"Follow back"):`<span style="font-size:24px;flex:none">${icon((n.text||"").toLowerCase())}</span>`}</div>`;
  const pri=all.filter(n=>n.ts>seen),oth=all.filter(n=>n.ts<=seen);
  const idx=n=>all.indexOf(n);
- let body="";
+ let body=window.__pushState==="on"||!pushOK()||Notification.permission==="denied"?"":`<button id="actpush" style="display:block;width:calc(100% - 32px);margin:10px 16px 0;padding:13px;border-radius:12px;background:#FE2C55;color:#fff;font-weight:800;font-size:15px">🔔 Turn on phone alerts</button><p class="mute" style="margin:6px 16px 0;font-size:13px">Get calls, messages and lives on your phone even when WorldLink is closed.</p>`;
  if(ACT_TAB===1){body=fol.length?fol.map(n=>row(n,idx(n))).join(""):'<p class="mute" style="padding:30px 20px;text-align:center">No new followers yet.</p>'}
  else{
   if(!all.length)body='<p class="mute" style="padding:30px 20px;text-align:center">Nothing yet. When someone likes, comments, follows you or messages you, you will see it here.</p>';
@@ -1870,6 +1888,7 @@ function actDraw(seen){
  openFull(`<div class="hd" style="gap:0"><button id="actb" aria-label="Back" style="font-size:28px;padding:0 14px">←</button><div style="flex:1;display:flex">${tb(0,"Activity",0)}${tb(1,"New followers",nnew)}</div></div><div class="pgx" style="padding:0 0 30px">${body}</div>`);
  const P=$("#panel");
  $("#actb").onclick=()=>{close()};
+ const ap=$("#actpush");if(ap)ap.onclick=async()=>{ap.textContent="Turning on…";const r=await pushSub(true);window.__pushState=r;if(r==="on"){ap.textContent="✅ Phone alerts are on"}else if(r==="denied"){ap.textContent="Blocked. Allow notifications for worldlink.app in Chrome settings."}else{ap.textContent="Could not turn on. Try again."}};
  P.querySelectorAll("[data-lv2]").forEach(el=>el.onclick=()=>{const l=LIVES.find(x=>x.uid===el.dataset.lv2);if(l)watchLive({uid:l.uid,name:l.name,title:l.title})});
  P.querySelectorAll("[data-at]").forEach(b=>b.onclick=()=>{ACT_TAB=+b.dataset.at;actDraw(seen)});
  const va=$("#actva");if(va)va.onclick=()=>{ACT_ALL=true;actDraw(seen)};
@@ -3264,6 +3283,7 @@ build();
  window.WLCloud={
   rt:SB.url?RTAPI:null,
   byField:byField,
+  fn:async function(name,body){if(!SB.url)return null;var t=await tok();if(!t)return null;var r=await fetch(SB.url+"/functions/v1/"+name,{method:"POST",headers:{"Content-Type":"application/json","apikey":SB.key,"x-wl-token":t},body:JSON.stringify(body)});try{return await r.json()}catch(e){return null}},
   spec:function(file){
    if(!SB.url||!window.__wlUser)return null;
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);

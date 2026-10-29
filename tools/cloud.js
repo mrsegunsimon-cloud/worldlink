@@ -51,6 +51,7 @@
  window.WLCloud={
   rt:SB.url?RTAPI:null,
   byField:byField,
+  fn:async function(name,body){if(!SB.url)return null;var t=await tok();if(!t)return null;var r=await fetch(SB.url+"/functions/v1/"+name,{method:"POST",headers:{"Content-Type":"application/json","apikey":SB.key,"x-wl-token":t},body:JSON.stringify(body)});try{return await r.json()}catch(e){return null}},
   spec:function(file){
    if(!SB.url||!window.__wlUser)return null;
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);

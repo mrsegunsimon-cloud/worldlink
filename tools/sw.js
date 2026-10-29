@@ -39,3 +39,12 @@ self.addEventListener("notificationclick",function(e){
   await clients.openWindow("/");
  })());
 });
+
+/* phone alerts (Web Push) */
+self.addEventListener("push",function(e){
+ var d={};try{d=e.data.json()}catch(x){d={t:"WorldLink",b:e.data?e.data.text():""}}
+ e.waitUntil((async function(){
+  if(await anyVisible())return;
+  await self.registration.showNotification(d.t||"WorldLink",{body:d.b||"",tag:d.tag||"wl",renotify:true,vibrate:[200,100,200],data:{url:"/"}});
+ })());
+});
