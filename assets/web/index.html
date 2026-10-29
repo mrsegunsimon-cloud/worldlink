@@ -291,6 +291,14 @@ function homeCards(){
  add("play","🎰","Play zone","pz","Free games and a daily bonus","Tap to play",()=>playZone());
  return out;
 }
+let CSND=(()=>{try{return localStorage.getItem("wl_csnd")!=="0"}catch(e){return true}})(),CAU=null,CIO=null;
+function cChime(kind){try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;CAU=CAU||new AC();if(CAU.state==="suspended")CAU.resume();
+ const Q={news:[[660,0],[880,.14]],sports:[[784,0],[784,.12],[1047,.26]],social:[[523,0],[659,.1],[784,.2]],market:[[1319,0],[1760,.09]],events:[[523,0],[659,.1],[784,.2],[1047,.3]],music:[[392,0],[494,.1],[587,.2],[784,.3]],campus:[[440,0],[554,.12],[659,.24]],explore:[[587,0],[740,.14],[880,.28]],learn:[[523,0],[784,.15]],play:[[880,0],[1109,.08],[1319,.16],[1760,.24]]}[kind]||[[660,0]];
+ Q.forEach(([f,t])=>{const o=CAU.createOscillator(),g=CAU.createGain(),t0=CAU.currentTime+t;o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(.2,t0+.02);g.gain.exponentialRampToValueAtTime(.001,t0+.4);o.connect(g);g.connect(CAU.destination);o.start(t0);o.stop(t0+.45)})}catch(e){}}
+function cSpeak(txt){try{if(!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);setTimeout(()=>{try{speechSynthesis.speak(u)}catch(e){}},600)}catch(e){}}
+function cStop(){try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}}
+function cPlay(el){if(!CSND||!el)return;cChime(el.dataset.kind);cSpeak(el.dataset.say||"")}
+function cSndBtn(){return `<button data-csnd="1" aria-label="Sound on or off" style="position:absolute;top:70px;right:14px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:20px;z-index:3">${CSND?"🔊":"🔇"}</button>`}
 let HCGO={};
 function injectCards(){
  try{
@@ -301,14 +309,15 @@ function injectCards(){
   for(let k=Math.min(1,clips.length-1);k<clips.length&&n<cards.length*2;k+=3){
    const c=cards[n%cards.length];n++;HCGO[c.k+n]=c.fn;
    const bg=(typeof PH!=="undefined"&&PH[c.ph])?`<img src="${PH[c.ph]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">`:"";
-   const el=document.createElement("section");el.className="clip hc";el.setAttribute("role","button");el.tabIndex=0;el.dataset.hc=c.k+n;
+   const el=document.createElement("section");el.className="clip hc";el.setAttribute("role","button");el.tabIndex=0;el.dataset.hc=c.k+n;el.dataset.kind=c.k;el.dataset.say=c.lab+". "+c.h+". "+c.sub;
    el.style.background="linear-gradient(165deg,#12307F,#FF7A1A)";
-   el.innerHTML=`${bg}<div class="shade"></div><div style="position:absolute;left:18px;right:18px;bottom:120px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)"><span style="display:inline-block;background:rgba(0,0,0,.45);padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px">${c.ic} ${esc(c.lab)}</span><h2 style="font-size:25px;line-height:1.2;margin:12px 0 6px;color:#fff">${esc(c.h)}</h2><p style="margin:0;opacity:.92">${esc(c.sub)}</p><span style="display:inline-block;margin-top:14px;background:#FF7A1A;padding:11px 22px;border-radius:999px;font-weight:800;text-shadow:none">Open ${esc(c.lab)} →</span></div>`;
+   el.innerHTML=`${bg}<div class="shade"></div><div style="position:absolute;left:18px;right:18px;bottom:120px;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)">${cSndBtn()}<span style="display:inline-block;background:rgba(0,0,0,.45);padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px">${c.ic} ${esc(c.lab)}</span><h2 style="font-size:25px;line-height:1.2;margin:12px 0 6px;color:#fff">${esc(c.h)}</h2><p style="margin:0;opacity:.92">${esc(c.sub)}</p><span style="display:inline-block;margin-top:14px;background:#FF7A1A;padding:11px 22px;border-radius:999px;font-weight:800;text-shadow:none">Open ${esc(c.lab)} →</span></div>`;
    clips[k].after(el);
   }
+  try{if(CIO)CIO.disconnect();CIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)cPlay(e.target);else cStop()}),{root:f,threshold:.7});f.querySelectorAll(".hc").forEach(x=>CIO.observe(x))}catch(e){}
  }catch(e){}
 }
-$("#feed").addEventListener("click",e=>{const h=e.target.closest(".hc");if(h&&HCGO[h.dataset.hc])HCGO[h.dataset.hc]()});
+$("#feed").addEventListener("click",e=>{const sb=e.target.closest("[data-csnd]");if(sb){e.stopPropagation();CSND=!CSND;try{localStorage.setItem("wl_csnd",CSND?"1":"0")}catch(_){}document.querySelectorAll("[data-csnd]").forEach(b=>b.textContent=CSND?"🔊":"🔇");if(CSND)cPlay(sb.closest(".hc"));else cStop();return}const h=e.target.closest(".hc");if(h&&HCGO[h.dataset.hc])HCGO[h.dataset.hc]()});
 $("#feed").addEventListener("keydown",e=>{if(e.key==="Enter"){const h=e.target.closest(".hc");if(h&&HCGO[h.dataset.hc])HCGO[h.dataset.hc]()}});
 function tab(n){order=mk(n);$("#t0").classList.toggle("on",n===0);$("#t1").classList.toggle("on",n===1);build();$("#feed").scrollTop=0}
 $("#t2").onclick=()=>{secFull=true;social();loadPS().then(()=>{/*wlFresh*/if(document.querySelector("#pt")&&!$("#pt").value)social()})};$("#t0").onclick=()=>tab(0);$("#t1").onclick=()=>tab(1);
@@ -319,7 +328,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-d</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-e</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -2461,41 +2470,68 @@ function captionVideo(f,css,cap,prog){
  })
 }
 
-/* ===== Background posting: tap Post, keep using the app; a progress circle at the top shows the upload ===== */
+/* ===== Background posting: a small draggable circle shows the upload; survives page refresh ===== */
 let BGB=false;
+const JDB=()=>new Promise((ok,no)=>{try{const r=indexedDB.open("wl_jobs",1);r.onupgradeneeded=()=>r.result.createObjectStore("j",{keyPath:"id"});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}});
+async function jTx(mode,fn){try{const d=await JDB();return await new Promise((ok,no)=>{const t=d.transaction("j",mode),r=fn(t.objectStore("j"));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})}catch(e){return null}}
+const jPut=j=>jTx("readwrite",o=>o.put(j)),jDel=id=>jTx("readwrite",o=>o.delete(id)),jAll=async()=>(await jTx("readonly",o=>o.getAll()))||[];
+function bgPos(el){let q=null;try{q=JSON.parse(localStorage.getItem("wl_ring")||"null")}catch(e){}
+ const W=innerWidth,H=innerHeight,x=q?Math.min(Math.max(0,q.x),W-56):W/2-28,y=q?Math.min(Math.max(0,q.y),H-56):70;el.style.left=x+"px";el.style.top=y+"px"}
 function bgRing(p,state,txt){
  let el=$("#bgr");
- if(!el){el=document.createElement("div");el.id="bgr";el.setAttribute("role","status");el.style.cssText="position:fixed;left:50%;top:calc(0px + 62px);transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:8px;background:rgba(10,14,30,.92);color:#fff;border-radius:999px;padding:6px 14px 6px 6px;box-shadow:0 4px 16px rgba(0,0,0,.4);font:700 13px system-ui,sans-serif";document.body.appendChild(el)}
+ if(!el){
+  el=document.createElement("div");el.id="bgr";el.setAttribute("role","status");
+  el.style.cssText="position:fixed;z-index:99999;width:56px;height:56px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none";
+  document.body.appendChild(el);bgPos(el);
+  let sx=0,sy=0,ox=0,oy=0,mv=false,dn=false;
+  el.addEventListener("pointerdown",e=>{dn=true;mv=false;sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;try{el.setPointerCapture(e.pointerId)}catch(_){}});
+  el.addEventListener("pointermove",e=>{if(!dn)return;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)+Math.abs(dy)>6)mv=true;if(mv){el.style.left=Math.min(Math.max(0,ox+dx),innerWidth-56)+"px";el.style.top=Math.min(Math.max(0,oy+dy),innerHeight-56)+"px"}});
+  const up=()=>{if(!dn)return;dn=false;if(mv){try{localStorage.setItem("wl_ring",JSON.stringify({x:el.offsetLeft,y:el.offsetTop}))}catch(_){}}else if(el.__tap){const f=el.__tap;el.__tap=null;f()}};
+  el.addEventListener("pointerup",up);el.addEventListener("pointercancel",()=>{dn=false});
+ }
  clearTimeout(el.__t);
- const C=2*Math.PI*16,pc=Math.max(0,Math.min(1,p||0)),col=state==="err"?"#E5233A":state==="ok"?"#34C759":"#FF7A1A";
+ const R=23,C=2*Math.PI*R,pc=Math.max(0,Math.min(1,p||0)),col=state==="err"?"#E5233A":state==="ok"?"#34C759":"#FF7A1A";
  const mid=state==="err"?"!":state==="ok"?"✓":Math.round(pc*100)+"%";
- el.innerHTML=`<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="4"/><circle cx="20" cy="20" r="16" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-(state?1:pc))}" transform="rotate(-90 20 20)"${state?"":' style="transition:stroke-dashoffset .3s"'}/><text x="20" y="24.5" text-anchor="middle" font-size="${state?15:11}" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">${mid}</text></svg><span>${esc(txt||"")}</span>`;
- el.style.display="flex";
+ el.setAttribute("aria-label",txt||"Uploading");el.title=txt||"";
+ el.innerHTML=`<svg width="56" height="56" viewBox="0 0 56 56" style="display:block;border-radius:50%;background:#0E1330;box-shadow:0 4px 14px rgba(0,0,0,.45)" aria-hidden="true"><circle cx="28" cy="28" r="${R}" fill="none" stroke="#3a4170" stroke-width="5"/><circle cx="28" cy="28" r="${R}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-(state?1:pc))}" transform="rotate(-90 28 28)"/><text x="28" y="${state?34:32.5}" text-anchor="middle" font-size="${state?20:13}" font-weight="800" fill="#ffffff" font-family="system-ui,sans-serif">${mid}</text></svg>${state&&txt?`<span style="position:absolute;top:60px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#0E1330;color:#fff;padding:4px 10px;border-radius:999px;font:700 12px system-ui,sans-serif">${esc(txt)}</span>`:""}`;
+ el.style.display="block";el.__tap=null;
  if(state==="ok")el.__t=setTimeout(()=>{el.style.display="none"},2600);
  return el;
 }
-async function bgPost(f,cap){
- if(BGB){bgRing(0,"err","Another video is still uploading");return}
- const css=PFX,tx=CAP;PFX="";CAP=null;BGB=true;
- close();
- const fail=(msg,retry)=>{BGB=false;const el=bgRing(0,"err",msg);el.onclick=()=>{el.onclick=null;el.style.display="none";retry&&retry()}};
- const run=async src=>{
-  try{
-   let nf=src;const burn=!!(css||tx);
-   if(burn){bgRing(0,"","Adding your edits");nf=await captionVideo(src,css,tx,(t,d)=>bgRing(d?.45*t/d:0,"","Adding your edits"))}
-   if(nf.size>20*1048576)return fail("Video is over 20 MB. Tap to trim it",()=>{secFull=true;editVideo(nf,true)});
-   bgRing(burn?.45:0,"","Uploading");
-   const it={id:"v"+Date.now(),u:me.name,uid:me.uid,c:cap||"My first WorldLink video",m:"Original sound - "+me.name,l:0,g:["#222","#444"],e:"🎬",cm:[],src:URL.createObjectURL(nf)};
-   let saved=false;
-   try{const A=await claude.use("assets"),D=await claude.use("db");
-    if(A&&D){const r=await A.upload(nf,q=>bgRing((burn?.45:0)+q*(burn?.55:1),"","Uploading"));it.src=r.url;await D.collection("videos").doc(it.id).set({id:it.id,url:r.url,c:it.c,u:me.name,uid:me.uid||null,ts:Date.now()});saved=true}}
-   catch(e){if(me.uid)return fail("Upload failed. Tap to try again",()=>run(nf))}
-   add(it);BGB=false;
-   bgRing(1,"ok",saved?"Posted":"Posted on this screen only");
-  }catch(e){fail("Could not finish. Tap to try again",()=>run(src))}
- };
- run(f);
+async function bgRun(job){
+ BGB=true;
+ const fail=(msg,retry)=>{BGB=false;const el=bgRing(0,"err",msg);el.__tap=()=>{el.style.display="none";retry&&retry()}};
+ try{
+  const burn=!!(job.css||job.tx);let nf=job.burned||job.f;
+  if(burn&&!job.burned){bgRing(0,"","Adding your edits");nf=await captionVideo(job.f,job.css,job.tx,(t,d)=>bgRing(d?.45*t/d:0,"","Adding your edits"));job.burned=nf;await jPut(job)}
+  if(nf.size>20*1048576){await jDel(job.id);BGB=false;return fail("Over 20 MB. Tap to trim",()=>{secFull=true;editVideo(nf,true)})}
+  if(window.WLCloud&&!window.__wlUser){for(let i=0;i<24&&!window.__wlUser;i++)await new Promise(r=>setTimeout(r,500));if(!window.__wlUser)return fail("Sign in to finish",()=>bgRun(job))}
+  const base=burn?.45:0;bgRing(base,"","Uploading");
+  const it={id:job.id,u:me.name,uid:me.uid,c:job.cap||"My first WorldLink video",m:"Original sound - "+me.name,l:0,g:["#222","#444"],e:"🎬",cm:[],src:URL.createObjectURL(nf)};
+  let saved=false;
+  try{const A=await claude.use("assets"),D=await claude.use("db");
+   if(A&&D){const r=await A.upload(nf,q=>bgRing(base+q*(1-base),"","Uploading"));it.src=r.url;await D.collection("videos").doc(it.id).set({id:it.id,url:r.url,c:it.c,u:me.name,uid:me.uid||null,ts:Date.now()});saved=true}}
+  catch(e){return fail("Upload failed. Tap to retry",()=>bgRun(job))}
+  if(!saved)return fail("Not saved. Tap to retry",()=>bgRun(job));
+  await jDel(job.id);
+  if(!CLIPS.some(c=>c.id===it.id))add(it);BGB=false;
+  bgRing(1,"ok","Posted");
+ }catch(e){fail("Could not finish. Tap to retry",()=>bgRun(job))}
 }
+async function bgPost(f,cap){
+ if(BGB){bgRing(0,"err","Another upload is running");return}
+ const job={id:"v"+Date.now(),cap,css:PFX,tx:CAP,f,burned:null,ts:Date.now()};PFX="";CAP=null;
+ try{document.querySelectorAll("#panel video").forEach(v=>{v.pause();v.removeAttribute("src");v.load()})}catch(e){}
+ close();try{$("#panel").innerHTML=""}catch(e){}
+ bgRing(0,"","Starting");
+ await jPut(job);bgRun(job);
+}
+async function bgResume(){
+ try{const L=await jAll();if(!L.length||BGB)return;L.sort((a,b)=>a.ts-b.ts);const j=L[0];
+  if(Date.now()-j.ts>7*864e5){await jDel(j.id);return}
+  bgRing(0,"","Resuming");bgRun(j)}catch(e){}
+}
+window.addEventListener("load",()=>setTimeout(bgResume,2500));
 function postForm(f,note){
  stopCam();
  const url=URL.createObjectURL(f);
