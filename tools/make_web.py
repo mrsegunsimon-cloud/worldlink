@@ -11,4 +11,18 @@ csp=("default-src 'none'; script-src 'self' 'unsafe-inline' https://www.gstatic.
 head='<meta http-equiv="Content-Security-Policy" content="%s"><meta name="referrer" content="no-referrer"><script>%s</script>'%(csp,shim)
 assert '<head>' in s
 s=s.replace('<head>','<head>'+head,1)
+# Move big embedded songs, pictures and videos out of the page so it downloads fast
+import re,os,base64,hashlib
+BASE=os.environ.get('WL_BASE','https://mrsegunsimon-cloud.github.io/worldlink/')
+EXT={'audio/mpeg':'mp3','image/jpeg':'jpg','video/mp4':'mp4','image/png':'png','audio/wav':'wav','image/webp':'webp'}
+md=os.path.join(os.path.dirname(os.path.abspath(dst)),'m');made={}
+def mv(m):
+    t=m.group(1)
+    if t not in EXT:return m.group(0)
+    raw=base64.b64decode(m.group(2));h=hashlib.sha256(raw).hexdigest()[:20]+'.'+EXT[t]
+    os.makedirs(md,exist_ok=True)
+    if h not in made:open(os.path.join(md,h),'wb').write(raw);made[h]=len(raw)
+    return BASE+'m/'+h
+s=re.sub(r'data:([a-z]+/[a-z0-9.+-]+);base64,([A-Za-z0-9+/=]{2000,})',mv,s)
+print('moved',len(made),'files',sum(made.values()),'bytes; page now',len(s))
 open(dst,'w',encoding='utf8').write(s)
