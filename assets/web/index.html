@@ -274,7 +274,7 @@ $("#feed").addEventListener("click",e=>{
  last=now;
 });
 function tab(n){order=mk(n);$("#t0").classList.toggle("on",n===0);$("#t1").classList.toggle("on",n===1);build();$("#feed").scrollTop=0}
-$("#t2").onclick=()=>{secFull=true;social()};$("#t0").onclick=()=>tab(0);$("#t1").onclick=()=>tab(1);
+$("#t2").onclick=()=>{secFull=true;social();loadPS().then(()=>{/*wlFresh*/if(document.querySelector("#pt")&&!$("#pt").value)social()})};$("#t0").onclick=()=>tab(0);$("#t1").onclick=()=>tab(1);
 let secFull=false;
 let FM=false;
 function open(h){$("#sheet").classList.remove("full","cam","sec");document.body.classList.remove("lt");$("#panel").innerHTML=secFull?`<button class="sx" id="sxc" aria-label="Close">✕</button>${FM?`<button class="sx sb" id="sxb" aria-label="Back to menu">←</button>`:""}`+h:h;$("#sheet").classList.add("on");if(secFull){document.documentElement.style.setProperty("--nh",document.querySelector("nav").offsetHeight+"px");$("#sheet").classList.add("sec");$("#sxc").onclick=close;const sb=$("#sxb");if(sb)sb.onclick=()=>{FM=false;secFull=false;$("#menu").click()};$("#panel").scrollTop=0}const x=$("#x");if(x)x.onclick=close}
