@@ -29,6 +29,11 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid in id.split('_');
     }
 
+    // Call set-up notes (short lived, one per person being called)
+    match /calls/{id} {
+      allow read, write: if signedIn();
+    }
+
     // Profiles: everyone signed in can read, only you can change yours
     match /profiles/{uid} {
       allow read: if signedIn();

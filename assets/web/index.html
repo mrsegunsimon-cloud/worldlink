@@ -334,7 +334,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-m</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-n</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -678,19 +678,91 @@ function comments(i){
  };
 }
 let stream;
-async function startCall(p,video){
- wlPause();const c=$("#call");c.classList.add("on");
- c.innerHTML=`<div class="cv"><div class="av" style="width:96px;height:96px;font-size:40px">${esc(p[0].toUpperCase())}</div><h2>@${esc(p)}</h2><p id="cs2">Calling… (demo only, not connected)</p></div>${video?'<video id="me" class="pip" muted playsinline autoplay></video>':""}<div class="ctl"><button data-k="mic" aria-label="Mute">🎤</button>${video?'<button data-k="cam" aria-label="Camera">📷</button>':""}<button data-k="spk" aria-label="Speaker">🔊</button><button class="end" data-k="end" aria-label="End call">✕</button></div>`;
- c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k;if(k==="end"){endCall();return}b.classList.toggle("off");if(k==="cam"&&stream)stream.getVideoTracks().forEach(t=>t.enabled=!b.classList.contains("off"))};
- if(video){try{stream=await navigator.mediaDevices.getUserMedia({video:true});$("#me").srcObject=stream}catch(e){const s=$("#cs2");if(s)s.textContent="Calling… (camera not available here)"}}
+/* wlCalls: real voice and video calls between two signed-in people (WebRTC, signalling through the calls collection) */
+let PC=null,CDOC=null,CPOLL=null,CTMO=null,LASTRING=0,RING=null;
+const ICE={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:["turn:openrelay.metered.ca:80","turn:openrelay.metered.ca:443","turns:openrelay.metered.ca:443?transport=tcp"],username:"openrelayproject",credential:"openrelayproject"}]};
+const cGet=async id=>{try{const D=await claude.use("db");const q=await D.collection("calls").doc(id).get();return q.exists?q.data():null}catch(e){return null}};
+const cPut=async(id,o)=>{try{const D=await claude.use("db");await D.collection("calls").doc(id).set(o)}catch(e){}};
+const iceDone=pc=>new Promise(r=>{if(pc.iceGatheringState==="complete")return r();const t=setTimeout(r,5000);pc.addEventListener("icegatheringstatechange",()=>{if(pc.iceGatheringState==="complete"){clearTimeout(t);r()}})});
+const uidOf=n=>{try{const d=DMS.find(x=>dmOther(x).n===n);if(d)return dmOther(d).u;const c=CLIPS.find(x=>x.u===n&&x.uid);if(c)return c.uid;for(const k in PROF)if(PROF[k]&&PROF[k].name===n)return k}catch(e){}return null};
+function callUI(name,status,video,incoming){
+ const c=$("#call");c.classList.add("on");
+ c.innerHTML=`<video id="rv" autoplay playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;display:none"></video><div class="cv" id="cvv" style="position:relative"><div class="av" style="width:96px;height:96px;font-size:40px">${esc((name||"?")[0].toUpperCase())}</div><h2>@${esc(name)}</h2><p id="cs2">${esc(status)}</p></div>${video?'<video id="me" class="pip" muted playsinline autoplay></video>':""}<div class="ctl" style="position:relative">${incoming?'<button class="end" data-k="no" aria-label="Decline" style="background:#ef4444">✕</button><button data-k="yes" aria-label="Accept" style="background:#22c55e;font-size:30px">📞</button>':`<button data-k="mic" aria-label="Mute">🎤</button>${video?'<button data-k="cam" aria-label="Camera">📷</button>':""}<button class="end" data-k="end" aria-label="End call">✕</button>`}</div>`;
+ c.onclick=e=>{const b=e.target.closest("button");if(!b)return;const k=b.dataset.k;
+  if(k==="end"||k==="no"){endCall(k==="no"?"declined":"");return}
+  if(k==="yes"){acceptCall(c.__d);return}
+  b.classList.toggle("off");const off=b.classList.contains("off");
+  if(k==="mic"&&stream)stream.getAudioTracks().forEach(t=>t.enabled=!off);
+  if(k==="cam"&&stream)stream.getVideoTracks().forEach(t=>t.enabled=!off)}
 }
+const cSay=t=>{const s=$("#cs2");if(s)s.textContent=t};
+async function cMedia(video){
+ stream=await navigator.mediaDevices.getUserMedia({audio:true,video:video?{facingMode:"user"}:false});
+ const m=$("#me");if(m)m.srcObject=stream;
+}
+function cPeer(video){
+ PC=new RTCPeerConnection(ICE);
+ stream.getTracks().forEach(t=>PC.addTrack(t,stream));
+ PC.ontrack=e=>{const rv=$("#rv");if(rv){rv.srcObject=e.streams[0];if(video){rv.style.display="block";const cv=$("#cvv");if(cv)cv.style.display="none"}else{rv.play().catch(()=>{});}}};
+ PC.onconnectionstatechange=()=>{const st=PC&&PC.connectionState;if(st==="connected")cSay("Connected");if(st==="failed"){cSay("Call failed. Check your network.");setTimeout(()=>endCall("failed"),1800)}};
+}
+async function startCall(p,video,uid){
+ wlPause();uid=uid||uidOf(p);
+ if(!uid||!me.uid||!window.RTCPeerConnection||!navigator.mediaDevices){
+  callUI(p,uid?"Calls are not available on this phone.":"Camera test: calls need the other person to have a WorldLink account.",video,false);
+  if(video){try{stream=await navigator.mediaDevices.getUserMedia({video:true});const m=$("#me");if(m)m.srcObject=stream}catch(e){cSay("Camera not available here")}}
+  return}
+ callUI(p,"Starting…",video,false);
+ try{await cMedia(video)}catch(e){cSay("Allow the microphone"+(video?" and camera":"")+" in your browser, then try again.");return}
+ try{
+  cPeer(video);const off=await PC.createOffer();await PC.setLocalDescription(off);await iceDone(PC);
+  const ts=Date.now();CDOC={id:uid,from:me.uid,fn:me.name,v:!!video,ts};
+  await cPut(uid,{from:me.uid,fn:me.name,v:!!video,st:"ring",ts,offer:PC.localDescription.sdp});
+  cSay("Ringing…");
+  CTMO=setTimeout(()=>{cSay("No answer");setTimeout(()=>endCall("noanswer"),1500)},45000);
+  clearInterval(CPOLL);CPOLL=setInterval(async()=>{
+   if(!PC)return;const d=await cGet(uid);if(!d||d.ts!==ts)return;
+   if(d.st==="on"&&d.answer&&!PC.remoteDescription){clearTimeout(CTMO);try{await PC.setRemoteDescription({type:"answer",sdp:d.answer});cSay("Connecting…")}catch(e){cSay("Could not connect")}}
+   if(d.st==="end"){cSay(PC.remoteDescription?"Call ended":"Declined");setTimeout(()=>endCall("remote"),1200)}
+  },1500);
+ }catch(e){cSay("Could not start the call.")}
+}
+async function acceptCall(d){
+ clearInterval(RING);RING=null;const video=!!d.v;
+ callUI(d.fn,"Connecting…",video,false);
+ try{await cMedia(video);cPeer(video);
+  await PC.setRemoteDescription({type:"offer",sdp:d.offer});
+  const an=await PC.createAnswer();await PC.setLocalDescription(an);await iceDone(PC);
+  CDOC={id:me.uid,from:d.from,fn:d.fn,v:d.v,ts:d.ts};
+  await cPut(me.uid,{from:d.from,fn:d.fn,v:!!d.v,ts:d.ts,st:"on",offer:d.offer,answer:PC.localDescription.sdp});
+  clearInterval(CPOLL);CPOLL=setInterval(async()=>{if(!PC)return;const x=await cGet(me.uid);if(x&&x.ts===d.ts&&x.st==="end"){cSay("Call ended");setTimeout(()=>endCall("remote"),1000)}},2000);
+ }catch(e){cSay("Could not connect the call.");setTimeout(()=>endCall("failed"),1500)}
+}
+function showIncoming(d){
+ if(PC)return;wlPause();callUI(d.fn||"Someone",d.v?"Incoming video call…":"Incoming call…",!!d.v,true);$("#call").__d=d;
+ clearInterval(RING);let n=0;RING=setInterval(async()=>{n++;try{cChime("ring")}catch(e){}
+  if(n%2===0){const x=await cGet(me.uid);if(!x||x.ts!==d.ts||x.st!=="ring"||n>20){clearInterval(RING);RING=null;if(!PC){$("#call").classList.remove("on");setTimeout(wlResume,150)}}}},1500);
+}
+setInterval(async()=>{
+ if(document.hidden||!me.uid||!window.__wlUser||PC||RING)return;
+ const d=await cGet(me.uid);
+ if(d&&d.st==="ring"&&d.from!==me.uid&&d.ts!==LASTRING&&Date.now()-d.ts<40000){LASTRING=d.ts;showIncoming(d)}
+},5000);
+function endCall(why){
+ clearInterval(CPOLL);CPOLL=null;clearTimeout(CTMO);clearInterval(RING);RING=null;
+ const D0=CDOC;CDOC=null;
+ if(D0&&why!=="remote"){cPut(D0.id,{from:D0.from,fn:D0.fn,v:!!D0.v,ts:D0.ts,st:"end"})}
+ else if(!D0&&why==="declined"){const d=$("#call").__d;if(d)cPut(me.uid,{from:d.from,fn:d.fn,v:!!d.v,ts:d.ts,st:"end"})}
+ try{PC&&PC.close()}catch(e){}PC=null;
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+ $("#call").classList.remove("on");$("#call").innerHTML="";setTimeout(wlResume,150)}
 function videoCalls(){
  const names=[...new Set(DMS.map(d=>dmOther(d).n).filter(Boolean).concat(PEOPLE.map(p=>p[0])))];
  open(`<div style="border-radius:18px;padding:16px 18px;background:linear-gradient(160deg,#0E9F6E,#1E6FFF);color:#fff;margin-bottom:12px"><div style="font-size:13px;opacity:.9">You are in</div><h2 style="color:#fff;margin:0;font-size:28px">📹 Video Call</h2><div style="font-size:14px;opacity:.95">Voice and video calls with friends</div></div><button class="btn" id="ct">Test my camera and microphone</button><p class="note">Demo: the call screen opens your camera, but nobody answers yet. Calls that connect two people arrive with the Android app, where your working Video Call feature already lives.</p><h2 style="font-size:16px;margin:14px 0 4px">Call a friend</h2>${names.map(n=>`<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)"><div class="av" style="width:46px;height:46px;border-width:0;background:${"#1E6FFF,#FF7A1A,#7C5CFF,#0E9F6E".split(",")[n.charCodeAt(0)%4]}">${esc(n[0].toUpperCase())}</div><b style="flex:1;min-width:0">@${esc(n)}</b><button class="ib" data-vc="v|${esc(n)}" aria-label="Voice call ${esc(n)}" style="color:var(--ink)">📞</button><button class="ib" data-vc="c|${esc(n)}" aria-label="Video call ${esc(n)}" style="color:var(--ink)">📹</button></div>`).join("")}<button class="btn ghost" id="x">Close</button>`);
  $("#ct").onclick=()=>startCall("camera test",true);
  $("#panel").querySelectorAll("[data-vc]").forEach(b=>b.onclick=()=>{const [k,n]=b.dataset.vc.split("|");startCall(n,k==="c")});
 }
-function endCall(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$("#call").classList.remove("on");setTimeout(wlResume,150)}
+
 const HOS=[["Avicena Hospital","Magodo","+2348182349616","4.6 (78 reviews)"],["God’s Apple City Hospital","Ojodu Berger","+2348107731801","4.0 (53 reviews)"],["Winan Hospital","Isheri Oke","+2348055923576","3.9 (27 reviews)"],["Sparkview Hospital","Isheri Oke","+2348024360184","3.6 (17 reviews)"],["St Claver Hospital","Isheri","+2347066292964","5.0 (5 reviews)"],["Nahome Clinic and Lab","Isheri Olofin","+2348033088753","5.0 (5 reviews)"]];
 function hospitals(){
  open(`<h2>Hospital directory</h2><p class="note" style="margin:0 0 8px">Sample for the Isheri area, Lagos. Details from Google on Oct 24, 2026, all listed as open 24 hours. Call first to confirm they can take an emergency. In the full app this loads for wherever you are.</p>${HOS.map(h=>`<div class="cm" style="display:flex;align-items:center;gap:10px"><div style="flex:1;min-width:0"><b>${h[0]}</b><div class="mute" style="font-size:13px">${h[1]}. Rating ${h[3]}</div></div><a class="btn red" style="width:auto;margin:0;padding:8px 14px" href="tel:${h[2]}">Call</a><a class="btn ghost" style="width:auto;margin:0;padding:8px 12px" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(h[0]+" "+h[1]+" Lagos")}">Map</a></div>`).join("")}<button class="btn ghost" id="bk">Back</button>`);
@@ -1903,7 +1975,7 @@ function dmOpenById(id){const d=DMS.find(x=>x.id===id);if(d)dmShow(d)}
 function dmShow(d,pre){
  dmCur=d.id;const o=dmOther(d);
  openFull(`<div class="hd"><button id="bk" aria-label="Back">←</button><b style="font-size:18px;flex:1;margin-left:6px;overflow:hidden;text-overflow:ellipsis">@${esc(o.n)}</b><button class="ib" id="vc" aria-label="Voice call">📞</button><button class="ib" id="vd" aria-label="Video call">📹</button></div><div id="ml" class="pgx" style="padding:8px 14px">${d.m.length?d.m.map(b=>{const me2=b.f===me.uid;return `<div style="text-align:${me2?"right":"left"};margin:6px 0"><span style="display:inline-block;background:${me2?"var(--acc)":"var(--bg)"};color:${me2?"var(--accink)":"var(--ink)"};padding:8px 12px;border-radius:16px;max-width:80%;text-align:left;overflow-wrap:anywhere">${bodyOf(b)}</span></div>`}).join(""):'<p class="mute">No messages yet. Say hello.</p>'}</div><div id="cin" style="padding:8px 14px 12px;border-top:1px solid var(--line)"><div style="display:flex;gap:8px"><input class="in" id="mi" maxlength="500" placeholder="Write a message" aria-label="Message" value="${esc(pre||"")}" style="margin:0"><button class="btn" id="ms" style="width:auto;margin:0">Send</button></div><p class="note" style="margin:6px 0 0">Meet in public places and never pay before you see the item.</p></div>`);
- $("#vc").onclick=()=>{close();startCall(o.n,false)};$("#vd").onclick=()=>{close();startCall(o.n,true)};
+ $("#vc").onclick=()=>{close();startCall(o.n,false,o.u)};$("#vd").onclick=()=>{close();startCall(o.n,true,o.u)};
  const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=()=>{dmCur=null;loadDMS().then(inbox)};wireSend();
  const sendObj=async o=>{
