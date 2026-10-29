@@ -209,7 +209,7 @@ const mk=n=>(n===0?CLIPS.map((_,i)=>i).filter(i=>me.f.includes(CLIPS[i].u)):CLIP
 let order=mk(1),liked={},saved={};const sv0=i=>(CLIPS[i].l>>3)+(saved[i]?1:0);CLIPS.forEach((c,i)=>{c.id=c.id||"s"+i});
 function build(){
  $("#feed").innerHTML=!order.length?'<div class="clip" style="display:grid;place-items:center;text-align:center;padding:30px;background:#111"><div><h2>Nothing here yet</h2><p>Follow people in Friends to see their videos here.</p></div></div>':order.map(i=>{const c=CLIPS[i];return `<section class="clip" data-i="${i}" style="background:linear-gradient(165deg,${c.g[0]},${c.g[1]})">
- ${c.src?`<video src="${esc(c.src)}" muted loop playsinline preload="metadata"></video>`:`<div class="big">${c.e}</div>`}<div class="shade"></div>
+ ${c.src?`<video data-lz="${esc(c.src)}" muted loop playsinline preload="metadata"></video>`:`<div class="big">${c.e}</div>`}<div class="shade"></div>
  <div class="cap"><b data-pn="${esc(c.u)}" data-pu="${esc(c.uid||"")}" style="cursor:pointer">@${esc(c.u)}</b><p id="cp${i}">${esc(c.c)}</p><button data-a="tr" data-i="${i}" style="display:block;margin-bottom:4px;font-size:12px;opacity:.9;padding:2px 0;color:#fff;text-decoration:underline">Translate</button><small>♪ ${esc(c.m)}${c.src?" (tap video for sound)":""}</small></div>
  <div class="rail">
   <div class="av" data-pn="${esc(c.u)}" data-pu="${esc(c.uid||"")}" style="cursor:pointer">${c.uid&&c.uid===me.uid&&me.pic?`<img src="${me.pic}" alt="">`:c.u[0].toUpperCase()}</div>${c.u&&c.u!==me.name&&!(me.f||[]).includes(c.u)?`<button data-a="fw" data-i="${i}" class="fplus" aria-label="Follow @${esc(c.u)}">+</button>`:""}
@@ -332,7 +332,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-g</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-h</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -2361,33 +2361,55 @@ async function fastCut(f,st,en,prog){
   return new File([d],"cut."+ext,{type:webm?"video/webm":"video/mp4"});
  }finally{try{ff.off("progress",h)}catch(e){}}
 }
+/* wlTrimStrip: film-strip trimmer (WhatsApp style). The cut itself happens later in the background, so Done is instant. */
+var VTRIM=null;
 function editVideo(f,big){
- const url=URL.createObjectURL(f);let st=0,en=0,du=0,sh=0,pos=.5;
- const hd=document.createElement("video");hd.src=url;hd.preload="metadata";
- openFull(`<div style="height:100%;overflow-y:auto;background:#000;color:#fff;padding:14px 16px calc(16px + env(safe-area-inset-bottom))"><h2 style="margin:0 0 10px;font-size:17px;text-align:center">Edit your video</h2><div id="vbox" style="margin:0 auto;max-height:46vh;aspect-ratio:9/16;max-width:100%;border-radius:12px;overflow:hidden;background:#111"><video id="evv" src="${url}" playsinline loop muted style="width:100%;height:100%;object-fit:cover"></video></div><p id="evt" class="note" style="color:#fff;text-align:center;margin:8px 0 2px">Loading…</p>${big?'<p class="note" style="color:#FFB454;text-align:center;margin:0">This video is over 20 MB. Move the End slider to keep a shorter part (about 30 to 60 seconds), then tap Done.</p>':""}<label style="display:block;font-size:13px;margin-top:6px">Start<input id="es" type="range" min="0" max="100" step="0.1" value="0" style="width:100%"></label><label style="display:block;font-size:13px">End<input id="ee" type="range" min="0" max="100" step="0.1" value="100" style="width:100%"></label><div style="font-size:13px;margin-top:6px">Shape</div><div id="esh" style="display:flex;gap:6px;overflow-x:auto;padding:4px 0">${VSHAPES.map((q,k)=>`<button data-sh="${k}" style="flex:none;padding:7px 12px;border-radius:999px;font-weight:700;font-size:13px;background:${k===0?"#fff":"rgba(255,255,255,.18)"};color:${k===0?"#000":"#fff"}">${q[0]}</button>`).join("")}</div><label id="epw" style="display:none;font-size:13px">Move the picture<input id="ep" type="range" min="0" max="100" value="50" style="width:100%"></label><p class="note" id="est" style="color:#fff"></p><div style="display:flex;gap:8px"><button class="btn ghost" id="ebk" style="margin:0;flex:1;color:#fff;border-color:rgba(255,255,255,.5)">Back</button><button class="btn" id="edn" style="margin:0;flex:2">Done</button></div></div>`,true);
- const v=$("#evv"),S=$("#es"),E=$("#ee"),T=$("#evt");
- const show=()=>{T.textContent=vFmt(st)+" to "+vFmt(en)+"  ·  "+(en-st).toFixed(1)+" seconds"};
+ const url=URL.createObjectURL(f);const pv=(VTRIM&&VTRIM.f===f)?VTRIM:null;
+ let st=pv?pv.st:0,en=pv?pv.en:0,du=0,sh=pv?pv.sh:0,pos=pv?pv.pos:.5,W=0;
+ const hd=document.createElement("video");hd.muted=true;hd.playsInline=true;hd.preload="auto";hd.src=url;
+ const sz=b=>b>=1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
+ const hh=`position:absolute;top:-3px;bottom:-3px;width:16px;background:#fff;touch-action:none;display:grid;place-items:center`;
+ openFull(`<div style="height:100%;display:flex;flex-direction:column;background:#000;color:#fff;padding:0 0 calc(12px + env(safe-area-inset-bottom))"><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px"><button id="ebk" aria-label="Cancel" style="color:#fff;font-size:26px;width:44px;height:44px">✕</button><b id="evt" style="font-size:15px;background:rgba(255,255,255,.14);padding:7px 14px;border-radius:999px">Loading…</b><button id="edn" aria-label="Done" style="width:44px;height:44px;border-radius:50%;background:#25D366;color:#fff;font-size:22px;font-weight:800">✓</button></div><div style="flex:1;min-height:0;display:grid;place-items:center;padding:0 10px"><div id="vbox" style="max-height:100%;max-width:100%;height:100%;aspect-ratio:9/16;border-radius:10px;overflow:hidden;background:#111"><video id="evv" src="${url}" playsinline loop muted autoplay style="width:100%;height:100%;object-fit:cover"></video></div></div><p id="est" class="note" style="color:#FFB454;text-align:center;margin:6px 12px 0;min-height:16px"></p><div id="stw" style="position:relative;height:58px;margin:10px 26px 8px;touch-action:none"><div id="stt" style="position:absolute;inset:0;display:flex;overflow:hidden;border-radius:4px;background:#222"></div><div id="sel" style="position:absolute;top:0;bottom:0;left:0;right:0;border-top:3px solid #fff;border-bottom:3px solid #fff;box-shadow:0 0 0 100vmax rgba(0,0,0,.55);clip-path:inset(-3px -100vmax)"><div id="shl" style="${hh};left:-16px;border-radius:6px 0 0 6px"><i style="width:3px;height:20px;background:#999;border-radius:2px"></i></div><div id="shr" style="${hh};right:-16px;border-radius:0 6px 6px 0"><i style="width:3px;height:20px;background:#999;border-radius:2px"></i></div></div></div><div id="esh" style="display:flex;gap:6px;overflow-x:auto;padding:4px 12px">${VSHAPES.map((q,k)=>`<button data-sh="${k}" style="flex:none;padding:6px 12px;border-radius:999px;font-weight:700;font-size:12px;background:${k===sh?"#fff":"rgba(255,255,255,.18)"};color:${k===sh?"#000":"#fff"}">${q[0]}</button>`).join("")}</div><label id="epw" style="display:none;font-size:12px;padding:0 14px">Move the picture<input id="ep" type="range" min="0" max="100" value="${Math.round(pos*100)}" style="width:100%"></label></div>`,true);
+ const v=$("#evv"),T=$("#evt"),sel=$("#sel"),stw=$("#stw"),stt=$("#stt");
+ const show=()=>{const n=du?f.size*(en-st)/du:0;T.textContent=vFmt(en-st)+" • "+sz(n);const o=$("#est");o.textContent=(n>20*1048576)?"Still over 20 MB. Drag the handles to keep about 30 to 60 seconds.":(big&&!pv&&n>20*1048576?"":"")};
+ const place=()=>{W=stw.clientWidth;if(!du)return;sel.style.left=(st/du*W)+"px";sel.style.right=(W-en/du*W)+"px";show()};
  const box=()=>{const r=VSHAPES[sh][1]||((v.videoWidth||9)/(v.videoHeight||16));$("#vbox").style.aspectRatio=String(r);v.style.objectPosition=(r>=(v.videoWidth/v.videoHeight||1)?"50% "+Math.round(pos*100)+"%":Math.round(pos*100)+"% 50%");$("#epw").style.display=sh?"block":"none"};
- v.onloadedmetadata=async()=>{du=await vDur(v);en=du;S.max=E.max=String(du);S.value="0";E.value=String(du);show();box();v.currentTime=0;v.play().catch(()=>{})};
+ v.onloadedmetadata=async()=>{du=await vDur(v);if(!en||en>du)en=du;if(st>=en)st=0;place();box();v.currentTime=st;v.play().catch(()=>{});thumbs()};
  v.ontimeupdate=()=>{if(v.currentTime>=en||v.currentTime<st){v.currentTime=st}};
- S.oninput=()=>{st=Math.min(+S.value,en-.5);S.value=String(st);v.currentTime=st;show()};
- E.oninput=()=>{en=Math.max(+E.value,st+.5);E.value=String(en);v.currentTime=Math.max(st,en-1);show()};
+ let dead=false;
+ const thumbs=async()=>{
+  try{
+   const w=stw.clientWidth||300,hgt=58,ar=9/16,n=Math.max(4,Math.ceil(w/(hgt*ar)));
+   const cs=[];for(let k=0;k<n;k++){const c=document.createElement("canvas");c.width=Math.round(w/n*2);c.height=hgt*2;c.style.cssText="flex:1;min-width:0;height:100%;object-fit:cover;background:#333";stt.appendChild(c);cs.push(c)}
+   await new Promise(r=>{if(hd.readyState>=1)r();else{hd.onloadedmetadata=r;setTimeout(r,4000)}});
+   const d=hd.duration||du;if(!isFinite(d)||!d)return;
+   for(let k=0;k<n&&!dead;k++){
+    await new Promise(r=>{let t=setTimeout(r,2500);hd.onseeked=()=>{clearTimeout(t);r()};hd.currentTime=Math.min(d-.05,(k+.5)/n*d)});
+    try{const c=cs[k],x=c.getContext("2d"),vw=hd.videoWidth,vh=hd.videoHeight;if(!vw)continue;const q=Math.max(c.width/vw,c.height/vh),dw=vw*q,dh=vh*q;x.drawImage(hd,(c.width-dw)/2,(c.height-dh)/2,dw,dh)}catch(e){}
+   }
+  }catch(e){}
+ };
+ const drag=(el,which)=>{
+  el.onpointerdown=e=>{
+   e.preventDefault();e.stopPropagation();try{el.setPointerCapture(e.pointerId)}catch(_){}
+   const r=stw.getBoundingClientRect();v.pause();
+   el.onpointermove=m=>{
+    if(!du)return;const t=Math.max(0,Math.min(du,(m.clientX-r.left)/r.width*du)),gap=Math.min(.5,du/2);
+    if(which==="l"){st=Math.min(t,en-gap);v.currentTime=st}else{en=Math.max(t,st+gap);v.currentTime=Math.max(st,en-.3)}
+    place()};
+   const up=()=>{el.onpointermove=null;el.onpointerup=el.onpointercancel=null;v.currentTime=st;v.play().catch(()=>{})};
+   el.onpointerup=el.onpointercancel=up};
+ };
+ drag($("#shl"),"l");drag($("#shr"),"r");
  $("#esh").onclick=e=>{const b=e.target.closest("[data-sh]");if(!b)return;sh=+b.dataset.sh;$("#esh").querySelectorAll("button").forEach(x=>{const on=x===b;x.style.background=on?"#fff":"rgba(255,255,255,.18)";x.style.color=on?"#000":"#fff"});box()};
  $("#ep").oninput=e=>{pos=+e.target.value/100;box()};
- $("#ebk").onclick=()=>vedit(f);
- $("#edn").onclick=async()=>{
-  if(!du){return}
-  if(!sh&&st<.05&&en>=du-.05){vedit(f);return}
-  $("#edn").disabled=true;v.pause();
-  $("#est").textContent="Editing… keep this screen open. It takes about as long as the clip.";
-  try{
-   let nf=null;
-   if(!sh){
-    try{$("#est").textContent="Getting the fast cutter (one time only, about 30 MB)…";nf=await fastCut(f,st,en,q=>{$("#est").textContent="Cutting… "+Math.round(q*100)+"%"})}catch(e){nf=null}
-   }
-   if(!nf){$("#est").textContent="Editing… keep this screen open. It takes about as long as the clip.";nf=await trimCrop(f,st,en,VSHAPES[sh][1],pos,(t,d)=>{if(d>0)$("#est").textContent="Editing… "+Math.min(100,Math.round(100*t/d))+"%"})}
-   vedit(nf,"Edited: "+(en-st).toFixed(1)+" seconds")}
-  catch(err){$("#edn").disabled=false;$("#est").textContent="Could not edit: "+(err.message||"try again")}
+ window.addEventListener("resize",place);
+ $("#ebk").onclick=()=>{dead=true;vedit(f)};
+ $("#edn").onclick=()=>{
+  if(!du)return;dead=true;
+  if(!sh&&st<.05&&en>=du-.05){VTRIM=null;vedit(f);return}
+  VTRIM={f,st,en,sh,pos};
+  vedit(f,"Trimmed: "+(en-st).toFixed(1)+" seconds");
  };
 }
 
@@ -2525,7 +2547,11 @@ async function bgRun(job){
  BGB=true;
  const fail=(msg,retry)=>{BGB=false;const el=bgRing(0,"err",msg);el.__tap=()=>{el.style.display="none";retry&&retry()}};
  try{
-  const burn=!!(job.css||job.tx);let nf=job.burned||job.f;
+   if(job.trim){const T=job.trim;bgRing(0,"","Trimming");let c=null;
+   if(!T.sh){/*wlTrimStrip2*/try{c=await Promise.race([fastCut(job.f,T.st,T.en,q=>bgRing(.4*q,"","Trimming")),new Promise((_,no)=>setTimeout(()=>no(new Error("slow")),25000))])}catch(e){c=null}}
+   if(!c)c=await trimCrop(job.f,T.st,T.en,VSHAPES[T.sh||0][1],T.pos==null?.5:T.pos,(t,d)=>bgRing(d?.4*Math.min(1,t/d):0,"","Trimming"));
+   job.f=c;job.trim=null;job.burned=null;await jPut(job)}
+ const burn=!!(job.css||job.tx);let nf=job.burned||job.f;
   if(burn&&!job.burned){bgRing(0,"","Adding your edits");nf=await captionVideo(job.f,job.css,job.tx,(t,d)=>bgRing(d?.45*t/d:0,"","Adding your edits"));job.burned=nf;await jPut(job)}
   if(nf.size>20*1048576){await jDel(job.id);BGB=false;return fail("Over 20 MB. Tap to trim",()=>{secFull=true;editVideo(nf,true)})}
   if(window.WLCloud&&!window.__wlUser){for(let i=0;i<24&&!window.__wlUser;i++)await new Promise(r=>setTimeout(r,500));if(!window.__wlUser)return fail("Sign in to finish",()=>bgRun(job))}
@@ -2544,7 +2570,7 @@ async function bgRun(job){
 }
 async function bgPost(f,cap){
  if(BGB){bgRing(0,"err","Another upload is running");return}
- const job={id:"v"+Date.now(),cap,css:PFX,tx:OV(),f,burned:null,ts:Date.now()};PFX="";CAP=null;STKL=[];
+ const job={id:"v"+Date.now(),cap,css:PFX,tx:OV(),f,burned:null,ts:Date.now()};if(VTRIM&&VTRIM.f===f)job.trim={st:VTRIM.st,en:VTRIM.en,sh:VTRIM.sh,pos:VTRIM.pos};VTRIM=null;PFX="";CAP=null;STKL=[];
  try{document.querySelectorAll("#panel video").forEach(v=>{v.pause();v.removeAttribute("src");v.load()})}catch(e){}
  close();try{$("#panel").innerHTML=""}catch(e){}
  bgRing(0,"","Starting");
@@ -2605,6 +2631,7 @@ function vedit(f,note){
    const a=document.createElement("a");a.href=URL.createObjectURL(out);a.download="worldlink-"+Date.now()+"."+((out.type||"").includes("mp4")?"mp4":"webm");document.body.appendChild(a);a.click();a.remove();bgRing(1,"ok","Saved")}
   catch(e){bgRing(0,"err","Could not save")}
  };
+ if(VTRIM&&VTRIM.f===f){const T=VTRIM;v.addEventListener("loadedmetadata",()=>{v.currentTime=T.st});v.addEventListener("timeupdate",()=>{if(v.currentTime>=T.en||v.currentTime<T.st-.3)v.currentTime=T.st})}else if(VTRIM&&VTRIM.f!==f)VTRIM=null;
  $("#vnx").onclick=()=>postForm(f,note);
 }
 function postForm(f,note){
@@ -2874,7 +2901,8 @@ function quizShow(){
  });
 }
 let io;
-function watch(){if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(!v)return;if(e.isIntersecting){v.play().catch(()=>{});clearTimeout(e.target.__vt);e.target.__vt=setTimeout(()=>viewed(+e.target.dataset.i),2000)}else{v.pause();clearTimeout(e.target.__vt)}}),{root:$("#feed"),threshold:.6});document.querySelectorAll(".clip").forEach(c=>io.observe(c))}
+/*wlLazy*/var lzio=null;const lzGo=v=>{if(v&&v.dataset.lz&&!v.getAttribute("src")){v.src=v.dataset.lz}};
+function watch(){if(lzio)lzio.disconnect();try{lzio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)lzGo(e.target.querySelector("video"))}),{root:$("#feed"),rootMargin:"120% 0px"});document.querySelectorAll(".clip").forEach(c=>lzio.observe(c))}catch(e){document.querySelectorAll(".clip video").forEach(lzGo)}if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target.querySelector("video");if(!v)return;if(e.isIntersecting){lzGo(v);v.play().catch(()=>{});clearTimeout(e.target.__vt);e.target.__vt=setTimeout(()=>viewed(+e.target.dataset.i),2000)}else{v.pause();clearTimeout(e.target.__vt)}}),{root:$("#feed"),threshold:.6});document.querySelectorAll(".clip").forEach(c=>io.observe(c))}
 function add(it){CLIPS.push(it);tab(1)}
 function create0(){
  open(`<h2>Post a video</h2><p class="mute">Choose a video from your phone (up to 20 MB).</p><input class="in" id="f" type="file" accept="video/*" aria-label="Choose a video"><input class="in" id="cp" type="text" maxlength="100" placeholder="Write a caption" aria-label="Caption"><p class="note" id="st"></p><button class="btn" id="go">Post</button><button class="btn ghost" id="x">Cancel</button>`);
