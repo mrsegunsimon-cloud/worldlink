@@ -2502,6 +2502,24 @@ function bgRing(p,state,txt){
  if(state==="ok")el.__t=setTimeout(()=>{el.style.display="none"},2600);
  return el;
 }
+async function bgfUp(nf,job,prog){
+ try{
+  if(!(window.WLCloud&&WLCloud.spec&&navigator.serviceWorker&&location.protocol==="https:"))return null;
+  const reg=await Promise.race([navigator.serviceWorker.ready,new Promise(r=>setTimeout(()=>r(null),4000))]);
+  if(!reg||!reg.backgroundFetch)return null;
+  let bf=await reg.backgroundFetch.get(job.id);
+  if(!bf){
+   const sp=WLCloud.spec(nf),t=await WLN("token");if(!sp||!t||!t.token)return null;
+   job.meta={doc:WLCloud.docUrl("videos",job.id),token:t.token,pub:sp.pub,u:me.name,uid:me.uid||""};await jPut(job);
+   bf=await reg.backgroundFetch.fetch(job.id,new Request(sp.url,{method:"POST",headers:sp.headers,body:nf}),{title:"Uploading your video to WorldLink",downloadTotal:4096,uploadTotal:nf.size});
+  }
+  return await new Promise(ok=>{
+   let last=-1,t0=Date.now();const stall=setInterval(()=>{const u=bf.uploaded||0;if(u!==last){last=u;t0=Date.now()}else if(u===0&&Date.now()-t0>25000){clearInterval(stall);try{bf.abort()}catch(e){}ok(null)}},3000);
+   const chk=()=>{prog(Math.min(1,(bf.uploaded||0)/nf.size));if(bf.result==="success"){clearInterval(stall);ok({url:job.meta.pub})}else if(bf.result==="failure"){clearInterval(stall);ok(null)}};
+   bf.addEventListener("progress",chk);chk()})
+ }catch(e){return null}
+}
+try{if(navigator.serviceWorker)navigator.serviceWorker.addEventListener("message",e=>{const d=e.data||{};if(d.type==="posted"||d.type==="upfail"){try{window.wlRefresh&&wlRefresh()}catch(x){}}})}catch(e){}
 async function bgRun(job){
  BGB=true;
  const fail=(msg,retry)=>{BGB=false;const el=bgRing(0,"err",msg);el.__tap=()=>{el.style.display="none";retry&&retry()}};
@@ -2510,11 +2528,12 @@ async function bgRun(job){
   if(burn&&!job.burned){bgRing(0,"","Adding your edits");nf=await captionVideo(job.f,job.css,job.tx,(t,d)=>bgRing(d?.45*t/d:0,"","Adding your edits"));job.burned=nf;await jPut(job)}
   if(nf.size>20*1048576){await jDel(job.id);BGB=false;return fail("Over 20 MB. Tap to trim",()=>{secFull=true;editVideo(nf,true)})}
   if(window.WLCloud&&!window.__wlUser){for(let i=0;i<24&&!window.__wlUser;i++)await new Promise(r=>setTimeout(r,500));if(!window.__wlUser)return fail("Sign in to finish",()=>bgRun(job))}
+  if(job.uploaded&&job.meta){try{const D=await claude.use("db");await D.collection("videos").doc(job.id).set({id:job.id,url:job.meta.pub,c:job.cap||"My first WorldLink video",u:me.name,uid:me.uid||null,ts:Date.now()});await jDel(job.id);BGB=false;try{wlRefresh()}catch(e){}return bgRing(1,"ok","Posted")}catch(e){return fail("Tap to finish posting",()=>bgRun(job))}}
   const base=burn?.45:0;bgRing(base,"","Uploading");
   const it={id:job.id,u:me.name,uid:me.uid,c:job.cap||"My first WorldLink video",m:"Original sound - "+me.name,l:0,g:["#222","#444"],e:"🎬",cm:[],src:URL.createObjectURL(nf)};
   let saved=false;
   try{const A=await claude.use("assets"),D=await claude.use("db");
-   if(A&&D){const r=await A.upload(nf,q=>bgRing(base+q*(1-base),"","Uploading"));it.src=r.url;await D.collection("videos").doc(it.id).set({id:it.id,url:r.url,c:it.c,u:me.name,uid:me.uid||null,ts:Date.now()});saved=true}}
+   if(A&&D){const pg=q=>bgRing(base+q*(1-base),"","Uploading");const r=(await bgfUp(nf,job,pg))||await A.upload(nf,pg);it.src=r.url;await D.collection("videos").doc(it.id).set({id:it.id,url:r.url,c:it.c,u:me.name,uid:me.uid||null,ts:Date.now()});saved=true}}
   catch(e){return fail("Upload failed. Tap to retry",()=>bgRun(job))}
   if(!saved)return fail("Not saved. Tap to retry",()=>bgRun(job));
   await jDel(job.id);
@@ -2862,6 +2881,13 @@ build();
   var j=await call("POST",FS.replace(/\/documents$/,"/documents")+":runQuery",{structuredQuery:{from:[{collectionId:col}],where:{fieldFilter:{field:{fieldPath:field},op:"EQUAL",value:{stringValue:val}}}}},true);
   return(j||[]).filter(function(x){return x.document}).map(function(x){return{id:idOf(x.document),data:decDoc(x.document)}})}
  window.WLCloud={
+  spec:function(file){
+   if(!SB.url||!window.__wlUser)return null;
+   var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
+   var name="u/"+window.__wlUser.uid+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+"."+ext;
+   var h={"apikey":SB.key,"Content-Type":file.type||"application/octet-stream","x-upsert":"false"};if(SB.key.indexOf("sb_")!==0)h.Authorization="Bearer "+SB.key;
+   return{url:SB.url+"/storage/v1/object/media/"+name,headers:h,pub:SB.url+"/storage/v1/object/public/media/"+name}},
+  docUrl:function(col,id){return FS+"/"+col+"/"+encodeURIComponent(id)},
   on:function(col){return !!window.__wlUser||col==="videos"},
   list:async function(col){
    if(col==="dms"&&window.__wlUser){var u=window.__wlUser.uid,a=await byField("dms","a",u),b=await byField("dms","b",u),seen={},out=[];a.concat(b).forEach(function(d){if(!seen[d.id]){seen[d.id]=1;out.push(d)}});return out}
@@ -2893,6 +2919,7 @@ build();
  };
 })();
 </script><script>
+try{if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("/sw.js").catch(function(){})}catch(e){}
 window.addEventListener("load",function(){setTimeout(function(){
  WLN("state").then(function(r){if(!r||!r.user)return;
   window.__wlUser=r.user;me.uid=r.user.uid;

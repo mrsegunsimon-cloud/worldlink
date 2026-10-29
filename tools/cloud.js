@@ -31,6 +31,13 @@
   var j=await call("POST",FS.replace(/\/documents$/,"/documents")+":runQuery",{structuredQuery:{from:[{collectionId:col}],where:{fieldFilter:{field:{fieldPath:field},op:"EQUAL",value:{stringValue:val}}}}},true);
   return(j||[]).filter(function(x){return x.document}).map(function(x){return{id:idOf(x.document),data:decDoc(x.document)}})}
  window.WLCloud={
+  spec:function(file){
+   if(!SB.url||!window.__wlUser)return null;
+   var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
+   var name="u/"+window.__wlUser.uid+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+"."+ext;
+   var h={"apikey":SB.key,"Content-Type":file.type||"application/octet-stream","x-upsert":"false"};if(SB.key.indexOf("sb_")!==0)h.Authorization="Bearer "+SB.key;
+   return{url:SB.url+"/storage/v1/object/media/"+name,headers:h,pub:SB.url+"/storage/v1/object/public/media/"+name}},
+  docUrl:function(col,id){return FS+"/"+col+"/"+encodeURIComponent(id)},
   on:function(col){return !!window.__wlUser||col==="videos"},
   list:async function(col){
    if(col==="dms"&&window.__wlUser){var u=window.__wlUser.uid,a=await byField("dms","a",u),b=await byField("dms","b",u),seen={},out=[];a.concat(b).forEach(function(d){if(!seen[d.id]){seen[d.id]=1;out.push(d)}});return out}

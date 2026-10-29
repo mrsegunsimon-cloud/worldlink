@@ -76,6 +76,7 @@ if s.count('</style>')!=1:
     i=s.rfind('</style>'); s=s[:i]+'nav{flex:none!important}'+s[i:]
 
 RESTORE = """<script>
+try{if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("/sw.js").catch(function(){})}catch(e){}
 window.addEventListener("load",function(){setTimeout(function(){
  WLN("state").then(function(r){if(!r||!r.user)return;
   window.__wlUser=r.user;me.uid=r.user.uid;
