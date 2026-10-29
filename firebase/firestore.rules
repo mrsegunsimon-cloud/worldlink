@@ -23,7 +23,10 @@ service cloud.firestore {
 
     // Private messages: only the two people in the conversation (ids look like uidA_uidB)
     match /dms/{id} {
-      allow read, write: if signedIn() && request.auth.uid in id.split('_');
+      // reading by query (my inbox) must be provable from the fields a and b
+      allow read: if signedIn() && (request.auth.uid in id.split('_')
+        || request.auth.uid == resource.data.a || request.auth.uid == resource.data.b);
+      allow write: if signedIn() && request.auth.uid in id.split('_');
     }
 
     // Profiles: everyone signed in can read, only you can change yours
