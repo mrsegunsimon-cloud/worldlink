@@ -30,7 +30,26 @@
  async function byField(col,field,val){
   var j=await call("POST",FS.replace(/\/documents$/,"/documents")+":runQuery",{structuredQuery:{from:[{collectionId:col}],where:{fieldFilter:{field:{fieldPath:field},op:"EQUAL",value:{stringValue:val}}}}},true);
   return(j||[]).filter(function(x){return x.document}).map(function(x){return{id:idOf(x.document),data:decDoc(x.document)}})}
+ /* Realtime (Supabase websocket): instant ringing for calls */
+ var RT={ws:null,j:{},want:{},h:[],ref:1,hb:null,q:[],ok:{},pend:{}};
+ function rtSend(o){var m=JSON.stringify(o);if(RT.ws&&RT.ws.readyState===1)RT.ws.send(m);else RT.q.push(m)}
+ function rtJoin(t){if(RT.j[t]||!RT.ws||RT.ws.readyState!==1)return;RT.j[t]=1;var r=String(RT.ref++);rtSend({topic:"realtime:"+t,event:"phx_join",payload:{config:{broadcast:{self:false,ack:false},presence:{key:""},postgres_changes:[],private:false}},ref:r,join_ref:r})}
+ function rtOpen(){
+  if(!SB.url||(RT.ws&&RT.ws.readyState<=1))return;
+  try{
+   var ws=new WebSocket(SB.url.replace(/^http/,"ws")+"/realtime/v1/websocket?apikey="+encodeURIComponent(SB.key)+"&vsn=1.0.0");RT.ws=ws;
+   ws.onopen=function(){RT.j={};RT.ok={};Object.keys(RT.want).forEach(rtJoin);var q=RT.q;RT.q=[];q.forEach(function(m){ws.send(m)});clearInterval(RT.hb);RT.hb=setInterval(function(){if(ws.readyState===1)ws.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:String(RT.ref++)}))},25000)};
+   ws.onmessage=function(e){try{var m=JSON.parse(e.data);if(m.event==="phx_reply"&&m.payload&&m.payload.status==="ok"){var tt=String(m.topic||"").replace("realtime:","");RT.ok[tt]=1;(RT.pend[tt]||[]).forEach(function(x){rtSend(x)});RT.pend[tt]=[]}if(m.event==="broadcast"&&m.payload&&m.payload.event){var t=String(m.topic||"").replace("realtime:","");RT.h.forEach(function(h){try{h(t,m.payload.event,m.payload.payload)}catch(_){}})}}catch(_){}};
+   ws.onclose=function(){clearInterval(RT.hb);RT.j={};RT.ok={};setTimeout(function(){if(Object.keys(RT.want).length)rtOpen()},2500)};
+   ws.onerror=function(){try{ws.close()}catch(_){}}
+  }catch(e){}}
+ var RTAPI={
+  on:function(h){RT.h.push(h)},
+  listen:function(t){RT.want[t]=1;rtOpen();rtJoin(t)},
+  send:function(t,ev,p){RT.want[t]=1;rtOpen();rtJoin(t);var o={topic:"realtime:"+t,event:"broadcast",payload:{type:"broadcast",event:ev,payload:p},ref:String(RT.ref++)};if(RT.ok[t])rtSend(o);else(RT.pend[t]=RT.pend[t]||[]).push(o)}
+ };
  window.WLCloud={
+  rt:SB.url?RTAPI:null,
   byField:byField,
   spec:function(file){
    if(!SB.url||!window.__wlUser)return null;
