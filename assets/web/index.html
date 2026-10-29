@@ -334,7 +334,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-q</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.29-r</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -2416,7 +2416,7 @@ function photoForm(f){
   PS.unshift(it);notify("*","posted a photo in Social"+(it.t?": "+it.t.slice(0,40):""));social();
  };
 }
-function mixMusic(f,song,prog){
+/*wlVolume*/function mixMusic(f,song,prog,opt){opt=opt||{};const VO=opt.vo==null?1:opt.vo,VM=opt.vm==null?.6:opt.vm;
  return new Promise((ok,no)=>{
   try{
    const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!window.MediaRecorder)return no(new Error("This phone cannot add music after recording."));
@@ -2425,8 +2425,8 @@ function mixMusic(f,song,prog){
    v.onloadedmetadata=async()=>{
     try{
      const ac=new AC(),d=ac.createMediaStreamDestination();
-     ac.createMediaElementSource(v).connect(d);
-     const au=new Audio(song.url);au.crossOrigin="anonymous";au.loop=true;const g=ac.createGain();g.gain.value=.6;ac.createMediaElementSource(au).connect(g);g.connect(d);
+     const vg=ac.createGain();vg.gain.value=VO;ac.createMediaElementSource(v).connect(vg);vg.connect(d);
+     const au=new Audio(song?song.url:"");if(song){au.crossOrigin="anonymous";au.loop=true;const g=ac.createGain();g.gain.value=VM;ac.createMediaElementSource(au).connect(g);g.connect(d)}
      const cap=v.captureStream?v.captureStream():v.mozCaptureStream();
      const out=new MediaStream([...cap.getVideoTracks(),...d.stream.getAudioTracks()]);
      const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
@@ -2436,7 +2436,7 @@ function mixMusic(f,song,prog){
      rc.onstop=()=>{fin();const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"mixed."+(type.includes("mp4")?"mp4":"webm"),{type}))};
      v.onended=()=>{if(rc.state==="recording")rc.stop()};
      const tk=setInterval(()=>{if(prog)prog(v.currentTime,v.duration)},300);
-     rc.start();await au.play().catch(()=>{});await v.play()
+     rc.start();if(song)await au.play().catch(()=>{});await v.play()
     }catch(e){no(e)}
    };
   }catch(e){no(e)}
@@ -2643,7 +2643,7 @@ function captionVideo(f,css,cap,prog){
 }
 
 /* ===== Background posting: a small draggable circle shows the upload; survives page refresh ===== */
-let BGB=false;
+let BGB=false;var VMIX=null;
 const JDB=()=>new Promise((ok,no)=>{try{const r=indexedDB.open("wl_jobs",1);r.onupgradeneeded=()=>r.result.createObjectStore("j",{keyPath:"id"});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}});
 async function jTx(mode,fn){try{const d=await JDB();return await new Promise((ok,no)=>{const t=d.transaction("j",mode),r=fn(t.objectStore("j"));t.oncomplete=()=>ok(r&&r.result);t.onerror=()=>no(t.error)})}catch(e){return null}}
 const jPut=j=>jTx("readwrite",o=>o.put(j)),jDel=id=>jTx("readwrite",o=>o.delete(id)),jAll=async()=>(await jTx("readonly",o=>o.getAll()))||[];
@@ -2696,7 +2696,8 @@ async function bgRun(job){
    if(!T.sh){/*wlTrimStrip2*/try{c=await Promise.race([fastCut(job.f,T.st,T.en,q=>bgRing(.4*q,"","Trimming")),new Promise((_,no)=>setTimeout(()=>no(new Error("slow")),25000))])}catch(e){c=null}}
    if(!c)c=await trimCrop(job.f,T.st,T.en,VSHAPES[T.sh||0][1],T.pos==null?.5:T.pos,(t,d)=>bgRing(d?.4*Math.min(1,t/d):0,"","Trimming"));
    job.f=c;job.trim=null;job.burned=null;await jPut(job)}
- const burn=!!(job.css||job.tx||(job.f&&job.f.size>4*1048576&&window.MediaRecorder));/*wlCompress: big videos are shrunk to 960px so they play fast for everyone*/let nf=job.burned||job.f;
+   if(job.mix){const M=job.mix;bgRing(0,"","Adding sound");try{job.f=await mixMusic(job.f,M.song,(t,d)=>bgRing(d?.4*Math.min(1,t/d):0,"","Adding sound"),{vo:M.vo,vm:M.vm})}catch(e){}job.mix=null;job.burned=null;await jPut(job)}
+const burn=!!(job.css||job.tx||(job.f&&job.f.size>4*1048576&&window.MediaRecorder));/*wlCompress: big videos are shrunk to 960px so they play fast for everyone*/let nf=job.burned||job.f;
   if(burn&&!job.burned){bgRing(0,"","Preparing video");try{nf=await captionVideo(job.f,job.css,job.tx,(t,d)=>bgRing(d?.45*t/d:0,"","Preparing video"))}catch(e){if(job.css||job.tx)throw e;nf=job.f};job.burned=nf;await jPut(job)}
   if(nf.size>20*1048576){await jDel(job.id);BGB=false;return fail("Over 20 MB. Tap to trim",()=>{secFull=true;editVideo(nf,true)})}
   if(window.WLCloud&&!window.__wlUser){for(let i=0;i<24&&!window.__wlUser;i++)await new Promise(r=>setTimeout(r,500));if(!window.__wlUser)return fail("Sign in to finish",()=>bgRun(job))}
@@ -2715,7 +2716,7 @@ async function bgRun(job){
 }
 async function bgPost(f,cap){
  if(BGB){bgRing(0,"err","Another upload is running");return}
- const job={id:"v"+Date.now(),cap,css:PFX,tx:OV(),f,burned:null,ts:Date.now()};if(VTRIM&&VTRIM.f===f)job.trim={st:VTRIM.st,en:VTRIM.en,sh:VTRIM.sh,pos:VTRIM.pos};VTRIM=null;PFX="";CAP=null;STKL=[];
+ const job={id:"v"+Date.now(),cap,css:PFX,tx:OV(),f,burned:null,ts:Date.now()};if(VTRIM&&VTRIM.f===f)job.trim={st:VTRIM.st,en:VTRIM.en,sh:VTRIM.sh,pos:VTRIM.pos};VTRIM=null;if(VMIX&&VMIX.f===f&&(VMIX.song||VMIX.vo!==1))job.mix={song:VMIX.song,vo:VMIX.vo,vm:VMIX.vm};VMIX=null;try{window.VAU&&VAU.pause()}catch(e){}PFX="";CAP=null;STKL=[];
  try{document.querySelectorAll("#panel video").forEach(v=>{v.pause();v.removeAttribute("src");v.load()})}catch(e){}
  close();try{$("#panel").innerHTML=""}catch(e){}
  bgRing(0,"","Starting");
@@ -2736,7 +2737,20 @@ function vedit(f,note){
  stopCam();VF=f;const url=URL.createObjectURL(f);let sel=-1;
  const side=(id,ic,l)=>`<button id="${id}" aria-label="${l}" style="display:flex;align-items:center;justify-content:flex-end;gap:10px;width:100%;color:#fff;font-weight:700;font-size:14px;padding:8px 0;text-shadow:0 1px 4px #000"><span>${l}</span><span style="display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.14);font-size:21px">${ic}</span></button>`;
  openFull(`<div style="position:relative;height:100%;background:#000;color:#fff;overflow:hidden"><div id="vst" style="position:absolute;left:0;right:0;top:0;bottom:0"><div id="vfr" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden"><video id="vev" src="${url}" autoplay loop playsinline style="width:100%;height:100%;object-fit:contain;display:block;filter:${PFX||"none"}"></video></div></div><button id="vbk" aria-label="Back" style="position:absolute;left:10px;top:18px;width:46px;height:46px;font-size:28px;color:#fff">←</button><button id="vsn" style="position:absolute;left:50%;top:20px;transform:translateX(-50%);background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:11px 20px;font-weight:700;font-size:15px;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">♪ ${note&&/Music/.test(note)?esc(note.replace("Music added: ","").slice(0,22)):"Add sound"}</button><div style="position:absolute;right:12px;top:96px;width:120px;z-index:4">${side("ved2","✂","Edit")}${side("vtx","Aa","Text")}${side("vsk","😊","Stickers")}${side("vfl","◎","Filters")}${side("vsv","⬇","Save")}</div><p id="vnt" style="position:absolute;left:14px;right:140px;bottom:112px;margin:0;color:#fff;font-size:13px;text-shadow:0 1px 4px #000">${note?esc(note):""}</p><div id="vfp" style="display:none;position:absolute;left:0;right:0;bottom:100px;background:rgba(0,0,0,.65);padding:10px 0;z-index:5"><div style="display:flex;gap:8px;overflow-x:auto;padding:2px 12px">${FX.map((q,k)=>`<button data-vf="${k}" style="flex:none;padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;background:${q[1]===PFX?"#fff":"rgba(255,255,255,.18)"};color:${q[1]===PFX?"#000":"#fff"}">${q[0]}</button>`).join("")}</div></div><div id="vsp" style="display:none;position:absolute;left:0;right:0;bottom:0;height:46%;background:#1c1c20;border-radius:18px 18px 0 0;z-index:6;padding:12px 12px 20px;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>Stickers</b><button id="vspx" aria-label="Close" style="color:#fff;font-size:22px;padding:4px 10px">✕</button></div><div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">${EMO.map((e,k)=>`<button data-ve="${k}" style="font-size:30px;padding:6px 0">${e}</button>`).join("")}</div></div><div id="vstb" style="display:none;position:absolute;left:50%;transform:translateX(-50%);bottom:112px;background:rgba(0,0,0,.7);border-radius:999px;padding:4px 8px;gap:4px;z-index:5"><button id="vsm" style="color:#fff;font-size:22px;padding:4px 12px">–</button><button id="vsp2" style="color:#fff;font-size:22px;padding:4px 12px">+</button><button id="vsd" style="color:#fff;font-size:18px;padding:4px 12px">🗑</button></div><div id="vds" style="display:none;position:absolute;left:12px;top:70px;background:#fff;color:#111;border-radius:14px;padding:6px;z-index:7;min-width:190px"><button id="vdc" style="display:block;width:100%;text-align:left;padding:12px;color:#E5233A;font-weight:700">🗑 Discard</button><button id="vdk" style="display:block;width:100%;text-align:left;padding:12px;font-weight:700">Keep editing</button></div><div style="position:absolute;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:3"><button id="vnx" style="width:100%;padding:15px;border-radius:999px;font-weight:800;font-size:17px;color:#fff;background:linear-gradient(90deg,#FE2C55,#c01a3a)">Next</button></div></div>`,true);
- const v=$("#vev"),fr=$("#vfr"),st=$("#vst");/*wlVFull*/v.muted=false;v.play().catch(()=>{v.muted=true;v.play().catch(()=>{})});
+ const v=$("#vev"),fr=$("#vfr"),st=$("#vst");if(!VMIX||VMIX.f!==f)VMIX={f,vo:1,vm:.6,song:null};
+  try{if(window.VAU){VAU.pause();VAU=null}}catch(e){}
+  v.volume=VMIX.vo;
+  if(VMIX.song){const au=new Audio(VMIX.song.url);au.loop=true;au.volume=VMIX.vm;window.VAU=au;v.addEventListener("play",()=>au.play().catch(()=>{}));v.addEventListener("pause",()=>au.pause());au.play().catch(()=>{})}
+  {const sb=document.createElement("button");sb.id="vvl";sb.setAttribute("aria-label","Volume");sb.textContent=VMIX.vo===0&&(!VMIX.song||VMIX.vm===0)?"🔇":"🔊";sb.style.cssText="position:absolute;right:12px;top:18px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:22px;z-index:6";fr.parentNode.parentNode.appendChild(sb);
+   const pn=document.createElement("div");pn.id="vvp";pn.style.cssText="display:none;position:absolute;right:12px;top:72px;width:min(300px,86%);background:rgba(10,10,12,.96);color:#fff;border-radius:16px;padding:14px 16px;z-index:7";
+   const sl=(id,l,val,dis)=>`<label style="display:block;font-size:14px;font-weight:700;margin:6px 0 2px">${l} <span id="${id}n" style="font-weight:600;opacity:.8">${Math.round(val*100)}%</span><input id="${id}" type="range" min="0" max="100" value="${Math.round(val*100)}" ${dis?"disabled":""} style="width:100%"></label>`;
+   pn.innerHTML=sl("vvo","Video sound",VMIX.vo,false)+(VMIX.song?sl("vvm","Music: "+esc(String(VMIX.song.name).slice(0,20)),VMIX.vm,false):'<p style="font-size:13px;margin:8px 0 0;opacity:.8">Tap ♪ Add sound to pick music, then adjust it here.</p>');
+   sb.parentNode.appendChild(pn);
+   sb.onclick=()=>{pn.style.display=pn.style.display==="none"?"block":"none"};
+   const ic=()=>{sb.textContent=VMIX.vo===0&&(!VMIX.song||VMIX.vm===0)?"🔇":"🔊"};
+   const vo=pn.querySelector("#vvo");vo.oninput=()=>{VMIX.vo=+vo.value/100;v.volume=VMIX.vo;pn.querySelector("#vvon").textContent=vo.value+"%";ic()};
+   const vm=pn.querySelector("#vvm");if(vm)vm.oninput=()=>{VMIX.vm=+vm.value/100;if(window.VAU)VAU.volume=VMIX.vm;pn.querySelector("#vvmn").textContent=vm.value+"%";ic()}}
+  /*wlVFull*/v.muted=false;v.play().catch(()=>{v.muted=true;v.play().catch(()=>{})});
  const fit=()=>{const vw=v.videoWidth,vh=v.videoHeight;if(!vw)return;const W=st.clientWidth,H=st.clientHeight,k=Math.min(W/vw,H/vh),w=Math.round(vw*k),h=Math.round(vh*k);fr.style.left=Math.round((W-w)/2)+"px";fr.style.top=Math.round((H-h)/2)+"px";fr.style.width=w+"px";fr.style.height=h+"px";draw()};
  const draw=()=>{const vw=v.videoWidth,vh=v.videoHeight;capLayer(fr,vw,vh,"contain",CAP);rs()};
  function rs(){
@@ -2766,9 +2780,7 @@ function vedit(f,note){
  $("#vsp").onclick=e=>{const b=e.target.closest("[data-ve]");if(!b)return;STKL.push({e:EMO[+b.dataset.ve],x:.5,y:.5,s:.2});sel=STKL.length-1;$("#vsp").style.display="none";$("#vstb").style.display="flex";rs()};
  $("#vsn").onclick=()=>soundPicker(()=>{
   if(!SND)return vedit(f,note);
-  const sd=SND;SND=null;
-  open(`<h2>Adding music</h2><p class="mute" id="mp">Mixing "${esc(sd.name)}" into your video. Keep this screen open. It takes about as long as the video.</p><div style="height:8px;border-radius:4px;background:var(--line)"><div id="mb" style="height:100%;width:0;border-radius:4px;background:var(--acc)"></div></div>`);
-  mixMusic(f,sd,(t,dur)=>{const b=$("#mb");if(b&&dur)b.style.width=Math.min(100,Math.round(100*t/dur))+"%"}).then(nf=>vedit(nf,"Music added: "+sd.name)).catch(e=>{vedit(f,"Could not add music: "+(e.message||"try again"))})
+  const sd=SND;SND=null;VMIX=VMIX&&VMIX.f===f?VMIX:{f,vo:1,vm:.6,song:null};VMIX.song={url:sd.url,name:sd.name};vedit(f,"Music added: "+sd.name)
  });
  $("#vsv").onclick=async()=>{
   try{let out=f;const ov=Object.assign({},OV()||{},{wm:me.name});
