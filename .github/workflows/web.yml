@@ -26,6 +26,19 @@ jobs:
           mkdir -p site
           python3 tools/make_web.py assets/web/index.html assets/firebase_config.json site/index.html
           touch site/.nojekyll
+      - name: Fast video cutter
+        continue-on-error: true
+        run: |
+          mkdir -p /tmp/ff && cd /tmp/ff
+          npm pack @ffmpeg/ffmpeg@0.12.10 @ffmpeg/core@0.12.6
+          mkdir a b && tar xzf ffmpeg-ffmpeg-*.tgz -C a && tar xzf ffmpeg-core-*.tgz -C b
+          cd - 
+          mkdir -p site/ffmpeg/core
+          cp /tmp/ff/a/package/dist/umd/*.js site/ffmpeg/
+          cp /tmp/ff/b/package/dist/umd/ffmpeg-core.js /tmp/ff/b/package/dist/umd/ffmpeg-core.wasm site/ffmpeg/core/
+          W=$(ls site/ffmpeg | grep -v '^ffmpeg.js$' | grep 'ffmpeg.js$' | head -1)
+          echo "{\"worker\":\"$W\"}" > site/ffmpeg/files.json
+          cat site/ffmpeg/files.json; ls -la site/ffmpeg site/ffmpeg/core
       - name: Beach list
         continue-on-error: true
         run: cp assets/beaches.json site/beaches.json
