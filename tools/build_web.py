@@ -49,7 +49,7 @@ rep('<p class="note">Demo screens only. Real sign-up arrives with the Android ap
 rep('if(fg)fg.onclick=e=>{e.preventDefault();$("#st").textContent="In the app we email you a link to reset your password."};',
     'if(fg)fg.onclick=e=>{e.preventDefault();if(window.WLAuth){const em=$("#ae").value.trim();if(!/^\\S+@\\S+\\.\\S+$/.test(em)){$("#st").textContent="Type your email above first, then tap Forgot password.";return}WLN("reset",{email:em}).then(r=>{$("#st").textContent=r.error?r.error:"Reset link sent to "+em+". Check your inbox."});return}$("#st").textContent="In the app we email you a link to reset your password."};')
 rep('   st.textContent=up?"Looks good. In the app we would now email you a link to confirm this address.":"Looks good. In the app you would now be logged in."}',
-    '''   if(window.WLAuth){st.textContent="Please wait...";WLN(up?"signup":"login",{email:e,password:pw}).then(function(r){if(r.error){st.textContent=r.error;return}window.__wlUser=r.user;me.uid=r.user.uid;if(me.name==="you")me.name=(r.user.name||"you");st.textContent=up?"Account created. A confirmation email was sent to "+e+".":"Welcome back!";setTimeout(function(){close();profile()},900)});return}
+    '''   if(window.WLAuth){st.textContent="Please wait...";WLN(up?"signup":"login",{email:e,password:pw}).then(function(r){if(r.error){st.textContent=r.error;return}window.__wlUser=r.user;me.uid=r.user.uid;if(window.wlRefresh)setTimeout(wlRefresh,300);if(me.name==="you")me.name=(r.user.name||"you");st.textContent=up?"Account created. A confirmation email was sent to "+e+".":"Welcome back!";setTimeout(function(){close();profile()},900)});return}
    st.textContent=up?"Looks good. In the app we would now email you a link to confirm this address.":"Looks good. In the app you would now be logged in."}''')
 rep('function editProfile(){', '''function authSheet(mode,how){
  if(window.__wlUser){
@@ -61,7 +61,7 @@ function editProfile(){''')
 
 rep('   st.textContent="Looks good. In the app we would now text a 6-digit code to "+n+"."}',
 r'''   if(window.WLAuth){st.textContent="Sending code...";WLN("phone_send",{phone:n}).then(function(r){if(r.error){st.textContent=r.error;return}
-    var done=function(u){window.__wlUser=u;me.uid=u.uid;if(me.name==="you")me.name=u.name||"you";st.textContent="Welcome!";setTimeout(function(){close();profile()},700)};
+    var done=function(u){window.__wlUser=u;me.uid=u.uid;if(window.wlRefresh)setTimeout(wlRefresh,300);if(me.name==="you")me.name=u.name||"you";st.textContent="Welcome!";setTimeout(function(){close();profile()},700)};
     if(r.user){done(r.user);return}
     $("#ap2").insertAdjacentHTML("afterend",'<input class="in" id="ac" inputmode="numeric" maxlength="6" placeholder="6-digit code" aria-label="Code">');
     st.textContent="Code sent to "+n+". Enter it below.";
@@ -82,6 +82,7 @@ window.addEventListener("load",function(){setTimeout(function(){
   if(me.name==="you")me.name=(r.user.name||"you");
   var on=document.querySelector("nav button.on");
   if(on&&/Profile/.test(on.textContent))profile();
+  if(window.wlRefresh)wlRefresh();
  })},1500)});
 </script>"""
 import json as _json,os as _os
