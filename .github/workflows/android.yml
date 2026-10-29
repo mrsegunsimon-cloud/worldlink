@@ -2,6 +2,8 @@ name: Android build
 on:
   push:
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   apk:
     runs-on: ubuntu-latest
@@ -44,3 +46,11 @@ jobs:
         with:
           name: worldlink-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Put the app on the Releases page (plain download, no zip)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk WorldLink.apk
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest WorldLink.apk --title "WorldLink app (latest build)" --notes "Newest Android build, made $(date -u +%Y-%m-%d' '%H:%M) UTC from commit ${GITHUB_SHA::7}."
