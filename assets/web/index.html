@@ -100,6 +100,9 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #fff
 .tabs button.on{opacity:1;border-color:#fff}
 .top{gap:4px}.tabs{gap:14px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
 .rail .av{width:48px;height:48px;border:3px solid #25C7F0;margin-bottom:4px}
+.fplus{width:22px;height:22px;border-radius:50%;background:#FF2D55;color:#fff;font-size:17px;font-weight:700;line-height:22px;padding:0;margin:-16px 0 0;position:relative;z-index:2;align-self:center}
+#pbar{position:fixed;left:12px;right:12px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);z-index:6;pointer-events:none}
+#pbar i{display:block;height:100%;width:0;border-radius:2px;background:#fff}
 .rail{gap:14px;bottom:70px}.rail span:not(.ic){font-weight:700;font-size:13px}.disc{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#555 0 18%,#111 20% 100%);border:2px solid #333;display:grid;place-items:center;color:#fff;font-size:16px;margin-top:2px}
 .cap{bottom:18px}.cap b{font-size:18px;letter-spacing:.2px}
 .sos{background:var(--sos);color:#fff;font-weight:800;padding:6px 12px;border-radius:999px;text-shadow:none}
@@ -155,6 +158,7 @@ nav button{position:relative}nav .nb{position:absolute;top:0;left:55%;background
 .hd.ph b{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
 .pgt{gap:1px}
 .pgt .vw{font-size:15px;left:8px;bottom:7px}
+.unr{background:var(--bg)}
 .sx{position:sticky;top:0;float:right;z-index:3;width:38px;height:38px;border-radius:50%;background:var(--bg);color:var(--ink);font-size:18px;border:1px solid var(--line);margin:0 0 6px 8px}
 .ncv{position:relative;border-radius:14px;display:grid;place-items:center;overflow:hidden;color:#fff}
 .ncv .pl{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700}
@@ -208,7 +212,7 @@ function build(){
  ${c.src?`<video src="${esc(c.src)}" muted loop playsinline preload="metadata"></video>`:`<div class="big">${c.e}</div>`}<div class="shade"></div>
  <div class="cap"><b>@${esc(c.u)}</b><p id="cp${i}">${esc(c.c)}</p><button data-a="tr" data-i="${i}" style="display:block;margin-bottom:4px;font-size:12px;opacity:.9;padding:2px 0;color:#fff;text-decoration:underline">Translate</button><small>♪ ${esc(c.m)}${c.src?" (tap video for sound)":""}</small></div>
  <div class="rail">
-  <div class="av">${c.uid&&c.uid===me.uid&&me.pic?`<img src="${me.pic}" alt="">`:c.u[0].toUpperCase()}</div>
+  <div class="av">${c.uid&&c.uid===me.uid&&me.pic?`<img src="${me.pic}" alt="">`:c.u[0].toUpperCase()}</div>${c.u&&c.u!==me.name&&!(me.f||[]).includes(c.u)?`<button data-a="fw" data-i="${i}" class="fplus" aria-label="Follow @${esc(c.u)}">+</button>`:""}
   <button data-a="like" data-i="${i}" class="${liked[i]?"on":""}" aria-label="Like"><span class="ic">♥</span><span id="l${i}">${fmt(cnt(i))}</span></button>
   <button data-a="cm" data-i="${i}" aria-label="Comments"><span class="ic">💬</span><span id="cc${i}">${c.cm.length+(c.sc||[]).length}</span></button>
   <button data-a="gf" data-i="${i}" aria-label="Send a gift"><span class="ic">🎁</span><span>Gift</span></button>
@@ -238,13 +242,24 @@ function like(i,force){
  $("#l"+i).textContent=fmt(cnt(i));
  $(`button[data-a=like][data-i="${i}"]`).classList.toggle("on",liked[i]);saveR(i);if(liked[i])notify(c.uid,"liked your video");
 }
+async function followFeed(i,b){
+ const c=CLIPS[i];if(!c||!c.u)return;
+ if(!(me.f||[]).includes(c.u))me.f=(me.f||[]).concat(c.u);
+ document.querySelectorAll('.fplus[data-i]').forEach(x=>{if(CLIPS[+x.dataset.i]&&CLIPS[+x.dataset.i].u===c.u)x.remove()});
+ try{const D=await claude.use("db");if(D&&me.uid)await D.collection("follows").doc(me.uid).set({list:me.f})}catch(e){}
+ try{notify(c.uid,"started following you")}catch(e){}
+}
+(function(){const p=document.createElement("div");p.id="pbar";p.innerHTML="<i></i>";document.body.appendChild(p);
+ const place=()=>{const n=document.querySelector("nav");p.style.bottom=(n?n.offsetHeight+4:74)+"px";p.style.display=document.getElementById("sheet").classList.contains("on")?"none":"block"};
+ place();addEventListener("resize",place);setInterval(place,1000);
+ document.addEventListener("timeupdate",e=>{const v=e.target;if(!v||v.tagName!=="VIDEO"||!v.closest("#feed")||v.paused&&!v.currentTime)return;if(v.duration)p.firstChild.style.width=Math.min(100,v.currentTime/v.duration*100)+"%"},true)})();
 let last=0,tt;
 $("#feed").addEventListener("click",e=>{
  const b=e.target.closest("button[data-a]");
  if(b){const i=+b.dataset.i,a=b.dataset.a;
   if(a==="like")like(i);
   else if(a==="cm")comments(i);
-  else if(a==="gf")giftSheet(i);
+  else if(a==="gf")giftSheet(i);else if(a==="fw"){followFeed(i,b)}
   else if(a==="sv"){saved[i]=!saved[i];b.classList.toggle("on",saved[i]);$("#sv"+i).textContent=fmt(sv0(i))}
   else if(a==="rp"){const c=CLIPS[i];if(me.uid&&c.uid&&c.uid===me.uid)ownVideo(i);else reportFlow("video",c.id,c.uid,c.u)}
   else if(a==="tr")trCap(i,b);
@@ -532,8 +547,8 @@ function inbox(){
  const nf=parseInt($("#bd").textContent)||0;
  const seen=new Set(DMS.map(d=>dmOther(d).n));
  const story=(att,inner,l)=>`<button ${att} style="flex:none;width:76px;text-align:center;color:inherit">${inner}<span style="display:block;font-size:13px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l)}</span></button>`;
- const ring=n=>`<div style="width:68px;height:68px;border-radius:50%;padding:3px;margin:0 auto;background:linear-gradient(45deg,#1E6FFF,#FF2D55)"><div class="av" style="width:100%;height:100%;border:3px solid var(--card);font-size:22px;background:${COL[n.charCodeAt(0)%4]}">${esc(n[0].toUpperCase())}</div></div>`;
- openFull(`<div class="hd"><button id="qf" aria-label="Find friends">👥</button><b style="font-size:20px">Inbox</b><button id="qs" aria-label="Search">🔍</button></div><div class="pgx"><div style="display:flex;gap:6px;overflow-x:auto;padding:6px 12px 14px">${story('id="sa"','<div style="width:68px;height:68px;border-radius:50%;margin:0 auto;border:1px solid var(--line);display:grid;place-items:center;font-size:30px;color:var(--acc)">+</div>',"Create")}${PEOPLE.slice(0,5).map(p=>story('data-st="1"',ring(p[0]),p[0])).join("")}</div><div style="border-top:8px solid var(--bg)"></div>${row('id="qa"',circ("#FF2D55","⚡"),"Activity & new followers","Likes, comments and new followers",nf?`<span class="bdg">${nf}</span>`:"",true)}${row('id="gc"',circ("#7C5CFF","💬"),"Group chats","Chat with several people at once","")}${row('id="qw"',circ("#0B1646","🌍"),"WorldLink","Welcome to WorldLink","")}${DMS.map(d=>{const o=dmOther(d);return row(`data-dm="${esc(d.id)}"`,av(o.n||"?"),o.n||"user",d.m.length?(x=>x.t?x.t.slice(0,50):x.img?"📷 Photo":"🎥 Video")(d.m[d.m.length-1]):"Say hi to "+(o.n||"them"),"")}).join("")}${PEOPLE.filter(p=>!seen.has(p[0])).map(p=>row(`data-c="${p[0]}"`,av(p[0]),p[0],"Say hi to "+p[0],"")).join("")}</div>`);
+ const ring=n=>`<div style="width:68px;height:68px;border-radius:50%;padding:3px;margin:0 auto;background:linear-gradient(45deg,#25C7F0,#2EE59D)"><div class="av" style="width:100%;height:100%;border:3px solid var(--card);font-size:22px;background:${COL[n.charCodeAt(0)%4]}">${esc(n[0].toUpperCase())}</div></div>`;
+ openFull(`<div class="hd"><button id="qf" aria-label="Find friends">👥</button><b style="font-size:20px">Inbox <span aria-hidden="true" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22C55E;vertical-align:middle;margin-left:4px"></span></b><button id="qs" aria-label="Search">🔍</button></div><div class="pgx"><div style="display:flex;gap:6px;overflow-x:auto;padding:6px 12px 14px">${story('id="sa"','<div style="width:68px;height:68px;border-radius:50%;margin:0 auto;border:1px solid var(--line);display:grid;place-items:center;font-size:30px;color:var(--acc)">+</div>',"Create")}${PEOPLE.slice(0,5).map(p=>story('data-st="1"',ring(p[0]),p[0])).join("")}</div><div style="border-top:8px solid var(--bg)"></div>${row('id="qa"'+(nf?' class="unr"':''),circ("#FF2D55","⚡"),"Activity & new followers","Likes, comments and new followers",nf?`<span class="bdg">${nf}</span>`:"",true)}${row('id="gc"',circ("#7C5CFF","💬"),"Group chats","Chat with several people at once","")}${row('id="qw"',circ("#0B1646","🌍"),"WorldLink","Welcome to WorldLink","")}${DMS.map(d=>{const o=dmOther(d);return row(`data-dm="${esc(d.id)}"`,av(o.n||"?"),o.n||"user",d.m.length?(x=>x.t?x.t.slice(0,50):x.img?"📷 Photo":"🎥 Video")(d.m[d.m.length-1]):"Say hi to "+(o.n||"them"),"")}).join("")}${PEOPLE.filter(p=>!seen.has(p[0])).map(p=>row(`data-c="${p[0]}"`,av(p[0]),p[0],"Say hi to "+p[0],"")).join("")}</div>`);
  $("#gc").onclick=groupsScreen;$("#qa").onclick=()=>notifs();$("#qf").onclick=()=>friends();$("#qs").onclick=searchAll;$("#sa").onclick=stories;
  $("#panel").querySelectorAll("[data-st]").forEach(b=>b.onclick=stories);
  $("#qw").onclick=()=>{open(`<h2>WorldLink</h2><p>Welcome to WorldLink. Share videos, follow friends, chat, follow sports and find help nearby, all in one app.</p><button class="btn" id="bk">Back to Inbox</button>`);$("#bk").onclick=inbox};
