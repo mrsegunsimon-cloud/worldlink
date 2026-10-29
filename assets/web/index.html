@@ -1424,7 +1424,7 @@ function blockedList(){
  $("#panel").querySelectorAll("[data-u]").forEach(b=>b.onclick=async()=>{me.b.splice(+b.dataset.u,1);await saveB();order=mk(1);build();blockedList()});
 }
 async function modScreen(){
- let D=null,mods=[],rs=[];
+ let D=null,mods=[],rs=[],po=[];
  try{D=await claude.use("db");const m=await D.collection("admin").doc("mods").get();mods=m.exists?(m.data().list||[]):[]}catch(e){}
  const bye='<button class="btn ghost" id="x">Close</button>';
  if(!me.uid||!D){open(`<h2>Moderation</h2><p class="mute">Moderator tools need an account and saving, which are not available here.</p>${bye}`);return}
@@ -1433,16 +1433,23 @@ async function modScreen(){
   $("#mc").onclick=async()=>{try{await D.collection("admin").doc("mods").set({list:[me.uid]})}catch(e){}modScreen()};return;
  }
  if(!mods.includes(me.uid)){open(`<h2>Moderation</h2><p class="mute">Only moderators can use this.</p>${bye}`);return}
- try{const s=await D.collection("reports").get();rs=s.docs.map(d=>d.data()).filter(r=>r&&r.type).sort((a,b)=>b.ts-a.ts)}catch(e){}
+ try{const s=await D.collection("reports").get();const all=s.docs.map(d=>d.data());rs=all.filter(r=>r&&r.type).sort((a,b)=>b.ts-a.ts);po=all.filter(r=>r&&r.kind==="payout").sort((a,b)=>b.ts-a.ts)}catch(e){}
  const colls={post:"posts",listing:"listings",video:"videos"},label={post:"Post",listing:"Listing",video:"Video"};
  const openN=rs.filter(r=>!r.status).length;
- open(`<h2>Moderation</h2><p class="mute">${openN} open report${openN===1?"":"s"}, ${rs.length} in total</p>${rs.length?rs.map((r,i)=>`<div class="cm"><b>${label[r.type]||r.type} by @${esc(r.name)}</b> <span class="mute" style="font-size:13px">${ago(r.ts)}${r.status?". "+(r.status==="removed"?"Removed":"Dismissed"):""}</span><div>${esc(r.reason||"")}</div>${r.note?`<div class="mute" style="font-size:13px">${esc(r.note)}</div>`:""}${r.status?"":`<div style="display:flex;gap:8px"><button class="btn red" style="width:auto;margin:8px 0 0;padding:8px 14px" data-rm="${i}">Remove content</button><button class="btn ghost" style="width:auto;margin:8px 0 0;padding:8px 14px" data-dm="${i}">Dismiss</button></div>`}</div>`).join(""):'<p class="mute">No reports yet.</p>'}${bye}`);
+ const poN=po.filter(r=>r.st!=="paid").length;
+ open(`<h2>Payout requests</h2><p class="mute">${poN} waiting to be paid, ${po.length} in total. Send the money from your bank app, then tap Mark paid.</p>${po.length?po.map((r,i)=>`<div class="cm"><b>${naira(r.amt)} · @${esc(r.name)}</b> <span class="mute" style="font-size:13px">${ago(r.ts)} · ${r.st==="paid"?"PAID":"waiting"}</span><div>${esc(r.legal||"")}</div><div>Bank: ${esc(r.bank||"")}</div><div>Account: <b>${esc(r.acct||"")}</b></div><div class="mute" style="font-size:13px">${esc(r.idType||"")} checked by you · ${r.coins||0} coins</div>${r.st==="paid"?"":`<button class="btn" style="width:auto;margin:8px 0 0;padding:8px 14px" data-pay="${i}">Mark paid</button>`}</div>`).join(""):'<p class="mute">No payout requests yet.</p>'}<div class="cm"><b>Test earnings</b><div class="mute" style="font-size:13px">Adds 3,000 coins to your own wallet (about ₦9,000 to cash out) so you can try a payout. Remove them before real launch.</div><div style="display:flex;gap:8px"><button class="btn ghost" style="width:auto;margin:8px 0 0;padding:8px 14px" data-tb="1">Add test earnings</button><button class="btn ghost" style="width:auto;margin:8px 0 0;padding:8px 14px" data-tb="-1">Remove</button></div></div><h2 style="margin-top:18px">Moderation</h2><p class="mute">${openN} open report${openN===1?"":"s"}, ${rs.length} in total</p>${rs.length?rs.map((r,i)=>`<div class="cm"><b>${label[r.type]||r.type} by @${esc(r.name)}</b> <span class="mute" style="font-size:13px">${ago(r.ts)}${r.status?". "+(r.status==="removed"?"Removed":"Dismissed"):""}</span><div>${esc(r.reason||"")}</div>${r.note?`<div class="mute" style="font-size:13px">${esc(r.note)}</div>`:""}${r.status?"":`<div style="display:flex;gap:8px"><button class="btn red" style="width:auto;margin:8px 0 0;padding:8px 14px" data-rm="${i}">Remove content</button><button class="btn ghost" style="width:auto;margin:8px 0 0;padding:8px 14px" data-dm="${i}">Dismiss</button></div>`}</div>`).join(""):'<p class="mute">No reports yet.</p>'}${bye}`);
  const rid=r=>r.id||"r"+r.ts;
  $("#panel").querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{
   const r=rs[+b.dataset.rm],c=colls[r.type];
   try{if(c){const t=await D.collection(c).doc(r.tid).get();if(t.exists)await D.collection(c).doc(r.tid).set({...t.data(),del:true})}}catch(e){}
   r.status="removed";try{await D.collection("reports").doc(rid(r)).set(r)}catch(e){}
   PS=PS.filter(x=>x.id!==r.tid);LS=LS.filter(x=>x.id!==r.tid);modScreen();
+ });
+ $("#panel").querySelectorAll("[data-tb]").forEach(b=>b.onclick=async()=>{me.wl.coins=Math.max(0,(me.wl.coins||0)+3000*+b.dataset.tb);await saveWallet();modScreen()});
+ $("#panel").querySelectorAll("[data-pd]").forEach(b=>b.onclick=async()=>{
+  const r=po[+b.dataset.pay];r.st="paid";r.paid=Date.now();
+  try{await D.collection("reports").doc(r.id).set(r)}catch(e){}
+  modScreen();
  });
  $("#panel").querySelectorAll("[data-dm]").forEach(b=>b.onclick=async()=>{
   const r=rs[+b.dataset.dm];r.status="dismissed";
