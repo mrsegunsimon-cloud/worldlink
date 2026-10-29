@@ -2329,7 +2329,9 @@ async function postVideo(f,cap){
  $("#panel").innerHTML=`<h2>Posted</h2><p class="mute">${saved?"Your video is saved and will be here next time.":"Your video shows on this screen only. It will disappear when you leave."}</p><button class="btn" id="x">Watch it</button>`;
  $("#x").onclick=close;
 }
+let PROF=[];async function loadProfs(){try{const D=await claude.use("db");if(!D)return;const s=await D.collection("profiles").get();PROF=s.docs.map(d=>Object.assign({uid:d.id},d.data())).filter(x=>x&&x.name)}catch(e){}}
 function searchAll(){
+ loadProfs().then(()=>{const q=$("#sq");if(q&&q.value.trim().length>1)renderSR(q.value.trim())});
  open(`<input class="in" id="sq" maxlength="60" placeholder="Search" aria-label="Search" style="margin-top:0;border-radius:999px;background:var(--bg);padding:12px 18px"><div id="sr">${trendHtml()}</div><button class="btn ghost" id="x">Close</button>`);
  const i=$("#sq");i.focus();
  i.oninput=()=>{const v=i.value.trim();v?renderSR(v):$("#sr").innerHTML=trendHtml()};
@@ -2338,14 +2340,14 @@ function searchAll(){
 const TREND=["Free lemons","Football tonight","Study tips","New beat","Street cleanup","Hospitals near me","Learn Yoruba","Marketplace deals"];
 const trendHtml=()=>`<h2 style="margin:14px 0 4px;font-size:15px">Trending</h2>${TREND.map((t,k)=>`<button data-tq="${esc(t)}" style="display:flex;width:100%;gap:12px;padding:11px 0;text-align:left;border-bottom:1px solid var(--line);color:inherit"><span style="color:${k<3?"#FF7A1A":"var(--mute)"};font-weight:700;width:18px">${k+1}</span><span>${esc(t)}</span></button>`).join("")}`;
 function renderSR(raw){
- const q=raw.toLowerCase(),box=$("#sr");
+ raw=raw.replace(/^@+/,"");const q=raw.toLowerCase(),box=$("#sr");
  if(q.length<2){box.innerHTML='<p class="mute" style="margin-top:12px">Type at least 2 letters.</p>';return}
  const has=(...a)=>a.some(v=>v&&String(v).toLowerCase().includes(q));
  const sec=(h,items)=>items.length?`<h2 style="margin:14px 0 4px;font-size:15px">${h}</h2>${items.join("")}`:"";
  const row=(a,t,s)=>`<button class="cm" style="display:block;width:100%;text-align:left;color:inherit" ${a}><b>${esc(t)}</b>${s?`<div class="mute" style="font-size:13px">${esc(s)}</div>`:""}</button>`;
  const pm=new Map();
  const addP=(n,u)=>{if(!n||blocked(u,n))return;if(!pm.has(n)||(!pm.get(n)&&u))pm.set(n,u||null)};
- PEOPLE.forEach(p=>addP(p[0],null));
+ PEOPLE.forEach(p=>addP(p[0],null));PROF.forEach(x=>addP(x.name,x.uid));
  CLIPS.forEach(c=>addP(c.u,c.uid));PS.forEach(x=>addP(x.u,x.o));LS.forEach(x=>addP(x.u,x.o));EV.forEach(x=>addP(x.u,x.o));TR.forEach(x=>addP(x.u,null));MV.forEach(x=>addP(x.u,null));
  const people=[...pm.entries()].filter(([n])=>n!==me.name&&n!=="you"&&has(n)).slice(0,8).map(([n,u])=>{const s=PEOPLE.find(p=>p[0]===n);return row(`data-p="${esc(n)}" data-u="${esc(u||"")}"`,"@"+n,s?s[1]:"WorldLink member")});
  const vids=CLIPS.map((c,i)=>[c,i]).filter(([c])=>!blocked(c.uid,c.u)&&has(c.c,c.u)).slice(0,6).map(([c,i])=>row(`data-v="${i}"`,c.c,"@"+c.u));
