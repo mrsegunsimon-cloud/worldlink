@@ -31,6 +31,7 @@
   var j=await call("POST",FS.replace(/\/documents$/,"/documents")+":runQuery",{structuredQuery:{from:[{collectionId:col}],where:{fieldFilter:{field:{fieldPath:field},op:"EQUAL",value:{stringValue:val}}}}},true);
   return(j||[]).filter(function(x){return x.document}).map(function(x){return{id:idOf(x.document),data:decDoc(x.document)}})}
  window.WLCloud={
+  byField:byField,
   spec:function(file){
    if(!SB.url||!window.__wlUser)return null;
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);

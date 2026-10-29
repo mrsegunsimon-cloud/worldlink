@@ -29,6 +29,13 @@ service cloud.firestore {
       allow write: if signedIn() && request.auth.uid in id.split('_');
     }
 
+    // Notifications are private: anyone signed in can send one, only the person it is for can read or clear it
+    match /notifs/{id} {
+      allow create: if signedIn();
+      allow read: if signedIn() && (resource.data.to == request.auth.uid || resource.data.to == '*');
+      allow update, delete: if signedIn() && resource.data.to == request.auth.uid;
+    }
+
     // Call set-up notes (short lived, one per person being called)
     match /calls/{id} {
       allow read, write: if signedIn();
@@ -72,12 +79,12 @@ service cloud.firestore {
     // Everything else people share: posts, stories, listings, events, groups, chats, music, notices, gifts
     match /{col}/{id} {
       allow read: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
-        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'notifs', 'gifts'];
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts'];
       allow create: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
-        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'notifs', 'gifts']
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts']
         && (ownerOf(request.resource.data) == '' || ownerOf(request.resource.data) == request.auth.uid);
       allow update: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
-        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'notifs', 'gifts']
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts']
         && (ownerOf(resource.data) == '' || isOwner(resource.data) || onlySocialChange() || isMod());
       allow delete: if signedIn() && isOwner(resource.data);
     }
