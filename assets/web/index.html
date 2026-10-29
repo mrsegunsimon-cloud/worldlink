@@ -1559,7 +1559,14 @@ async function notify(to,text){if(!to||to===me.uid)return;try{const D=await clau
 async function notifs(){
  await loadNF();
  const seen=me.ns,list=NF.filter(n=>!blocked(null,n.from)).slice(0,50);
- open(`<h2>Notifications</h2>${list.length?list.map(n=>`<div class="cm" style="${n.ts>seen?"background:var(--bg);border-radius:10px;padding:8px":""}"><b>@${esc(n.from)}</b> ${esc(n.text)} <span class="mute" style="font-size:13px">${ago(n.ts)}</span></div>`).join(""):'<p class="mute">Nothing yet. When someone likes or comments on your posts and videos, or joins your events, you will see it here.</p>'}<p class="note">Alerts on your phone when the app is closed come with the Android app.</p><button class="btn ghost" id="x">Close</button>`);
+ open(`<h2>Notifications</h2>${list.length?list.map((n,ni)=>`<div class="cm" role="button" tabindex="0" data-nt="${ni}" style="cursor:pointer;${n.ts>seen?"background:var(--bg);border-radius:10px;padding:8px":""}"><b>@${esc(n.from)}</b> ${esc(n.text)} <span class="mute" style="font-size:13px">${ago(n.ts)}</span></div>`).join(""):'<p class="mute">Nothing yet. When someone likes or comments on your posts and videos, or joins your events, you will see it here.</p>'}<p class="note">Alerts on your phone when the app is closed come with the Android app.</p><button class="btn ghost" id="x">Close</button>`);
+  $("#panel").querySelectorAll("[data-nt]").forEach(el=>{const go=()=>{const n=list[+el.dataset.nt];if(!n)return;const t=(n.text||"").toLowerCase();
+   if(/your video/.test(t)){close();tab(1)}
+   else if(/following/.test(t)){close();profile()}
+   else if(/message/.test(t)){secFull=true;inbox()}
+   else if(/going to/.test(t)){explore("events")}
+   else{secFull=true;social()}};
+   el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
  me.ns=Date.now();badge();
  try{const D=await claude.use("db");if(D&&me.uid)await D.collection("data/users/"+me.uid).doc("notifseen").set({ts:me.ns})}catch(e){}
 }
