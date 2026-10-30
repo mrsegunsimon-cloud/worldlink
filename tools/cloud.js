@@ -61,6 +61,14 @@
   docUrl:function(col,id){return FS+"/"+col+"/"+encodeURIComponent(id)},
   on:function(col){return !!window.__wlUser||col==="videos"},
   list:async function(col){
+   /*wlCache: 3 min cache + stale fallback so a quota error never blanks the app and reads stay low*/
+   if(col==="dms")return WLCloud._l0(col);
+   var K="wlc_"+col,now=Date.now(),c=null;try{c=JSON.parse(localStorage.getItem(K)||"null")}catch(e){}
+   if(c&&c.d&&now-c.t<180000)return c.d;
+   var r=[];try{r=await WLCloud._l0(col)}catch(e){r=[]}
+   if(r&&r.length){try{localStorage.setItem(K,JSON.stringify({t:now,d:r}))}catch(e){}return r}
+   return(c&&c.d)||[]},
+  _l0:async function(col){
    if(col==="dms"&&window.__wlUser){var u=window.__wlUser.uid,a=await byField("dms","a",u),b=await byField("dms","b",u),seen={},out=[];a.concat(b).forEach(function(d){if(!seen[d.id]){seen[d.id]=1;out.push(d)}});return out}
    if(col==="videos"){try{var q=await call("POST",FS+":runQuery",{structuredQuery:{from:[{collectionId:"videos"}],orderBy:[{field:{fieldPath:"__name__"},direction:"DESCENDING"}],limit:80}},!!window.__wlUser);
     if(q&&q.length!==undefined){return q.filter(function(x){return x.document}).map(function(x){return{id:idOf(x.document),data:decDoc(x.document)}}).reverse()}}catch(e){}}
@@ -71,7 +79,7 @@
     if(!j.nextPageToken)break;pt=j.nextPageToken}
    return out},
   get:async function(col,id){var j=await call("GET",col+"/"+encodeURIComponent(id),null,!!window.__wlUser);return j?decDoc(j):null},
-  set:async function(col,id,v){var f={};for(var k in v)if(v[k]!==undefined)f[k]=enc(v[k]);await call("PATCH",col+"/"+encodeURIComponent(id),{fields:f},true)},
+  set:async function(col,id,v){try{localStorage.removeItem("wlc_"+col)}catch(e){}var f={};for(var k in v)if(v[k]!==undefined)f[k]=enc(v[k]);await call("PATCH",col+"/"+encodeURIComponent(id),{fields:f},true)},
   upload:async function(file,onp){
    var t=await tok();if(!t||!window.__wlUser)throw new Error("Sign in first");
    var ext=((file.name||"").split(".").pop()||"").toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,5)||(file.type.split("/")[1]||"bin").replace(/[^a-z0-9]/g,"").slice(0,5);
