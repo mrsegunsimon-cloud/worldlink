@@ -42,6 +42,22 @@ Deno.serve(async (req) => {
     if (r.status === 409) return ok("already recorded");
     if (!r.ok) { console.error("could not save credit:", r.status, (await r.text()).slice(0, 300)); return new Response("could not save", { status: 500 }); }
     console.log("credit recorded", ref, coins);
+    // tell the buyer: a note in their notifications and an alert on their phone (never blocks the credit)
+    try {
+      const text = `🪙 ${coins} coins added to your wallet. Thank you!`;
+      await fetch(`https://firestore.googleapis.com/v1/projects/${proj}/databases/(default)/documents/notifs?documentId=${encodeURIComponent("n" + ref)}`, {
+        method: "POST", headers: { Authorization: "Bearer " + lg.idToken, "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { id: { stringValue: "n" + ref }, to: { stringValue: uid }, from: { stringValue: "WorldLink" }, text: { stringValue: text }, ts: { integerValue: String(Date.now()) } } }),
+      });
+      const sb = Deno.env.get("SUPABASE_URL"), ak = Deno.env.get("SUPABASE_ANON_KEY") || "";
+      for (const fn of ["Push-alerts", "push-alerts"]) {
+        const pr = await fetch(sb + "/functions/v1/" + fn, {
+          method: "POST", headers: { "Content-Type": "application/json", "x-wl-token": lg.idToken, apikey: ak, Authorization: "Bearer " + ak },
+          body: JSON.stringify({ a: "send", to: uid, t: "WorldLink", b: text, tag: "coins" }),
+        });
+        if (pr.status !== 404) break;
+      }
+    } catch (e) { console.error("notify failed:", String(e)); }
     return ok("recorded");
   } catch (e) {
     console.error("webhook error:", String(e));
