@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.text();
     const secret = Deno.env.get("PAYSTACK_SECRET") || "";
-    if (!secret) return new Response("not set up", { status: 500 });
+    if (!secret) { console.error("PAYSTACK_SECRET missing"); return new Response("not set up", { status: 500 }); }
     if ((await hmac512(secret, body)) !== (req.headers.get("x-paystack-signature") || "")) return new Response("bad signature", { status: 401 });
     const ev = JSON.parse(body);
     if (ev.event !== "charge.success") return ok("ignored");
@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: Deno.env.get("SRV_EMAIL"), password: Deno.env.get("SRV_PASSWORD"), returnSecureToken: true }),
     })).json();
-    if (!lg.idToken) return new Response("helper sign-in failed", { status: 500 });
+    if (!lg.idToken) { console.error("helper sign-in failed:", JSON.stringify(lg).slice(0, 300)); return new Response("helper sign-in failed", { status: 500 }); }
     const r = await fetch(`https://firestore.googleapis.com/v1/projects/${proj}/databases/(default)/documents/credits?documentId=${encodeURIComponent(ref)}`, {
       method: "POST", headers: { Authorization: "Bearer " + lg.idToken, "Content-Type": "application/json" },
       body: JSON.stringify({ fields: {
@@ -40,9 +40,11 @@ Deno.serve(async (req) => {
       } }),
     });
     if (r.status === 409) return ok("already recorded");
-    if (!r.ok) return new Response("could not save", { status: 500 });
+    if (!r.ok) { console.error("could not save credit:", r.status, (await r.text()).slice(0, 300)); return new Response("could not save", { status: 500 }); }
+    console.log("credit recorded", ref, coins);
     return ok("recorded");
   } catch (e) {
+    console.error("webhook error:", String(e));
     return new Response("error", { status: 500 });
   }
 });
