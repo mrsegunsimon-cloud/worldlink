@@ -26,6 +26,8 @@ jobs:
           mkdir -p site
           python3 tools/make_web.py assets/web/index.html assets/firebase_config.json site/index.html
           touch site/.nojekyll
+      - name: Install-on-phone files (icons and manifest)
+        run: cp assets/pwa/* site/
       - name: Background uploads (service worker)
         run: cp tools/sw.js site/sw.js
       - name: Fast video cutter

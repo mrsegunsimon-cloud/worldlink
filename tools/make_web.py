@@ -7,8 +7,9 @@ fc={"apiKey":c["apiKey"],"authDomain":c["projectId"]+".firebaseapp.com","project
 shim=open(__file__.replace('make_web.py','webshim.js'),encoding='utf8').read().replace('__FIREBASE_CONFIG__',json.dumps(fc))
 csp=("default-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.gstatic.com https://js.paystack.co https://worldlink.app; worker-src 'self' blob: https://worldlink.app;  style-src 'self' 'unsafe-inline'; "
  "img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; font-src 'self' data:; "
- "connect-src https: wss:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://checkout.paystack.com")
-head='<meta http-equiv="Content-Security-Policy" content="%s"><meta name="referrer" content="no-referrer"><script>%s</script>'%(csp,shim)
+ "connect-src https: wss:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://checkout.paystack.com")
+inst=open(__file__.replace('make_web.py','install.js'),encoding='utf8').read()
+head='<link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#12307F"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="WorldLink"><script>'+inst+'</script>'+'<meta http-equiv="Content-Security-Policy" content="%s"><meta name="referrer" content="no-referrer"><script>%s</script>'%(csp,shim)
 assert '<head>' in s
 s=s.replace('<head>','<head>'+head,1)
 # Move big embedded songs, pictures and videos out of the page so it downloads fast
