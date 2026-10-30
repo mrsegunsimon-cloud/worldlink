@@ -26,8 +26,9 @@ Deno.serve(async (req) => {
     if (b.a === "sub") {
       const s = b.sub;
       if (!s || typeof s.endpoint !== "string" || !s.endpoint.startsWith("https://")) return json({ ok: false }, 400);
-      const r = await fetch(SB + "/rest/v1/push_subs?on_conflict=uid", {
-        method: "POST", headers: { ...H, Prefer: "resolution=merge-duplicates" },
+      await fetch(SB + "/rest/v1/push_subs?uid=eq." + encodeURIComponent(me), { method: "DELETE", headers: H });
+      const r = await fetch(SB + "/rest/v1/push_subs", {
+        method: "POST", headers: H,
         body: JSON.stringify({ uid: me, sub: s, updated: new Date().toISOString() }),
       });
       return json({ ok: r.ok });
