@@ -10,6 +10,7 @@ VP="BMGhFI0Jh4o69Cesc3iH5iUIDkxkovHKZ1dFXhDn-NYm61_TKSWg65tvku8OAY6j7klZhDJnQHOP
 NEW=r'''/* wlPush: phone alerts when the app is closed (website, Chrome) */
 const VAPID_PUB="__VP__";
 const b64u=t=>{const p="=".repeat((4-t.length%4)%4),b=(t+p).replace(/-/g,"+").replace(/_/g,"/"),r=atob(b),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o};
+async function pushFn(b){let r=null;for(const n of["Push-alerts","push-alerts"]){try{r=await WLCloud.fn(n,b);if(r&&r._s&&r._s!==404)return r}catch(e){r=null}}return r}
 const pushOK=()=>!!(window.WLCloud&&WLCloud.fn&&"serviceWorker"in navigator&&"PushManager"in window&&"Notification"in window&&window.__wlUser);
 async function swReg(){
  let reg=await navigator.serviceWorker.getRegistration("/");
@@ -26,11 +27,11 @@ async function pushSub(ask){
   const reg=await swReg();
   let sub=await reg.pushManager.getSubscription();
   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
-  const r=await WLCloud.fn("push-alerts",{a:"sub",sub:sub.toJSON()});
+  const r=await pushFn({a:"sub",sub:sub.toJSON()});
   if(r&&r.ok)return"on";window.__pushWhy="server said "+(r?(r._s+" "+(r.why||"")):"nothing");return"error"
  }catch(e){window.__pushWhy=(e&&e.name||"error")+": "+(e&&e.message||"");return"error"}
 }
-function pushTo(uid,title,body,tag){try{if(uid&&window.WLCloud&&WLCloud.fn&&window.__wlUser)WLCloud.fn("push-alerts",{a:"send",to:uid,t:title,b:body,tag:tag||"wl"}).catch(()=>{})}catch(e){}}
+function pushTo(uid,title,body,tag){try{if(uid&&window.WLCloud&&WLCloud.fn&&window.__wlUser)pushFn({a:"send",to:uid,t:title,b:body,tag:tag||"wl"}).catch(()=>{})}catch(e){}}
 setInterval(()=>{if(!window.__wlPS&&pushOK()&&Notification.permission==="granted"){window.__wlPS=1;pushSub(false).then(r=>{window.__pushState=r})}},4000);
 '''.replace("__VP__",VP)
 rep('let RTL=false;',NEW+'let RTL=false;')
