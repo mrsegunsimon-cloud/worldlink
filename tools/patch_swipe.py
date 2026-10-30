@@ -40,7 +40,7 @@ NEW='${DMS.filter(d=>wlVis(d)===0).map(DMROW).join("")}${(()=>{const ar=DMS.filt
 rep(OLD,NEW)
 rep(' $("#panel").querySelectorAll("[data-dm]").forEach(b=>b.onclick=()=>dmOpenById(b.dataset.dm));\n}',
  ''' $("#panel").querySelectorAll("[data-dm]").forEach(b=>b.onclick=()=>dmOpenById(b.dataset.dm));
- const arc=$("#arc");if(arc)arc.onclick=()=>{INB_ARCH=!INB_ARCH;inbox()};
+ const arc=$("#arc");if(arc)arc.onclick=()=>{INB_ARCH=!INB_ARCH;inbox();setTimeout(()=>{const g=$("#arc");if(g)g.scrollIntoView({block:INB_ARCH?"start":"center"})},60)};
  swipeRows($("#panel"),"[data-dm]",el=>{const d=DMS.find(x=>x.id===el.dataset.dm);if(!d)return null;return wlVis(d)===2?[{k:"un",l:"Unarchive",c:"#6B7280"},{k:"del",l:"Delete",c:"#E5233A"}]:[{k:"arc",l:"Archive",c:"#6B7280"},{k:"del",l:"Delete",c:"#E5233A"}]},(k,el)=>{const d=DMS.find(x=>x.id===el.dataset.dm);if(!d)return;const h=wlHS();if(k==="un")delete h["dm:"+d.id];else h["dm:"+d.id]={t:wlLast(d)||Date.now(),a:k==="arc"?1:0};wlHSave(h);inbox()});
 }''')
 # notifications: hide deleted ones everywhere (also the red badge)
