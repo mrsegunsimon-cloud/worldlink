@@ -62,6 +62,8 @@
   on:function(col){return !!window.__wlUser||col==="videos"},
   list:async function(col){
    if(col==="dms"&&window.__wlUser){var u=window.__wlUser.uid,a=await byField("dms","a",u),b=await byField("dms","b",u),seen={},out=[];a.concat(b).forEach(function(d){if(!seen[d.id]){seen[d.id]=1;out.push(d)}});return out}
+   if(col==="videos"){try{var q=await call("POST",FS+":runQuery",{structuredQuery:{from:[{collectionId:"videos"}],orderBy:[{field:{fieldPath:"__name__"},direction:"DESCENDING"}],limit:80}},!!window.__wlUser);
+    if(q&&q.length!==undefined){return q.filter(function(x){return x.document}).map(function(x){return{id:idOf(x.document),data:decDoc(x.document)}}).reverse()}}catch(e){}}
    var out=[],pt="";
    for(var i=0;i<10;i++){
     var j=await call("GET",col+"?pageSize=300"+(pt?"&pageToken="+encodeURIComponent(pt):""),null,!!window.__wlUser);
