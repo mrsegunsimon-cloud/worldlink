@@ -203,7 +203,7 @@ const $=s=>document.querySelector(s);
 const fmt=n=>n>=1e3?(n/1e3).toFixed(n>=1e4?0:1).replace(/\.0$/,"")+"K":""+n;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const blocked=(u,n)=>{try{return me.b.some(x=>(u&&x.u===u)||x.n===n)}catch(e){return false}};
-const mk=n=>(n===0?CLIPS.map((_,i)=>i).filter(i=>me.f.includes(CLIPS[i].u)):CLIPS.map((_,i)=>i).filter(i=>i>=5).reverse().concat([0,1,2,3,4])).filter(i=>!blocked(CLIPS[i].uid,CLIPS[i].u)).sort((a,b)=>((CLIPS[b].bu>Date.now())-(CLIPS[a].bu>Date.now())));
+const mk=n=>(n===0?CLIPS.map((_,i)=>i).filter(i=>me.f.includes(CLIPS[i].u)):CLIPS.map((_,i)=>i).filter(i=>i>=5).reverse().concat([0,1,2,3,4])).filter(i=>!blocked(CLIPS[i].uid,CLIPS[i].u)&&!wlPrivHide(CLIPS[i])).sort((a,b)=>((CLIPS[b].bu>Date.now())-(CLIPS[a].bu>Date.now())));
 /*learn*/(function(){const B="https://worldlink.app/starter/";[["lang0", "Yoruba: E ku aaro = Good morning"], ["lang1", "Swahili: Habari yako = How are you"], ["lang2", "Hausa: Sannu = Hello"], ["lang3", "French: Bonjour = Hello"], ["lang4", "Spanish: Buenos dias = Good morning"], ["lang5", "Portuguese: Obrigado = Thank you"], ["lang6", "Japanese: Konnichiwa = Hello"], ["lang7", "Hindi: Namaste = Greetings"], ["tip0", "Study tip 1: Study 25 minutes Rest 5 minutes, Repeat 4 times"], ["tip1", "Study tip 2: Put your phone in another room, Focus doubles"], ["tip2", "Study tip 3: Teach what you learn to a friend, You remember more"], ["tip3", "Study tip 4: Sleep 7-8 hours Your brain saves, what you studied"], ["tip4", "Study tip 5: Write 3 questions after every lesson, Test yourself"], ["tip5", "Study tip 6: Drink water Short walk, Fresh mind"], ["tip6", "Study tip 7: Start with the hardest subject, while you are fresh"], ["tip7", "Study tip 8: Plan tomorrow tonight in 5 minutes, Less stress"], ["fact0", "World fact 1: Africa has 54 countries, More than any continent"], ["fact1", "World fact 2: Brazil has the Amazon forest, Over 20% of Earth's oxygen cycle"], ["fact2", "World fact 3: Japan has over 6,800 islands, Only 14 are big"], ["fact3", "World fact 4: Nigeria is Africa's most populous, over 200 million people"], ["fact4", "World fact 5: The Pacific Ocean is bigger than, all land combined"], ["fact5", "World fact 6: Iceland has no mosquitoes, and lots of volcanoes"], ["fact6", "World fact 7: Canada has the longest coastline, on Earth"], ["fact7", "World fact 8: India has over 20 official, languages"]].reverse().forEach(([k,c])=>CLIPS.push({u:"WorldLink Learn (made by WorldLink)",c:c+" 📚 #learn",m:"Music: Tanner Helland (CC BY 4.0)",l:0,g:["#0f766e","#1d4ed8"],e:"📚",cm:[],uid:"worldlink-learn",id:"wllearn-"+k,src:B+k+".mp4"}))})();
 /*starter*/(function(){const B="https://worldlink.app/starter/";[["welcome","Welcome to WorldLink! Share your day with the world 🌍 #welcome"],["howpost","How to post your first video: tap + , record, add a caption, post 🎬 #howto"],["explore","Explore live news, sports, music and beaches in one app ⚽🏖️🎵 #explore"],["safe","Your videos are yours - delete any time from your Profile 🔒 #privacy"],["music","Free songs and music videos in Discover 🎶 #music"],["invite","Be an early creator - invite 3 friends and earn free coins 🎁 #invite"]].reverse().forEach(([k,c])=>CLIPS.push({u:"WorldLink Team ✔ (official)",c:c+" · Official WorldLink video",m:"Music: Tanner Helland (CC BY 4.0)",l:0,g:["#0f766e","#1d4ed8"],e:"🌍",cm:[],uid:"worldlink-team",id:"wlteam-"+k,src:B+k+".mp4"}))})();
 let order=mk(1),liked={},saved={};const sv0=i=>(CLIPS[i].l>>3)+(saved[i]?1:0);CLIPS.forEach((c,i)=>{c.id=c.id||"s"+i});
@@ -336,7 +336,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.30-R</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.10.30-S</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -396,16 +396,33 @@ function hlView(i){
  $("#bk").onclick=()=>profile();
  $("#hd").onclick=async()=>{me.hl.splice(i,1);await saveHL();profile()};
 }
+/*wlPrivacy1*/function wlNote(t){const o=document.getElementById("wlnote");if(o)o.remove();const e=document.createElement("div");e.id="wlnote";e.textContent=t;e.style.cssText="position:fixed;left:50%;bottom:90px;transform:translateX(-50%);max-width:86%;background:rgba(0,0,0,.85);color:#fff;padding:11px 16px;border-radius:14px;font:600 14px system-ui,sans-serif;z-index:99999;text-align:center";document.body.appendChild(e);setTimeout(()=>e.remove(),3500)}
+function privOf(uid){const x=(typeof PROF!=="undefined"?PROF:[]).find(y=>y.uid===uid);return(x&&x.priv)||{}}
+async function followsMe(uid){try{if(!FOLLOWS||Date.now()-(window.__flAt||0)>60000){await loadFollowsAll();window.__flAt=Date.now()}const e=(FOLLOWS||[]).find(d=>d.uid===uid);const mn=String(me.name||"").trim().toLowerCase();return !!(e&&(e.list||[]).some(x=>String(x||"").trim().toLowerCase()===mn))}catch(e){return true}}
+async function wlMayMsg(uid){const p=privOf(uid);if(!uid||p.m!=="f")return true;return await followsMe(uid)}
+async function wlMayCmt(uid){const p=privOf(uid);if(!uid||!p.c||p.c==="a")return true;if(p.c==="n")return false;return await followsMe(uid)}
+function wlPrivHide(c){try{return !!(c&&c.uid&&c.uid!==me.uid&&privOf(c.uid).p&&!(me.f||[]).includes(c.u))}catch(e){return false}}
+function privacy(){
+ me.priv=Object.assign({m:"a",c:"a",p:0},me.priv||{});
+ const seg=(k,opts)=>`<div style="display:flex;flex-direction:column;gap:6px;margin:8px 0 16px">${opts.map(o=>`<button class="btn${String(me.priv[k])===String(o[0])?"":" ghost"}" data-pk="${k}" data-pv="${o[0]}" style="margin:0;text-align:left">${String(me.priv[k])===String(o[0])?"✓ ":""}${o[1]}</button>`).join("")}</div>`;
+ open(`<h2 style="text-align:center">🔒 Privacy</h2><b>Private account</b><p class="mute" style="margin:2px 0 0;font-size:14px">Only people you follow back and who follow you see your videos on Home and on your profile.</p>${seg("p",[[0,"Public. Everyone can see my videos"],[1,"Private. Only my followers"]])}<b>Who can message me</b>${seg("m",[["a","Everyone"],["f","Only people I follow"]])}<b>Who can comment on my videos</b>${seg("c",[["a","Everyone"],["f","Only people I follow"],["n","No one"]])}<p class="note" id="pvn" style="text-align:center"></p><button class="btn ghost" id="pvx">Close</button>`);
+ $("#pvx").onclick=close;
+ $("#panel").querySelectorAll("[data-pk]").forEach(b=>b.onclick=async()=>{
+  const k=b.dataset.pk,v=b.dataset.pv;me.priv[k]=k==="p"?+v:v;
+  try{const D=await claude.use("db");if(D&&me.uid){const r=await D.collection("profiles").doc(me.uid).get();await D.collection("profiles").doc(me.uid).set(Object.assign(r.exists?r.data():{name:me.name,bio:me.bio||""},{priv:me.priv}));try{const q=PROF.find(x=>x.uid===me.uid);if(q)q.priv=me.priv}catch(e){}}}catch(e){}
+  privacy();const n=$("#pvn");if(n)n.textContent="Saved ✓";
+ });
+}
 function profMenu(){
  const old=document.getElementById("pmenu");if(old)old.remove();
  const ch='<span class="ch">›</span>';
  const row=(id,ic,l)=>`<button class="pmr" data-pr="${id}"><span class="pi">${ic}</span>${l}${ch}</button>`;
  const el=document.createElement("div");el.id="pmenu";
- el.innerHTML=`<div class="pp"><div class="pmg">${row("wl","👛","Balance and earnings")}</div><div class="pmg">${row("bc","🪙","Buy coins")}${row("iv","📨","Invite friends")}</div><div class="pmg">${row("au","👤","Sign in or create account")}${row("bl","🚫","Blocked accounts ("+me.b.length+")")}</div><div class="pmg">${row("md","🛡️","Moderator tools")}${row("lg","🌐","Language")}${row("th","◐","Theme")}</div></div>`;
+ el.innerHTML=`<div class="pp"><div class="pmg">${row("wl","👛","Balance and earnings")}</div><div class="pmg">${row("bc","🪙","Buy coins")}${row("iv","📨","Invite friends")}</div><div class="pmg">${row("au","👤","Sign in or create account")}${row("pv","🔒","Privacy")}${row("bl","🚫","Blocked accounts ("+me.b.length+")")}</div><div class="pmg">${row("md","🛡️","Moderator tools")}${row("lg","🌐","Language")}${row("th","◐","Theme")}</div></div>`;
  document.body.appendChild(el);
  const shut=()=>el.remove();
  el.onclick=e=>{if(e.target===el)shut()};
- const A={wl:wallet,bc:()=>buyCoins(),iv:inviteFriends,au:()=>authSheet("up"),bl:blockedList,md:modScreen,lg:langSheet,th:theme};
+ const A={wl:wallet,bc:()=>buyCoins(),iv:inviteFriends,au:()=>authSheet("up"),pv:privacy,bl:blockedList,md:modScreen,lg:langSheet,th:theme};
  el.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{shut();A[b.dataset.pr]()});
 }
 function profile(tabk){
@@ -511,7 +528,7 @@ function editProfile(){
   const n=$("#nm").value.trim().replace(/[^a-zA-Z0-9._]/g,"");
   if(n.length<3){$("#st").textContent="Username needs at least 3 letters or numbers.";return}
   me.name=n;me.bio=$("#bi").value.trim();
-  try{const D=await claude.use("db");if(D&&me.uid)await D.collection("profiles").doc(me.uid).set({name:me.name,bio:me.bio,pic:me.pic||""})}catch(e){}
+  try{const D=await claude.use("db");if(D&&me.uid)await D.collection("profiles").doc(me.uid).set({name:me.name,bio:me.bio,pic:me.pic||"",priv:me.priv||{m:"a",c:"a",p:0}})}catch(e){}
   profile();
  };
 }
@@ -744,6 +761,7 @@ function comments(i){
  open(`<h2 style="text-align:center;font-size:16px">${all.length} comment${all.length===1?"":"s"}</h2><div style="max-height:46vh;overflow-y:auto">${all.map(row).join("")||'<p class="mute" style="text-align:center">Be the first to comment.</p>'}</div><div style="display:flex;gap:8px;align-items:center"><input class="in" id="ci" maxlength="140" placeholder="Add comment..." aria-label="Comment" style="margin:10px 0 0;border-radius:999px;background:var(--bg)"><button class="btn" id="cs" style="width:auto;margin:10px 0 0;border-radius:999px;padding:11px 18px">Post</button></div><button class="btn ghost" id="x">Close</button>`);
  $("#cs").onclick=async()=>{
   const v=$("#ci").value.trim();if(!v)return;
+  if(c.uid&&c.uid!==me.uid&&!(await wlMayCmt(c.uid))){wlNote("Comments are limited on this video by its owner.");return}
   (c.sc=c.sc||[]).push({n:me.name,t:v});
   const r=R[c.id]=R[c.id]||{likes:[],comments:[]};r.id=c.id;r.comments=c.sc.slice(-100);
   const n=$("#cc"+i);if(n)n.textContent=c.cm.length+c.sc.length;
@@ -2329,6 +2347,7 @@ function dmShow(d,pre){
   const l=$("#ml");l.scrollTop=l.scrollHeight;
  $("#bk").onclick=()=>{dmCur=null;loadDMS().then(inbox)};wireSend();
  const sendObj=async o=>{
+  if(!(await wlMayMsg(dmOther(d).u))){wlNote("This person only accepts messages from people they follow.");return}
   try{const D=await claude.use("db");if(D){const s=await D.collection("dms").doc(d.id).get();if(s.exists){const r=s.data();if(r.m&&r.m.length>d.m.length)d.m=r.m}}}catch(e){}
   d.m.push(Object.assign({f:me.uid,n:me.name,ts:Date.now()},o));d.m=d.m.slice(-200);
   try{const D=await claude.use("db");if(D)await D.collection("dms").doc(d.id).set(d)}catch(e){}
@@ -3163,7 +3182,7 @@ function personSheet(n,uid,back){
  if(n===me.name&&me.name!=="you"){secFull=true;return profile()}
  const pr=(typeof PROF!=="undefined"?PROF:[]).find(x=>x.name===n);if(!uid&&pr)uid=pr.uid;
  const person=PEOPLE.find(x=>x[0]===n),f=(me.f||[]).includes(n);
- const idx=CLIPS.map((c,i)=>i).filter(i=>CLIPS[i].u===n&&CLIPS[i].src&&!blocked(CLIPS[i].uid,CLIPS[i].u));
+ const idx=CLIPS.map((c,i)=>i).filter(i=>CLIPS[i].u===n&&CLIPS[i].src&&!blocked(CLIPS[i].uid,CLIPS[i].u)&&!wlPrivHide(CLIPS[i]));
  const likes=idx.reduce((a,i)=>a+cnt(i),0),bio=(pr&&pr.bio)||(person?person[1]:"")||"New on WorldLink";
  const pic=pr&&pr.pic?`<img src="${esc(pr.pic)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:esc(n[0].toUpperCase());
  const tile=i=>`<div data-pv="${i}" style="position:relative;cursor:pointer;aspect-ratio:3/4;background:#222;overflow:hidden"><video src="${esc(CLIPS[i].src)}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video><span style="position:absolute;left:6px;bottom:4px;color:#fff;font-weight:700;font-size:13px;text-shadow:0 1px 3px #000">▷ ${fmt(vcnt(i))}</span></div>`;
@@ -3372,9 +3391,9 @@ function create0(){
   $("#x").onclick=close;
  };
 }
-async function wlBoot(){try{const D=await claude.use("db");if(!D)return;try{const U=await claude.use("user");if(U){me.uid=await U.id();const p=await D.collection("profiles").doc(me.uid).get();if(p.exists){const d=p.data();me.name=d.name||me.name;me.bio=d.bio||"";if(d.pic)me.pic=d.pic}const fs=await D.collection("follows").doc(me.uid).get();if(fs.exists)me.f=fs.data().list||[];const bs=await D.collection("data/users/"+me.uid).doc("blocks").get();if(bs.exists)me.b=bs.data().list||[]}}catch(e){}const s=await D.collection("videos").get();
+async function wlBoot(){try{const D=await claude.use("db");if(!D)return;try{const U=await claude.use("user");if(U){me.uid=await U.id();const p=await D.collection("profiles").doc(me.uid).get();if(p.exists){const d=p.data();me.name=d.name||me.name;me.bio=d.bio||"";if(d.pic)me.pic=d.pic;me.priv=d.priv||null}const fs=await D.collection("follows").doc(me.uid).get();if(fs.exists)me.f=fs.data().list||[];const bs=await D.collection("data/users/"+me.uid).doc("blocks").get();if(bs.exists)me.b=bs.data().list||[]}}catch(e){}const s=await D.collection("videos").get();
  s.docs.map(d=>d.data()).filter(v=>v&&!v.del&&!CLIPS.some(c=>c.id===(v.id||"o"+v.ts))).sort((a,b)=>a.ts-b.ts).forEach(v=>CLIPS.push({u:v.u||"you",c:v.c||"",m:"Original sound - "+(v.u||"you"),l:0,g:["#222","#444"],e:"🎬",cm:[],uid:v.uid,bu:v.bu||0,id:v.id||"o"+v.ts,src:v.url}));
- try{await loadR(D)}catch(e){}order=mk(1);build();setTimeout(grantFC,2500)}catch(e){}}
+ try{await loadR(D)}catch(e){}try{if(!PROF.length)await loadProfs()}catch(e){}order=mk(1);build();setTimeout(grantFC,2500)}catch(e){}}
 wlBoot();
 
 /* wlHomeUX: pull down on the first video to load the latest videos */
