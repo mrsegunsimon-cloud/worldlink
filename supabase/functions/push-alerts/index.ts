@@ -14,7 +14,12 @@ const SB = Deno.env.get("SUPABASE_URL")!, KEY = Deno.env.get("SUPABASE_SERVICE_R
 const H = { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" };
 const recent = new Map<string, number[]>();
 
-webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://worldlink.app", Deno.env.get("VAPID_PUBLIC")!, Deno.env.get("VAPID_PRIVATE")!);
+let vapidOk = false;
+function vapid() {
+  if (vapidOk) return;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://worldlink.app", (Deno.env.get("VAPID_PUBLIC") || "").trim(), (Deno.env.get("VAPID_PRIVATE") || "").trim());
+  vapidOk = true;
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -34,6 +39,7 @@ Deno.serve(async (req) => {
       return json({ ok: r.ok });
     }
     if (b.a === "send") {
+      vapid();
       const to = String(b.to || "");
       if (!to || to === me) return json({ ok: false });
       // at most 30 alerts a minute per sender
