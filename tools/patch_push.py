@@ -11,12 +11,19 @@ NEW=r'''/* wlPush: phone alerts when the app is closed (website, Chrome) */
 const VAPID_PUB="__VP__";
 const b64u=t=>{const p="=".repeat((4-t.length%4)%4),b=(t+p).replace(/-/g,"+").replace(/_/g,"/"),r=atob(b),o=new Uint8Array(r.length);for(let i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o};
 const pushOK=()=>!!(window.WLCloud&&WLCloud.fn&&"serviceWorker"in navigator&&"PushManager"in window&&"Notification"in window&&window.__wlUser);
+async function swReg(){
+ let reg=await navigator.serviceWorker.getRegistration("/");
+ if(!reg||!(reg.active)){try{const all=await navigator.serviceWorker.getRegistrations();for(const r of all){if(!r.active)await r.unregister()}}catch(e){}reg=await navigator.serviceWorker.register("/sw.js")}
+ for(let i=0;i<40&&!reg.active;i++)await new Promise(r=>setTimeout(r,250));
+ if(!reg.active)throw new Error("The phone's background helper did not start. Close the app fully and try again.");
+ return reg
+}
 async function pushSub(ask){
  try{
   if(!pushOK())return"unsupported";
   if(Notification.permission==="denied")return"denied";
   if(Notification.permission!=="granted"){if(!ask)return"off";const r=await Notification.requestPermission();if(r!=="granted")return"denied"}
-  const reg=await navigator.serviceWorker.ready;
+  const reg=await swReg();
   let sub=await reg.pushManager.getSubscription();
   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
   const r=await WLCloud.fn("push-alerts",{a:"sub",sub:sub.toJSON()});
