@@ -66,6 +66,11 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Email addresses for updates: only the payments helper account (used by the email function) can touch them
+    match /mails/{id} {
+      allow read, write: if signedIn() && request.auth.token.email == 'payments@worldlink.app';
+    }
+
     // Reports are for moderators only
     match /reports/{id} {
       allow create: if signedIn();
