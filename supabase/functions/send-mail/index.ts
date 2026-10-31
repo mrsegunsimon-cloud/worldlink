@@ -99,9 +99,13 @@ Deno.serve(async (req) => {
       const subject = String(b.subject || "").trim().slice(0, 150), text = String(b.text || "").trim().slice(0, 5000);
       if (!subject || !text) return json({ ok: false, why: "write a subject and a message" }, 400);
       const body = esc(text).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+      const base = (Deno.env.get("SUPABASE_URL") || "") + "/storage/v1/object/public/";
+      const okUrl = (u: unknown) => typeof u === "string" && u.startsWith(base);
+      const media = (okUrl(b.img) ? `<p><img src="${esc(b.img)}" alt="" style="max-width:100%;border-radius:12px"></p>` : "")
+        + (okUrl(b.vid) ? `<p><a href="${esc(b.vid)}" style="display:inline-block;background:#12307F;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:700">▶ Watch the video</a></p>` : "");
       const mk = async (to: string, id: string) => ({
         from: FROM, to: [to], subject,
-        html: wrap(body + `<p><a href="https://worldlink.app" style="display:inline-block;background:#FF7A1A;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:700">Open WorldLink</a></p>`,
+        html: wrap(body + media + `<p><a href="https://worldlink.app" style="display:inline-block;background:#FF7A1A;color:#fff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:700">Open WorldLink</a></p>`,
           `You get this because you have a WorldLink account. <a href="${Deno.env.get("SUPABASE_URL")}/functions/v1/send-mail?u=${encodeURIComponent(id)}&t=${await sign(id)}">Unsubscribe</a>`),
       });
       if (b.a === "test") { await sendBatch([await mk(email, uid)]); return json({ ok: true, sent: 1 }); }
