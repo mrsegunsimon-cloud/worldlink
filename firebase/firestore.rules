@@ -31,7 +31,8 @@ service cloud.firestore {
 
     // Notifications are private: anyone signed in can send one, only the person it is for can read or clear it
     match /notifs/{id} {
-      allow create: if signedIn() && (request.resource.data.to != '*' || isMod());
+      allow create: if signedIn() && (request.resource.data.to != '*' || isMod()
+        || (request.resource.data.get('k', '') == 'series' && id.matches('ns_.*')));
       allow read: if signedIn() && (resource.data.to == request.auth.uid || resource.data.to == '*');
       allow update, delete: if signedIn() && resource.data.to == request.auth.uid;
     }

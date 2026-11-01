@@ -1,4 +1,4 @@
-/*wlSeries1*//*wlSeries2*//*wlSeries3*//*wlSeries4*//*wlSeries5*/
+/*wlSeries1*//*wlSeries2*//*wlSeries3*//*wlSeries4*//*wlSeries5*//*wlSeries6*/
 var SER=[],EPS=[],SERL=false;
 async function loadSeries(){try{const D=await claude.use("db");if(!D)return;const a=await D.collection("series").get(),b=await D.collection("episodes").get();SER=a.docs.map(d=>d.data()).filter(x=>x&&x.id&&!x.del).sort((p,q)=>q.ts-p.ts);EPS=b.docs.map(d=>d.data()).filter(x=>x&&x.id&&x.url&&!x.del).sort((p,q)=>(p.n||0)-(q.n||0));SERL=true}catch(e){}}
 const serEps=id=>EPS.filter(e=>e.sid===id).sort((a,b)=>(a.n||0)-(b.n||0));
@@ -55,6 +55,16 @@ function serThumb(src){
 }
 const serTh=s=>{const e=serEps(s.id).find(x=>x.th);return e?e.th:""};
 const serCover=(s,css)=>{const th=serTh(s);return th?`background:#12307F url('${esc(th)}') center/cover no-repeat;${css||""}`:`background:${serGrad(s.t)};${css||""}`};
+async function serAnnounce(s,th){
+ try{
+  const D=await claude.use("db");if(!D||!me.uid)return;
+  await D.collection("notifs").doc("ns_"+s.id).set({id:"ns_"+s.id,to:"*",from:me.name,text:'posted a new series: "'+s.t+'"',k:"series",sid:s.id,th:th||"",ts:Date.now()});
+  pushFn({a:"series",sid:s.id,t:"🎬 New series by @"+me.name,b:s.t,img:th||""}).catch(()=>{});
+ }catch(e){}
+}
+async function serDeep(sid){
+ try{secFull=true;await Promise.all([loadSeries(),serMods()]);if(SER.find(x=>x.id===sid))seriesPage(sid);else seriesHome()}catch(e){}
+}
 async function serBackfill(s){
  try{
   if(!s||s.o!==me.uid||window.__tbf&&window.__tbf[s.id])return;
@@ -104,6 +114,47 @@ function serShrink(f,vbps,prog,ctl){
    }catch(e){no(e)}
   };
  });
+}
+async function serSplit(f,ctx,back){
+ if(!me.uid){back(null,"Please sign in first.");return}
+ if(!ctx.s&&ctx.withMeta&&!(ctx.v&&ctx.v.t)){back(null,"Give your series a title first, then choose the video again.");return}
+ const m=await serMeta(f);
+ if(!m.d){back(null,"Could not read this video.");return}
+ const bps=f.size/m.d,seg=Math.max(20,Math.min(Math.floor(17e6/bps),300)),N=Math.ceil(m.d/seg);
+ if(N>60){back(null,"That video would need more than 60 episodes. Cut it shorter first.");return}
+ open(`<h2>Split into episodes</h2><p>Your ${Math.round(m.d/60)}-minute video will become about <b>${N} episodes</b> of about ${seg>=60?Math.round(seg/60*10)/10+" min":seg+" sec"} each. Every episode keeps the original quality and fits in 20 MB.</p><p class="note">This takes a few minutes. Keep this screen open and your phone charged.</p><button class="btn" id="go2">Start splitting</button><button class="btn ghost" id="bk2">Back</button>`);
+ $("#bk2").onclick=()=>back(null,"");
+ $("#go2").onclick=async()=>{
+  secFull=true;open(`<h2 style="text-align:center">Making your episodes…</h2><p id="trp" class="mute" style="text-align:center">Getting ready…</p><p class="note" style="text-align:center">Keep this screen open. Do not leave the app.</p>`);
+  const say=t=>{const p=$("#trp");if(p)p.textContent=t};
+  let wl=null;try{wl=await navigator.wakeLock.request("screen")}catch(x){}
+  let s=ctx.s,made=0,err="";
+  try{
+   const ff=await ffLoad(),webm=/webm/.test(f.type||"")||/\.webm$/i.test(f.name||""),ext=webm?"webm":"mp4",a="in."+ext,b="out."+ext;
+   say("Loading the video…");await ff.writeFile(a,new Uint8Array(await f.arrayBuffer()));
+   const A=await claude.use("assets"),D=await claude.use("db");
+   const base=s?serEps(s.id).reduce((q,x)=>Math.max(q,x.n||0),0):0;
+   for(let i=0;i<N;i++){
+    say("Episode "+(i+1)+" of "+N+": cutting…");
+    const rc=await ff.exec(["-ss",String(i*seg),"-i",a,"-t",String(seg),"-c","copy","-avoid_negative_ts","make_zero","-y",b]);
+    if(rc!==0)throw new Error("cut");
+    const d=await ff.readFile(b);try{await ff.deleteFile(b)}catch(x){}
+    if(!d||d.length<2000)break;
+    const ef=new File([d],"ep."+ext,{type:webm?"video/webm":"video/mp4"});
+    if(ef.size>20*1048576)throw new Error("big");
+    say("Episode "+(i+1)+" of "+N+": uploading…");
+    let url=null;for(let t=0;t<2&&!url;t++){try{const r=await A.upload(ef);url=r&&r.url}catch(x){}}
+    if(!url)throw new Error("upload");
+    if(!s){s={id:"sr"+Date.now(),t:ctx.v.t,d:ctx.v.d||"",u:me.name,o:me.uid,ts:Date.now()};await D.collection("series").doc(s.id).set(s);SER.unshift(s)}
+    say("Episode "+(i+1)+" of "+N+": making the picture…");const th=await serThumb(URL.createObjectURL(ef));const e={id:"ep"+Date.now()+i,sid:s.id,n:base+i+1,t:"Part "+(i+1),url,th,u:me.name,o:me.uid,ts:Date.now()};
+    await D.collection("episodes").doc(e.id).set(e);EPS.push(e);made++;if(made===1&&!ctx.s)serAnnounce(s,th);
+   }
+   try{await ff.deleteFile(a)}catch(x){}
+  }catch(x){err=x&&x.message||"error"}
+  try{wl&&wl.release()}catch(x){}
+  if(s){seriesPage(s.id);if(err){const p=document.querySelector("#panel");if(p)p.insertAdjacentHTML("afterbegin",`<p class="note" style="color:#c2410c">Posted ${made} of ${N} episodes. Something stopped the rest. You can add the remaining parts with + Add episode.</p>`)}}
+  else back(null,"Could not split this video on this phone. Try cutting it shorter.");
+ };
 }
 async function serBig(f,back,ctx){
  const m=await serMeta(f),mb=Math.round(f.size/1048576),min=m.d?Math.max(1,Math.round(m.d/60)):0;
@@ -157,7 +208,7 @@ function newSeries(){
   const url=await epUpload(f,st,btn);if(!url)return;st.textContent="Making the picture…";const th=await serThumb(URL.createObjectURL(f));
   const s={id:"sr"+Date.now(),t,d,u:me.name,o:me.uid,ts:Date.now()},e={id:"ep"+Date.now(),sid:s.id,n:1,t:et,url,th,u:me.name,o:me.uid,ts:Date.now()};
   try{const D=await claude.use("db");await D.collection("series").doc(s.id).set(s);await D.collection("episodes").doc(e.id).set(e)}catch(x){btn.disabled=false;st.textContent="Could not save. Try again.";return}
-  SER.unshift(s);EPS.push(e);seriesPage(s.id);
+  SER.unshift(s);EPS.push(e);seriesPage(s.id);serAnnounce(s,th);
  });
 }
 function addEpisode(s){
@@ -176,7 +227,7 @@ function epPlay(sid,k){
  let o=document.getElementById("spv");if(o)o.remove();
  document.body.classList.add("spo");$("#sheet").classList.remove("on");
  o=document.createElement("div");o.id="spv";o.style.cssText="position:fixed;inset:0;z-index:92;background:#0b0e1e;color:#fff;display:flex;flex-direction:column";
- o.innerHTML=`<div style="position:relative;flex:none;height:40vh;min-height:210px;background:#000"><video id="spvv" src="${esc(e.url)}" ${e.th?`poster="${esc(e.th)}"`:""} preload="auto" controls playsinline autoplay controlsList="nodownload" style="width:100%;height:100%;object-fit:contain;background:#000"></video><div id="spwm" aria-hidden="true" style="position:absolute;left:14px;top:60px;pointer-events:none;text-shadow:0 1px 5px rgba(0,0,0,.85);font-size:14px;line-height:1.15;opacity:.9;transition:all .6s"><b>🌍 WorldLink</b><div style="font-size:11px">@${esc(e.u)} · worldlink.app</div></div><button id="spx" aria-label="Close" style="position:absolute;top:max(8px,env(safe-area-inset-top,0px));left:8px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:22px">←</button></div><div id="spb" style="flex:1;min-height:0;overflow-y:auto;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px))"></div>`;
+ o.innerHTML=`<div style="position:relative;flex:none;height:40vh;min-height:210px;background:#000"><video id="spvv" crossorigin="anonymous" src="${esc(e.url)}" ${e.th?`poster="${esc(e.th)}"`:""} preload="auto" controls playsinline autoplay controlsList="nodownload" style="width:100%;height:100%;object-fit:contain;background:#000"></video><div id="spwm" aria-hidden="true" style="position:absolute;left:14px;top:60px;pointer-events:none;text-shadow:0 1px 5px rgba(0,0,0,.85);font-size:14px;line-height:1.15;opacity:.9;transition:all .6s"><b>🌍 WorldLink</b><div style="font-size:11px">@${esc(e.u)} · worldlink.app</div></div><button id="spx" aria-label="Close" style="position:absolute;top:max(8px,env(safe-area-inset-top,0px));left:8px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;font-size:22px">←</button></div><div id="spb" style="flex:1;min-height:0;overflow-y:auto;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px))"></div>`;
  document.body.appendChild(o);
  const v=$("#spvv"),wm=$("#spwm"),pos=[[14,60],[null,60],[14,null],[null,null]];let pi=0;
  const mv=setInterval(()=>{if(!document.getElementById("spv")){clearInterval(mv);return}pi=(pi+1)%4;const p=pos[pi];wm.style.left=p[0]===null?"auto":p[0]+"px";wm.style.right=p[0]===null?"14px":"auto";wm.style.top=p[1]===null?"auto":p[1]+"px";wm.style.bottom=p[1]===null?"56px":"auto"},6000);
@@ -188,7 +239,7 @@ function epPlay(sid,k){
  const draw=()=>{
   const l=e.l||[],liked=me.uid&&l.includes(me.uid),cm=e.cm||[],bt="flex:none;padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font-weight:700;font-size:14px;white-space:nowrap";
   const sc=$("#spb").scrollTop;
-  $("#spb").innerHTML=`<b style="display:block;font-size:17px;line-height:1.3">${esc(s.t)} · Episode ${e.n||k+1}${e.t?": "+esc(e.t):""}</b><div style="font-size:13px;opacity:.7;margin:3px 0 10px">👁 ${e.v||0} view${(e.v||0)===1?"":"s"} · ${ago(e.ts)==="now"?"now":ago(e.ts)+" ago"}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">${serAv(e.u,38)}<b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${esc(e.u)}</b></div><div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px"><button id="sl" style="${bt};${liked?"background:#FE2C55":""}">${liked?"❤️":"🤍"} ${l.length}</button><button id="scm" style="${bt}">💬 ${cm.length}</button><button id="ssh" style="${bt}">↗ Share</button><button id="spg" style="${bt};background:#FF7A1A">🎁 Gift</button><button id="spd" style="${bt}">⬇ Download</button>${k+1<E.length?`<button id="spn" style="${bt}">Next ▶</button>`:""}</div><p id="spm" class="note" style="margin:4px 0 0;color:#ffd0a8;display:none"></p><h3 id="scmh" style="margin:14px 0 8px;font-size:16px">Comments · ${cm.length}</h3><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">${serAv(me.name,34)}<input id="sci" maxlength="300" placeholder="${me.uid?"Add a comment…":"Sign in to comment"}" aria-label="Add a comment" style="flex:1;min-width:0;padding:11px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:15px"><button id="scs" style="padding:10px 14px;border-radius:999px;background:#FF7A1A;color:#fff;font-weight:700">Post</button></div>${cm.length?cm.slice().reverse().map(c=>`<div style="display:flex;gap:10px;margin-bottom:14px">${serAv(c.n,36)}<div style="flex:1;min-width:0"><div style="font-size:13px"><b>@${esc(c.n)}</b> <span style="opacity:.6">${c.ts?(ago(c.ts)==="now"?"now":ago(c.ts)+" ago"):""}</span></div><div style="font-size:15px;line-height:1.35;overflow-wrap:anywhere">${esc(c.t)}</div></div>${can(c)?`<button data-cd="${cm.indexOf(c)}" aria-label="Delete comment" style="opacity:.6;padding:4px 6px">✕</button>`:""}</div>`).join(""):'<p style="opacity:.6">No comments yet. Be the first.</p>'}${E.length>1?`<h3 style="margin:16px 0 8px;font-size:16px">All episodes</h3>${E.map((x,q)=>`<button data-go="${q}" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);${q===k?"color:#FF7A1A;font-weight:700":""}"><span>${q===k?"▶":"•"}</span><span>Episode ${x.n||q+1}${x.t?": "+esc(x.t):""}</span></button>`).join("")}`:""}`;
+  $("#spb").innerHTML=`<b style="display:block;font-size:17px;line-height:1.3">${esc(s.t)} · Episode ${e.n||k+1}${e.t?": "+esc(e.t):""}</b><div style="font-size:13px;opacity:.7;margin:3px 0 10px">👁 ${e.v||0} view${(e.v||0)===1?"":"s"} · ${ago(e.ts)==="now"?"now":ago(e.ts)+" ago"}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">${serAv(e.u,38)}<b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${esc(e.u)}</b></div><div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px"><button id="sl" style="${bt};${liked?"background:#FE2C55":""}">${liked?"❤️":"🤍"} ${l.length}</button><button id="scm" style="${bt}">💬 ${cm.length}</button><button id="ssh" style="${bt}">↗ Share</button><button id="spg" style="${bt};background:#FF7A1A">🎁 Gift</button><button id="spd" style="${bt}">⬇ Download</button><button id="sct" style="${bt}">📺 TV</button>${k+1<E.length?`<button id="spn" style="${bt}">Next ▶</button>`:""}</div><p id="spm" class="note" style="margin:4px 0 0;color:#ffd0a8;display:none"></p><h3 id="scmh" style="margin:14px 0 8px;font-size:16px">Comments · ${cm.length}</h3><div style="display:flex;gap:10px;align-items:center;margin-bottom:12px">${serAv(me.name,34)}<input id="sci" maxlength="300" placeholder="${me.uid?"Add a comment…":"Sign in to comment"}" aria-label="Add a comment" style="flex:1;min-width:0;padding:11px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-size:15px"><button id="scs" style="padding:10px 14px;border-radius:999px;background:#FF7A1A;color:#fff;font-weight:700">Post</button></div>${cm.length?cm.slice().reverse().map(c=>`<div style="display:flex;gap:10px;margin-bottom:14px">${serAv(c.n,36)}<div style="flex:1;min-width:0"><div style="font-size:13px"><b>@${esc(c.n)}</b> <span style="opacity:.6">${c.ts?(ago(c.ts)==="now"?"now":ago(c.ts)+" ago"):""}</span></div><div style="font-size:15px;line-height:1.35;overflow-wrap:anywhere">${esc(c.t)}</div></div>${can(c)?`<button data-cd="${cm.indexOf(c)}" aria-label="Delete comment" style="opacity:.6;padding:4px 6px">✕</button>`:""}</div>`).join(""):'<p style="opacity:.6">No comments yet. Be the first.</p>'}${E.length>1?`<h3 style="margin:16px 0 8px;font-size:16px">All episodes</h3>${E.map((x,q)=>`<button data-go="${q}" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;color:#fff;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.12);${q===k?"color:#FF7A1A;font-weight:700":""}"><span>${q===k?"▶":"•"}</span><span>Episode ${x.n||q+1}${x.t?": "+esc(x.t):""}</span></button>`).join("")}`:""}`;
   $("#spb").scrollTop=sc;
   const need=()=>{if(me.uid)return true;const m=$("#spm");m.style.display="block";m.textContent="Please sign in first.";return false};
   $("#sl").onclick=()=>{if(!need())return;const was=(e.l||[]).includes(me.uid);e.l=was?e.l.filter(u=>u!==me.uid):(e.l||[]).concat(me.uid);epSave(e);if(!was)notify(e.o,"liked your episode of "+s.t);draw()};
@@ -196,6 +247,7 @@ function epPlay(sid,k){
   $("#ssh").onclick=async()=>{const u="https://worldlink.app/";try{if(navigator.share)await navigator.share({title:s.t,text:s.t+" · Episode "+(e.n||k+1)+" on WorldLink",url:u});else{await navigator.clipboard.writeText(u);const m=$("#spm");m.style.display="block";m.textContent="Link copied."}}catch(x){}};
   $("#spg").onclick=()=>{v.pause();giftSheet({uid:e.o,u:e.u,sid:s.id})};
   $("#spd").onclick=()=>epDownload(s,e,k,v,$("#spm"),$("#spd"));
+  $("#sct").onclick=async()=>{const m=$("#spm");m.style.display="block";try{if(v.remote&&v.remote.prompt){m.textContent="Choose your TV from the list.";await v.remote.prompt()}else m.textContent="To watch on a TV: open worldlink.app in Chrome and tap TV, or use your phone's Smart View or Screen mirroring."}catch(x){m.textContent="No TV found. Check that your phone and TV are on the same Wi-Fi, or use Smart View or Screen mirroring."}};
   const nx=$("#spn");if(nx)nx.onclick=()=>{close2();epPlay(sid,k+1)};
   const post=()=>{if(!need())return;const t=$("#sci").value.trim();if(!t)return;(e.cm=e.cm||[]).push({n:me.name,o:me.uid,t,ts:Date.now()});epSave(e);notify(e.o,"commented on your episode: "+t.slice(0,40));draw()};
   $("#scs").onclick=post;$("#sci").onkeydown=ev=>{if(ev.key==="Enter"){ev.preventDefault();post()}};
@@ -242,3 +294,10 @@ async function epDownload(s,e,k,pv,msg,btn){
  }catch(x){say("Could not make the watermarked download on this phone. Please try again, or use a newer browser.")}
  btn.disabled=false;
 }
+
+(function(){
+ const m=/[?&]s=(sr\d+)/.exec(location.search);
+ const go=sid=>{let n=0;const iv=setInterval(()=>{if(++n>80){clearInterval(iv);return}try{if(!(me&&me.uid))return;clearInterval(iv);try{history.replaceState(null,"",location.pathname)}catch(e){}serDeep(sid)}catch(e){}},500)};
+ if(m)go(m[1]);
+ try{navigator.serviceWorker.addEventListener("message",e=>{const d=e.data||{};if(d.type==="openseries"&&/^sr\d+$/.test(d.sid||""))serDeep(d.sid)})}catch(e){}
+})();

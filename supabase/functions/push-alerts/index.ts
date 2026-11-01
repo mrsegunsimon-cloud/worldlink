@@ -13,6 +13,7 @@ const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: 
 const SB = Deno.env.get("SUPABASE_URL")!, KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const H = { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" };
 const recent = new Map<string, number[]>();
+const recentS = new Map<string, number[]>();
 
 let vapidOk = false;
 function vapid() {
@@ -57,6 +58,32 @@ Deno.serve(async (req) => {
         if (sc === 404 || sc === 410) await fetch(SB + "/rest/v1/push_subs?uid=eq." + encodeURIComponent(to), { method: "DELETE", headers: H });
         return json({ ok: false, why: "gone" });
       }
+    }
+    if (b.a === "series") {
+      // tell everyone who has alerts on that a new series was posted (3 per hour per person)
+      vapid();
+      const sid = String(b.sid || "");
+      if (!/^sr\d+$/.test(sid)) return json({ ok: false }, 400);
+      const now = Date.now(), L = (recentS.get(me) || []).filter((t) => now - t < 3600000);
+      if (L.length >= 3) return json({ ok: false, why: "slow down" }, 429);
+      L.push(now); recentS.set(me, L);
+      const img = String(b.img || "");
+      const okImg = img.startsWith(SB + "/storage/v1/object/public/") ? img : "";
+      const rs = await (await fetch(SB + "/rest/v1/push_subs?select=uid,sub&limit=2000", { headers: H })).json();
+      if (!Array.isArray(rs)) return json({ ok: false });
+      const msg = JSON.stringify({ t: String(b.t || "New series").slice(0, 60), b: String(b.b || "").slice(0, 120), tag: "series-" + sid, img: okImg, sid });
+      let sent = 0;
+      const todo = rs.filter((r) => r && r.uid !== me && r.sub);
+      for (let i = 0; i < todo.length; i += 25) {
+        await Promise.all(todo.slice(i, i + 25).map(async (r) => {
+          try { await webpush.sendNotification(r.sub, msg, { TTL: 3600, urgency: "normal" }); sent++; }
+          catch (e) {
+            const sc = (e as { statusCode?: number }).statusCode;
+            if (sc === 404 || sc === 410) await fetch(SB + "/rest/v1/push_subs?uid=eq." + encodeURIComponent(r.uid), { method: "DELETE", headers: H });
+          }
+        }));
+      }
+      return json({ ok: true, sent });
     }
     return json({ ok: false }, 400);
   } catch (e) {

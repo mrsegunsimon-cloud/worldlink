@@ -34,9 +34,10 @@ self.addEventListener("backgroundfetchclick",function(e){e.waitUntil(clients.ope
 self.addEventListener("notificationclick",function(e){
  e.notification.close();
  e.waitUntil((async function(){
+  var dd=(e.notification&&e.notification.data)||{};
   var l=await clients.matchAll({type:"window",includeUncontrolled:true});
-  if(l.length){try{await l[0].focus();return}catch(err){}}
-  await clients.openWindow("/");
+  if(l.length){try{await l[0].focus();if(dd.sid)l[0].postMessage({type:"openseries",sid:dd.sid});return}catch(err){}}
+  await clients.openWindow(dd.url||"/");
  })());
 });
 
@@ -45,6 +46,6 @@ self.addEventListener("push",function(e){
  var d={};try{d=e.data.json()}catch(x){d={t:"WorldLink",b:e.data?e.data.text():""}}
  e.waitUntil((async function(){
   if(await anyVisible())return;
-  await self.registration.showNotification(d.t||"WorldLink",{body:d.b||"",tag:d.tag||"wl",renotify:true,vibrate:[200,100,200],data:{url:"/"}});
+  var o={body:d.b||"",tag:d.tag||"wl",renotify:true,vibrate:[200,100,200],data:{url:d.sid?"/?s="+d.sid:"/",sid:d.sid||""}};if(d.img){o.image=d.img;o.icon=d.img}await self.registration.showNotification(d.t||"WorldLink",o);
  })());
 });
