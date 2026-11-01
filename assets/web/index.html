@@ -98,7 +98,7 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #fff
 .tabs{display:flex;gap:12px;font-weight:700;font-size:15px;white-space:nowrap}
 .tabs button{opacity:.65;padding:6px 2px;border-bottom:2px solid transparent;color:#fff}
 .tabs button.on{opacity:1;border-color:#fff}
-.top{gap:4px}.tabs{gap:14px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}
+.top{gap:2px}.tabs{gap:7px;font-size:13px;flex:1;justify-content:center;overflow-x:auto;scrollbar-width:none}.top .ib{padding:6px 4px}.tabs button{padding:6px 0}.top{padding-left:8px;padding-right:8px}
 .rail .av{width:48px;height:48px;border:3px solid #25C7F0;margin-bottom:4px}
 .fplus{width:22px;height:22px;border-radius:50%;background:#FF2D55;color:#fff;font-size:17px;font-weight:700;line-height:22px;padding:0;margin:-16px 0 0;position:relative;z-index:2;align-self:center}
 #pbar{position:fixed;left:12px;right:12px;height:3px;border-radius:2px;background:rgba(255,255,255,.3);z-index:6;pointer-events:none}
@@ -113,6 +113,7 @@ nav button{flex:1;font-size:12px;color:var(--mute);padding:4px}
 nav button .ic{display:block;font-size:22px}
 nav button.on{color:var(--ink);font-weight:700}
 nav .plus{flex:none;width:52px;height:34px;border-radius:10px;background:#fff;color:#000;font-size:24px;font-weight:700;box-shadow:-3px 0 0 #3EA6FF,3px 0 0 #FF7A1A;margin:0 8px;padding:0}
+body.spo #sheet{z-index:95}
 .sheet{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:70}
 .sheet.on{display:flex}
 .panel{background:var(--card);color:var(--ink);width:100%;max-width:560px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + 0px);max-height:80vh;overflow-y:auto}
@@ -142,7 +143,7 @@ nav{background:#000;border-top:0}nav button{color:#fff;opacity:.7}nav button.on{
 body.lt nav{background:#fff;border-top:1px solid var(--line)}body.lt nav button{color:#111}body.lt nav .plus{background:#000;color:#fff}
 nav button{position:relative}nav .nb{position:absolute;top:0;left:55%;background:#FF2D55;color:#fff;border-radius:999px;font-size:11px;font-weight:700;padding:1px 6px;display:none}
 @media (max-height:720px){.rail{gap:5px;bottom:58px}.rail .ic{font-size:24px}.rail .av{width:38px;height:38px;border-width:2px;margin-bottom:0}.rail span:not(.ic){font-size:12px}.disc{width:34px;height:34px}.rail svg{width:24px;height:24px}}
-@media (max-width:380px){.tabs{gap:9px;font-size:14px}.top .ib{padding:4px 2px}}
+@media (max-width:380px){.tabs{gap:6px;font-size:13px}.top .ib{padding:4px 2px}}
 .sheet.sec{align-items:stretch;bottom:var(--nh,62px);background:var(--card)}
 .sheet.sec .panel{max-width:none;max-height:none;height:100%;border-radius:0;padding:14px 16px 24px}
 .sb{float:left!important;margin:0 8px 6px 0!important}
@@ -171,7 +172,7 @@ body.mini .sheet.sec .panel{padding-bottom:96px}body.mini .sheet.full .pgx{paddi
 <div class="stage">
   <div class="top">
     <button class="ib" id="menu" aria-label="Open menu">☰</button>
-    <div class="tabs"><button id="t2">Community</button><button id="t0">Following</button><button id="t1" class="on">For You</button></div>
+    <div class="tabs"><button id="t2">Community</button><button id="t3">Series</button><button id="t0">Following</button><button id="t1" class="on">For You</button></div>
     <div style="display:flex;align-items:center"><button class="ib" id="bell" aria-label="Notifications" style="position:relative">🔔<b id="bd"></b></button><button class="ib" id="srch" aria-label="Search">🔍</button></div>
   </div>
   <div id="feed"></div>
@@ -325,7 +326,7 @@ $("#feed").addEventListener("click",e=>{const sb=e.target.closest("[data-csnd]")
 document.addEventListener("loadedmetadata",e=>{const v=e.target;if(v&&v.tagName==="VIDEO"&&v.closest&&v.closest("#feed")&&v.videoWidth>v.videoHeight*1.05)v.style.objectFit="contain"},true);
 $("#feed").addEventListener("keydown",e=>{if(e.key==="Enter"){const h=e.target.closest(".hc");if(h&&HCGO[h.dataset.hc])HCGO[h.dataset.hc]()}});
 function tab(n){order=mk(n);$("#t0").classList.toggle("on",n===0);$("#t1").classList.toggle("on",n===1);build();$("#feed").scrollTop=0}
-$("#t2").onclick=()=>{secFull=true;social();loadPS().then(()=>{/*wlFresh*/if(document.querySelector("#cnp"))social()})};$("#t0").onclick=()=>tab(0);$("#t1").onclick=()=>tab(1);
+$("#t2").onclick=()=>{secFull=true;social();loadPS().then(()=>{/*wlFresh*/if(document.querySelector("#cnp"))social()})};$("#t3").onclick=()=>seriesOpen();$("#t0").onclick=()=>tab(0);$("#t1").onclick=()=>tab(1);
 let secFull=false;
 let FM=false;
 function wlPI(clip,on){let i=clip.querySelector(".wlpi");if(!i){i=document.createElement("div");i.className="wlpi";i.textContent="▶";i.style.cssText="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:64px;color:#fff;background:rgba(0,0,0,.35);width:104px;height:104px;border-radius:50%;display:grid;place-items:center;pointer-events:none;z-index:4";clip.appendChild(i)}i.style.display=on?"grid":"none"}
@@ -336,7 +337,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.11.01-A</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.11.01-B</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -1825,6 +1826,122 @@ function social(){
  P.querySelectorAll("[data-d]").forEach(b=>b.onclick=async()=>{const x=find(b.dataset.d);if(!x)return;x.del=true;await saveP(x);PS=PS.filter(y=>y!==x);social()});
  P.querySelectorAll("[data-cs]").forEach(b=>b.onclick=async()=>{const x=find(b.dataset.cs),i=P.querySelector(`[data-ci="${b.dataset.cs}"]`),v=i?i.value.trim():"";if(!x||!v)return;(x.cm=x.cm||[]).push({n:me.name,t:v});await saveP(x);notify(x.o,"commented on your post: "+v.slice(0,40));social()});
 }
+/*wlSeries1*/
+var SER=[],EPS=[],SERL=false;
+async function loadSeries(){try{const D=await claude.use("db");if(!D)return;const a=await D.collection("series").get(),b=await D.collection("episodes").get();SER=a.docs.map(d=>d.data()).filter(x=>x&&x.id&&!x.del).sort((p,q)=>q.ts-p.ts);EPS=b.docs.map(d=>d.data()).filter(x=>x&&x.id&&x.url&&!x.del).sort((p,q)=>(p.n||0)-(q.n||0));SERL=true}catch(e){}}
+const serEps=id=>EPS.filter(e=>e.sid===id).sort((a,b)=>(a.n||0)-(b.n||0));
+const serGrad=t=>{const g=GRAD[hsh(t||"x")%GRAD.length];return `linear-gradient(160deg,${g[0]},${g[1]})`};
+const isMod2=()=>{try{return !!(me.uid&&window.__mods&&window.__mods.includes(me.uid))}catch(e){return false}};
+async function serMods(){try{if(window.__mods||!me.uid)return;const D=await claude.use("db");const d=await D.collection("admin").doc("mods").get();window.__mods=d.exists?((d.data()||{}).list||[]):[]}catch(e){window.__mods=[]}}
+function seriesHome(){
+ secFull=true;
+ const L=SER.filter(s=>!blocked(s.o,s.u));
+ const card=s=>{const n=serEps(s.id).length;return `<button data-sv="${esc(s.id)}" style="display:flex;gap:12px;width:100%;align-items:center;text-align:left;color:inherit;padding:10px 0;border-bottom:1px solid var(--line)"><span style="width:84px;height:112px;border-radius:14px;background:${serGrad(s.t)};display:grid;place-items:center;color:#fff;font-size:34px;flex:none;position:relative">🎬<span style="position:absolute;left:6px;bottom:6px;right:6px;font-size:11px;font-weight:700;text-align:center;background:rgba(0,0,0,.45);border-radius:6px;padding:1px 0">${n} ep</span></span><span style="flex:1;min-width:0"><b style="display:block;font-size:17px;line-height:1.25">${esc(s.t)}</b><span class="mute" style="display:block;font-size:13px;margin:2px 0 4px">by @${esc(s.u)} · ${ago(s.ts)==="now"?"now":ago(s.ts)+" ago"}</span><span style="display:block;font-size:13px;opacity:.85;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(s.d||"")}</span></span></button>`};
+ open(`<div style="display:flex;align-items:center;gap:8px;padding:2px 0 8px"><h2 style="flex:1;margin:0;font-size:30px;letter-spacing:-.02em">Series</h2><button id="sn" class="btn" style="width:auto;margin:0;padding:10px 16px">+ New series</button></div><p class="note" style="margin:0 0 6px">Watch movie series, episode by episode. Send a gift to the creator, or download an episode with the WorldLink watermark.</p>${L.length?L.map(card).join(""):`<p class="mute" style="text-align:center;padding:30px 10px">${SERL?"No series yet. Tap + New series to post the first one.":"Loading…"}</p>`}<button class="btn ghost" id="x" style="margin-top:12px">Close</button>`);
+ $("#sn").onclick=()=>newSeries();
+ $("#panel").querySelectorAll("[data-sv]").forEach(b=>b.onclick=()=>seriesPage(b.dataset.sv));
+}
+async function seriesOpen(){secFull=true;seriesHome();await Promise.all([loadSeries(),serMods()]);if(document.querySelector("#sn")&&!document.querySelector("[data-sv-open]"))seriesHome()}
+function seriesPage(id){
+ secFull=true;const s=SER.find(x=>x.id===id);if(!s){seriesHome();return}
+ const E=serEps(id),mine=s.o&&s.o===me.uid,mod=isMod2();
+ open(`<div style="display:flex;align-items:center;gap:8px"><button id="sb" aria-label="Back" style="font-size:26px;padding:4px 8px;color:inherit">←</button><h2 style="flex:1;margin:0;font-size:22px;line-height:1.2" data-sv-open="1">${esc(s.t)}</h2></div><div style="height:120px;border-radius:16px;background:${serGrad(s.t)};display:grid;place-items:center;color:#fff;font-size:44px;margin:10px 0">🎬</div><div class="mute" style="font-size:13px">by <b data-pn="${esc(s.u)}" data-pu="${esc(s.o||"")}" style="cursor:pointer">@${esc(s.u)}</b> · ${E.length} episode${E.length===1?"":"s"}</div>${s.d?`<p style="margin:8px 0">${esc(s.d)}</p>`:""}${mine?`<button class="btn" id="ae">+ Add episode</button>`:""}${E.length?E.map((e,k)=>`<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)"><button data-ep="${k}" style="flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;color:inherit"><span style="width:38px;height:38px;border-radius:50%;background:var(--acc);color:var(--accink);display:grid;place-items:center;flex:none">▶</span><span style="min-width:0"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Episode ${e.n||k+1}${e.t?": "+esc(e.t):""}</b></span></button>${(mine||mod)?`<button data-ed="${k}" aria-label="Delete episode" style="font-size:18px;opacity:.6;padding:6px">🗑️</button>`:""}</div>`).join(""):'<p class="mute">No episodes yet.</p>'}<div style="display:flex;gap:8px;margin-top:10px">${!mine?`<button class="btn ghost" id="sr" style="margin:0">Report</button>`:""}${(mine||mod)?`<button class="btn ghost" id="sd" style="margin:0">Delete series</button>`:""}</div><button class="btn ghost" id="x" style="margin-top:8px">Close</button>`);
+ $("#sb").onclick=seriesHome;
+ $("#panel").querySelectorAll("[data-ep]").forEach(b=>b.onclick=()=>epPlay(id,+b.dataset.ep));
+ $("#panel").querySelectorAll("[data-pn]").forEach(el=>el.onclick=()=>personSheet(el.dataset.pn,el.dataset.pu||"",()=>seriesPage(id)));
+ const ae=$("#ae");if(ae)ae.onclick=()=>addEpisode(s);
+ const sr=$("#sr");if(sr)sr.onclick=()=>reportFlow("video",s.id,s.o,s.u,()=>seriesPage(id));
+ const sd=$("#sd");if(sd)sd.onclick=async()=>{if(!confirm("Delete this whole series?"))return;s.del=true;try{const D=await claude.use("db");await D.collection("series").doc(s.id).set(s)}catch(e){}SER=SER.filter(x=>x!==s);seriesHome()};
+ $("#panel").querySelectorAll("[data-ed]").forEach(b=>b.onclick=async()=>{const e=E[+b.dataset.ed];if(!e||!confirm("Delete this episode?"))return;e.del=true;try{const D=await claude.use("db");await D.collection("episodes").doc(e.id).set(e)}catch(x){}EPS=EPS.filter(y=>y!==e);seriesPage(id)});
+}
+function epForm(title,withMeta,s,go){
+ open(`<h2>${title}</h2>${withMeta?`<input class="in" id="stt" maxlength="60" placeholder="Series title" aria-label="Series title"><input class="in" id="std" maxlength="200" placeholder="What is it about? (optional)" aria-label="Description">`:""}<input class="in" id="ept" maxlength="60" placeholder="Episode title (optional)" aria-label="Episode title"><p class="note" style="margin:0 0 4px">Choose the episode video. Up to 20 MB. Post only videos you made or have the rights to share.</p><input class="in" id="epf" type="file" accept="video/*" aria-label="Choose the episode video"><p class="note" id="st"></p><button class="btn" id="epp">Post</button><button class="btn ghost" id="epb">Cancel</button>`);
+ $("#epb").onclick=()=>s?seriesPage(s.id):seriesHome();
+ $("#epp").onclick=()=>go($("#epf").files[0],$("#ept").value.trim(),withMeta?$("#stt").value.trim():"",withMeta?$("#std").value.trim():"",$("#st"),$("#epp"));
+}
+async function epUpload(f,st,btn){
+ if(!f){st.textContent="Choose a video first.";return null}
+ if(!f.type.startsWith("video")){st.textContent="Choose a video file.";return null}
+ if(f.size>20*1048576){st.textContent="That video is over 20 MB. Choose a shorter one.";return null}
+ if(!me.uid){st.textContent="Please sign in first.";return null}
+ btn.disabled=true;st.textContent="Uploading… keep this screen open.";
+ for(let t=0;t<2;t++){try{const A=await claude.use("assets");const r=await A.upload(f);if(r&&r.url)return r.url}catch(e){}}
+ btn.disabled=false;st.textContent="Upload failed. Check your connection and try again.";return null;
+}
+function newSeries(){
+ if(!me.uid){open(`<h2>Sign in first</h2><p class="mute">Sign in or create an account to post a series.</p><button class="btn" id="x">OK</button>`);return}
+ epForm("New series",true,null,async(f,et,t,d,st,btn)=>{
+  if(!t){st.textContent="Give your series a title.";return}
+  const url=await epUpload(f,st,btn);if(!url)return;
+  const s={id:"sr"+Date.now(),t,d,u:me.name,o:me.uid,ts:Date.now()},e={id:"ep"+Date.now(),sid:s.id,n:1,t:et,url,u:me.name,o:me.uid,ts:Date.now()};
+  try{const D=await claude.use("db");await D.collection("series").doc(s.id).set(s);await D.collection("episodes").doc(e.id).set(e)}catch(x){btn.disabled=false;st.textContent="Could not save. Try again.";return}
+  SER.unshift(s);EPS.push(e);seriesPage(s.id);
+ });
+}
+function addEpisode(s){
+ epForm("Add episode to "+s.t,false,s,async(f,et,_t,_d,st,btn)=>{
+  const url=await epUpload(f,st,btn);if(!url)return;
+  const n=serEps(s.id).reduce((m,x)=>Math.max(m,x.n||0),0)+1,e={id:"ep"+Date.now(),sid:s.id,n,t:et,url,u:me.name,o:me.uid,ts:Date.now()};
+  try{const D=await claude.use("db");await D.collection("episodes").doc(e.id).set(e);s.ts=Date.now();await D.collection("series").doc(s.id).set(s)}catch(x){btn.disabled=false;st.textContent="Could not save. Try again.";return}
+  EPS.push(e);seriesPage(s.id);
+ });
+}
+function epPlay(sid,k){
+ const s=SER.find(x=>x.id===sid),E=serEps(sid),e=E[k];if(!s||!e)return;
+ try{PL.a.pause()}catch(x){}
+ let o=document.getElementById("spv");if(o)o.remove();
+ document.body.classList.add("spo");
+ o=document.createElement("div");o.id="spv";o.style.cssText="position:fixed;inset:0;z-index:92;background:#000;color:#fff;display:flex;flex-direction:column";
+ o.innerHTML=`<div style="position:relative;flex:1;min-height:0"><video id="spvv" src="${esc(e.url)}" controls playsinline autoplay controlsList="nodownload" style="width:100%;height:100%;object-fit:contain;background:#000"></video><div id="spwm" aria-hidden="true" style="position:absolute;left:14px;top:76px;pointer-events:none;text-shadow:0 1px 5px rgba(0,0,0,.85);font-size:15px;line-height:1.15;opacity:.9;transition:all .6s"><b>🌍 WorldLink</b><div style="font-size:12px">@${esc(e.u)} · worldlink.app</div></div><div style="position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:max(12px,0px) 14px 30px;background:linear-gradient(rgba(0,0,0,.6),transparent)"><button id="spx" aria-label="Close" style="color:#fff;font-size:26px">←</button><div style="min-width:0;flex:1"><b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.t)}</b><span style="font-size:12px;opacity:.8">Episode ${e.n||k+1}${e.t?": "+esc(e.t):""}</span></div></div></div><div style="display:flex;gap:8px;padding:10px 12px calc(12px + 0px);background:#0b0e1e"><button id="spg" class="btn" style="margin:0;flex:1;padding:12px 6px">🎁 Gift</button><button id="spd" class="btn ghost" style="margin:0;flex:1;padding:12px 6px;color:#fff;border-color:rgba(255,255,255,.4)">⬇ Download</button>${k+1<E.length?`<button id="spn" class="btn ghost" style="margin:0;flex:1;padding:12px 6px;color:#fff;border-color:rgba(255,255,255,.4)">Next ▶</button>`:""}</div><p id="spm" class="note" style="margin:0;padding:0 12px 8px;background:#0b0e1e;color:#ffd0a8;text-align:center;display:none"></p>`;
+ document.body.appendChild(o);
+ const v=$("#spvv"),wm=$("#spwm"),pos=[[14,76],[null,76],[14,null],[null,null]];let pi=0;
+ const mv=setInterval(()=>{if(!document.getElementById("spv")){clearInterval(mv);return}pi=(pi+1)%4;const p=pos[pi];wm.style.left=p[0]===null?"auto":p[0]+"px";wm.style.right=p[0]===null?"14px":"auto";wm.style.top=p[1]===null?"auto":p[1]+"px";wm.style.bottom=p[1]===null?"70px":"auto"},6000);
+ const close2=()=>{clearInterval(mv);v.pause();o.remove();document.body.classList.remove("spo")};
+ $("#spx").onclick=close2;
+ v.onended=()=>{if(k+1<E.length){close2();epPlay(sid,k+1)}};
+ const nx=$("#spn");if(nx)nx.onclick=()=>{close2();epPlay(sid,k+1)};
+ $("#spg").onclick=()=>{v.pause();giftSheet({uid:e.o,u:e.u})};
+ $("#spd").onclick=()=>epDownload(s,e,k,v,$("#spm"),$("#spd"));
+}
+async function epDownload(s,e,k,pv,msg,btn){
+ const say=t=>{msg.style.display="block";msg.textContent=t};
+ if(typeof MediaRecorder==="undefined"){say("Downloads with the watermark are not supported on this phone's browser.");return}
+ pv.pause();btn.disabled=true;
+ try{
+  const v=document.createElement("video");v.crossOrigin="anonymous";v.playsInline=true;v.src=e.url;v.preload="auto";
+  await new Promise((ok,no)=>{v.onloadedmetadata=ok;v.onerror=()=>no(new Error("load"))});
+  const W=v.videoWidth||720,H=v.videoHeight||1280,sc=Math.min(1,960/Math.max(W,H)),cw=Math.round(W*sc/2)*2,ch=Math.round(H*sc/2)*2;
+  const cv=document.createElement("canvas");cv.width=cw;cv.height=ch;const g=cv.getContext("2d");
+  const cs=cv.captureStream(30);let vs=null;
+  try{vs=v.captureStream?v.captureStream():(v.mozCaptureStream?v.mozCaptureStream():null)}catch(x){}
+  if(vs)vs.getAudioTracks().forEach(t=>cs.addTrack(t));
+  const types=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
+  const mt=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+  const rec=new MediaRecorder(cs,mt?{mimeType:mt,videoBitsPerSecond:2500000}:{videoBitsPerSecond:2500000}),parts=[];
+  rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)parts.push(ev.data)};
+  const done=new Promise(ok=>rec.onstop=ok);
+  const draw=()=>{try{g.drawImage(v,0,0,cw,ch);
+   const s1=Math.max(14,Math.round(cw/26)),ph=Math.floor((v.currentTime/6)%4),right=ph%2===1,bot=ph>=2;
+   g.save();g.globalAlpha=.9;g.shadowColor="rgba(0,0,0,.85)";g.shadowBlur=6;g.fillStyle="#fff";g.textAlign=right?"right":"left";
+   const x=right?cw-s1:s1,y=bot?ch-s1*4.2:s1*3.2;
+   g.font="bold "+s1+"px Arial,sans-serif";g.fillText("🌍 WorldLink",x,y);
+   g.font=Math.round(s1*.75)+"px Arial,sans-serif";g.fillText("@"+e.u+" · worldlink.app",x,y+s1*1.15);
+   g.restore();
+   g.save();g.fillStyle="rgba(0,0,0,.45)";g.fillRect(0,ch-s1*2.2,cw,s1*2.2);g.fillStyle="#fff";g.font="bold "+Math.round(s1*.8)+"px Arial,sans-serif";g.textAlign="center";g.fillText(s.t+" · Episode "+(e.n||k+1)+" · worldlink.app",cw/2,ch-s1*.75);g.restore()}catch(x){}};
+  const iv=setInterval(()=>{draw();if(v.duration)say("Saving with the WorldLink watermark… "+Math.min(99,Math.round(v.currentTime/v.duration*100))+"%. Keep this screen open.")},33);
+  rec.start(1000);v.currentTime=0;await v.play();
+  await new Promise(ok=>{v.onended=ok;v.onerror=ok});
+  clearInterval(iv);draw();rec.stop();await done;
+  const ext=/mp4/.test(rec.mimeType||mt)?"mp4":"webm",blob=new Blob(parts,{type:rec.mimeType||mt||"video/webm"});
+  if(!blob.size)throw new Error("empty");
+  const nm=("WorldLink-"+s.t.replace(/[^\w]+/g,"-")+"-ep"+(e.n||k+1)+"."+ext).replace(/-+/g,"-");
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nm;a.setAttribute("data-direct","1");document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+  say("✓ Saved "+nm+" to your downloads.");
+ }catch(x){say("Could not make the watermarked download on this phone. Please try again, or use a newer browser.")}
+ btn.disabled=false;
+}
+
 function newPhotoPost(){
  open(`<h2>New photo post</h2><p class="mute">Community is for photos only. Videos go on Home.</p><input class="in" id="pf" type="file" accept="image/*" aria-label="Choose a photo"><img id="pv" alt="" style="display:none;width:100%;max-height:260px;object-fit:cover;border-radius:14px;margin-bottom:8px"><input class="in" id="pt" maxlength="280" placeholder="Write a caption (optional)" aria-label="Caption"><p class="note" id="st"></p><button class="btn" id="pp">Post photo</button><button class="btn ghost" id="pb">Cancel</button>`);
  $("#pb").onclick=()=>{secFull=true;social()};
@@ -2495,7 +2612,7 @@ async function buyCoins(back){
  });
 }
 async function giftSheet(i){
- await loadWallet();const c=CLIPS[i];
+ await loadWallet();const c=typeof i==="object"?i:CLIPS[i];
  const draw=()=>{open(`<h2 style="text-align:center;font-size:17px">Send a gift to @${esc(c.u)}</h2><p style="text-align:center;margin:0 0 10px">Your coins: <b>🪙 ${me.wl.vc}</b>${me.wl.bn?` <span class="mute" style="font-size:12px">(+${me.wl.bn} bonus coins, for boosts only)</span>`:""}</p><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${GIFTS.map((g,k)=>`<button data-g="${k}" style="background:var(--bg);border-radius:12px;padding:8px 2px;border:1px solid var(--line)"><span style="font-size:30px;display:block">${g[0]}</span><span style="font-size:12px">${g[1]}</span><span style="font-size:12px;display:block;color:var(--acc);font-weight:700">${g[2]}</span></button>`).join("")}</div><p class="note" id="st"></p><button class="btn" id="bc2">Buy coins</button><button class="btn ghost" id="x">Close</button>`);
   $("#bc2").onclick=()=>buyCoins();
   $("#panel").querySelectorAll("[data-g]").forEach(b=>b.onclick=async()=>{

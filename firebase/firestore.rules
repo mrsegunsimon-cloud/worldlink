@@ -84,12 +84,12 @@ service cloud.firestore {
     // Everything else people share: posts, stories, listings, events, groups, chats, music, notices, gifts
     match /{col}/{id} {
       allow read: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
-        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts'];
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts', 'series', 'episodes'];
       allow create: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
-        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts']
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts', 'series', 'episodes']
         && (ownerOf(request.resource.data) == '' || ownerOf(request.resource.data) == request.auth.uid);
       allow update: if signedIn() && col in ['posts', 'stories', 'listings', 'events', 'groups', 'gchats',
-        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts']
+        'tracks', 'mvideos', 'reactions', 'campuslife', 'howto', 'gifts', 'series', 'episodes']
         && (ownerOf(resource.data) == '' || isOwner(resource.data) || onlySocialChange() || isMod());
       allow delete: if signedIn() && isOwner(resource.data);
     }
