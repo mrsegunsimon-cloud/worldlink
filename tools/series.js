@@ -1,4 +1,4 @@
-/*wlSeries1*//*wlSeries2*/
+/*wlSeries1*//*wlSeries2*//*wlSeries3*/
 var SER=[],EPS=[],SERL=false;
 async function loadSeries(){try{const D=await claude.use("db");if(!D)return;const a=await D.collection("series").get(),b=await D.collection("episodes").get();SER=a.docs.map(d=>d.data()).filter(x=>x&&x.id&&!x.del).sort((p,q)=>q.ts-p.ts);EPS=b.docs.map(d=>d.data()).filter(x=>x&&x.id&&x.url&&!x.del).sort((p,q)=>(p.n||0)-(q.n||0));SERL=true}catch(e){}}
 const serEps=id=>EPS.filter(e=>e.sid===id).sort((a,b)=>(a.n||0)-(b.n||0));
@@ -34,8 +34,49 @@ function epForm(title,withMeta,s,go,pre){
  $("#epf").onchange=()=>{const f=$("#epf").files[0];if(f)$("#st").textContent=(f.size/1048576).toFixed(1)+" MB"+(f.size>20*1048576?". That is over 20 MB. Tap Post and you can cut it shorter.":"")};
  $("#epp").onclick=()=>{
   const f=$("#epf").files[0],v={t:withMeta?$("#stt").value.trim():"",d:withMeta?$("#std").value.trim():"",e:$("#ept").value.trim()};
-  if(f&&f.type.startsWith("video")&&f.size>20*1048576){serTrim(f,(f2,msg)=>epForm(title,withMeta,s,go,Object.assign({},v,{f:f2||f,msg:msg})));return}
+  if(f&&f.type.startsWith("video")&&f.size>20*1048576){serBig(f,(f2,msg)=>epForm(title,withMeta,s,go,Object.assign({},v,{f:f2||f,msg:msg})));return}
   go(f,v.e,v.t,v.d,$("#st"),$("#epp"));
+ };
+}
+function serMeta(f){return new Promise(ok=>{const v=document.createElement("video");v.preload="metadata";v.onloadedmetadata=()=>{const d=v.duration||0;try{URL.revokeObjectURL(v.src)}catch(x){}ok({d:isFinite(d)?d:0})};v.onerror=()=>ok({d:0});v.src=URL.createObjectURL(f)})}
+function serShrink(f,vbps,prog){
+ return new Promise((ok,no)=>{
+  if(!window.MediaRecorder)return no(new Error("no recorder"));
+  const v=document.createElement("video");v.src=URL.createObjectURL(f);v.playsInline=true;v.preload="auto";v.onerror=()=>no(new Error("read"));
+  v.onloadedmetadata=()=>{
+   try{
+    const vw=v.videoWidth||720,vh=v.videoHeight||1280,mx=vbps>900000?1280:vbps>450000?960:vbps>200000?640:480,k=Math.min(1,mx/Math.max(vw,vh)),W=Math.round(vw*k)&~1||360,H=Math.round(vh*k)&~1||640;
+    const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+    const AC=window.AudioContext||window.webkitAudioContext;let ac=null,tracks=[];
+    if(AC){try{ac=new AC();const d=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(d);tracks=d.stream.getAudioTracks();ac.resume()}catch(e){ac=null}}
+    const out=new MediaStream([...c.captureStream(24).getVideoTracks(),...tracks]);
+    const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
+    const rc=new MediaRecorder(out,Object.assign(mt?{mimeType:mt}:{},{videoBitsPerSecond:Math.round(vbps),audioBitsPerSecond:48000})),ch=[];
+    rc.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+    let iv=setInterval(()=>{try{x.drawImage(v,0,0,W,H);prog(v.currentTime,v.duration)}catch(e){}},40);
+    rc.onstop=()=>{clearInterval(iv);try{ac&&ac.close()}catch(e){}try{URL.revokeObjectURL(v.src)}catch(e){}const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"episode."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+    v.onended=()=>{if(rc.state==="recording")rc.stop()};
+    rc.start(1000);v.play().catch(e=>no(e));
+   }catch(e){no(e)}
+  };
+ });
+}
+async function serBig(f,back){
+ const m=await serMeta(f),mb=Math.round(f.size/1048576),min=m.d?Math.max(1,Math.round(m.d/60)):0;
+ const vbps=m.d?17e6*8/m.d-48000:0,can=m.d&&vbps>=100000&&!!window.MediaRecorder;
+ open(`<h2>This video is ${mb} MB${min?" (about "+min+" min)":""}</h2>${can?`<p>WorldLink can shrink it to fit 20 MB for you. It takes about as long as the video, so keep this screen open and keep your phone charged.${vbps<250000?" The picture will look soft because the video is long.":""}</p><button class="btn" id="sk">Shrink it automatically</button>`:`<p class="mute">This video is too long to shrink to 20 MB and still look good. Cut it shorter, or post it as several episodes.</p>`}<button class="btn ${can?"ghost":""}" id="ct">Cut it shorter instead</button><button class="btn ghost" id="cn">Cancel</button>`);
+ $("#cn").onclick=()=>back(null,"");
+ $("#ct").onclick=()=>serTrim(f,back);
+ const sk=$("#sk");if(!sk)return;
+ sk.onclick=async()=>{
+  secFull=true;open(`<h2 style="text-align:center">Shrinking your video…</h2><p id="trp" class="mute" style="text-align:center">Starting…</p><p class="note" style="text-align:center">Keep this screen open. Do not leave the app.</p>`);
+  let wl=null;try{wl=await navigator.wakeLock.request("screen")}catch(e){}
+  let c=null;
+  try{c=await serShrink(f,vbps,(t,d)=>{const p=$("#trp");if(p&&d)p.textContent="Shrinking… "+Math.round(t/d*100)+"%. About "+Math.max(1,Math.ceil((d-t)/60))+" min left."})}catch(e){c=null}
+  try{wl&&wl.release()}catch(e){}
+  if(!c||!c.size){back(null,"Could not shrink this video on this phone. Try cutting it shorter.");return}
+  if(c.size>20*1048576){back(null,"It is still "+(c.size/1048576).toFixed(0)+" MB after shrinking. Cut it shorter.");return}
+  back(c,"Shrunk to "+(c.size/1048576).toFixed(1)+" MB. Tap Post.");
  };
 }
 function serTrim(f,back){

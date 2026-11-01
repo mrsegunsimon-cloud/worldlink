@@ -337,7 +337,7 @@ function openFull(h,cam){secFull=false;open(h);document.documentElement.style.se
 function close(){FM=false;secFull=false;$("#sheet").classList.remove("on","full","cam","sec");document.body.classList.remove("lt");document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.n==="Home"));try{stopCam()}catch(e){}setTimeout(wlResume,150)}
 $("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
 $("#menu").onclick=()=>{FM=false;
- open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.11.01-C</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
+ open(`<div style="display:flex;align-items:center;gap:10px"><svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="WorldLink logo"><circle cx="32" cy="32" r="29" fill="#12307F"/><g fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.6"><ellipse cx="32" cy="32" rx="12" ry="29"/><path d="M4 32h56M8 20h48M8 44h48"/></g><path d="M18 40Q32 18 46 26" fill="none" stroke="#FF7A1A" stroke-width="3.5" stroke-linecap="round"/><circle cx="18" cy="40" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/><circle cx="46" cy="26" r="5.5" fill="#fff" stroke="#FF7A1A" stroke-width="3"/></svg><h2 style="margin:0">WorldLink</h2></div><p class="mute">Everything in one app.</p><p class="note" style="margin:-8px 0 8px;font-size:11px;opacity:.6">Version 2026.11.01-D</p>${(()=>{const MP={Social:"ev_community",Sports:"ev_sport",Campus:"c_hall",Entertainment:"ev_music",Market:"m_market",Explore:"santorini","Learn how":"learning","Play zone":"pz"};const t=(k,l,p)=>`<button data-m="${k}" aria-label="${l}" style="position:relative;height:98px;border-radius:14px;overflow:hidden;padding:0;color:#fff;text-align:left;border:0"><img src="${PH[p]}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-weight:800;font-size:15px">${l}</span></button>`;return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">${MENU.map((m,i)=>MP[m[0]]&&PH[MP[m[0]]]?t(i,m[0],MP[m[0]]):"").join("")}${t("news","World News","w_world")}${t("lang","Language","l_dict")}${t("sos","Emergency","em").replace('style="position','style="grid-column:1/-1;position')}</div>`})()}<div class="grid">${MENU.map((m,i)=>MP0(m[0])?"":`<button data-m="${i}"><span class="ic">${m[1]}</span>${m[0]}</button>`).join("")}<button data-m="theme"><span class="ic">◐</span>Theme</button></div>`);
  $("#panel").querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const k=b.dataset.m;if(k!=="theme"){secFull=true;FM=true}
   if(k==="sos")sos();else if(k==="stories")stories();else if(k==="lang")langSheet();else if(k==="news")worldNews();else if(k==="theme")theme();else{const m=MENU[k];if(m[0]==="Sports")return football("scores");if(m[0]==="Campus")return campus();if(m[0]==="Learn how")return learnHow();if(m[0]==="Play zone")return playZone();if(m[0]==="Entertainment")return music();if(m[0]==="Market"){MKV={v:"home"};return market()}if(m[0]==="Explore")return explore();if(m[0]==="Social")return social();if(m[0]==="Video Call")return videoCalls();open(`<h2>${m[1]} ${m[0]}</h2><p class="mute">${m[2]}</p><p>Planned for ${m[3]}.</p><button class="btn ghost" id="x">Close</button>`)}})};
 (function(){const b=document.createElement("button");b.id="sosf";b.setAttribute("aria-label","Emergency help");b.textContent="🚨 SOS";b.onclick=()=>{secFull=true;sos()};document.body.appendChild(b)})();
@@ -1826,7 +1826,7 @@ function social(){
  P.querySelectorAll("[data-d]").forEach(b=>b.onclick=async()=>{const x=find(b.dataset.d);if(!x)return;x.del=true;await saveP(x);PS=PS.filter(y=>y!==x);social()});
  P.querySelectorAll("[data-cs]").forEach(b=>b.onclick=async()=>{const x=find(b.dataset.cs),i=P.querySelector(`[data-ci="${b.dataset.cs}"]`),v=i?i.value.trim():"";if(!x||!v)return;(x.cm=x.cm||[]).push({n:me.name,t:v});await saveP(x);notify(x.o,"commented on your post: "+v.slice(0,40));social()});
 }
-/*wlSeries1*//*wlSeries2*/
+/*wlSeries1*//*wlSeries2*//*wlSeries3*/
 var SER=[],EPS=[],SERL=false;
 async function loadSeries(){try{const D=await claude.use("db");if(!D)return;const a=await D.collection("series").get(),b=await D.collection("episodes").get();SER=a.docs.map(d=>d.data()).filter(x=>x&&x.id&&!x.del).sort((p,q)=>q.ts-p.ts);EPS=b.docs.map(d=>d.data()).filter(x=>x&&x.id&&x.url&&!x.del).sort((p,q)=>(p.n||0)-(q.n||0));SERL=true}catch(e){}}
 const serEps=id=>EPS.filter(e=>e.sid===id).sort((a,b)=>(a.n||0)-(b.n||0));
@@ -1862,8 +1862,49 @@ function epForm(title,withMeta,s,go,pre){
  $("#epf").onchange=()=>{const f=$("#epf").files[0];if(f)$("#st").textContent=(f.size/1048576).toFixed(1)+" MB"+(f.size>20*1048576?". That is over 20 MB. Tap Post and you can cut it shorter.":"")};
  $("#epp").onclick=()=>{
   const f=$("#epf").files[0],v={t:withMeta?$("#stt").value.trim():"",d:withMeta?$("#std").value.trim():"",e:$("#ept").value.trim()};
-  if(f&&f.type.startsWith("video")&&f.size>20*1048576){serTrim(f,(f2,msg)=>epForm(title,withMeta,s,go,Object.assign({},v,{f:f2||f,msg:msg})));return}
+  if(f&&f.type.startsWith("video")&&f.size>20*1048576){serBig(f,(f2,msg)=>epForm(title,withMeta,s,go,Object.assign({},v,{f:f2||f,msg:msg})));return}
   go(f,v.e,v.t,v.d,$("#st"),$("#epp"));
+ };
+}
+function serMeta(f){return new Promise(ok=>{const v=document.createElement("video");v.preload="metadata";v.onloadedmetadata=()=>{const d=v.duration||0;try{URL.revokeObjectURL(v.src)}catch(x){}ok({d:isFinite(d)?d:0})};v.onerror=()=>ok({d:0});v.src=URL.createObjectURL(f)})}
+function serShrink(f,vbps,prog){
+ return new Promise((ok,no)=>{
+  if(!window.MediaRecorder)return no(new Error("no recorder"));
+  const v=document.createElement("video");v.src=URL.createObjectURL(f);v.playsInline=true;v.preload="auto";v.onerror=()=>no(new Error("read"));
+  v.onloadedmetadata=()=>{
+   try{
+    const vw=v.videoWidth||720,vh=v.videoHeight||1280,mx=vbps>900000?1280:vbps>450000?960:vbps>200000?640:480,k=Math.min(1,mx/Math.max(vw,vh)),W=Math.round(vw*k)&~1||360,H=Math.round(vh*k)&~1||640;
+    const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+    const AC=window.AudioContext||window.webkitAudioContext;let ac=null,tracks=[];
+    if(AC){try{ac=new AC();const d=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(d);tracks=d.stream.getAudioTracks();ac.resume()}catch(e){ac=null}}
+    const out=new MediaStream([...c.captureStream(24).getVideoTracks(),...tracks]);
+    const mt=["video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m))||"";
+    const rc=new MediaRecorder(out,Object.assign(mt?{mimeType:mt}:{},{videoBitsPerSecond:Math.round(vbps),audioBitsPerSecond:48000})),ch=[];
+    rc.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+    let iv=setInterval(()=>{try{x.drawImage(v,0,0,W,H);prog(v.currentTime,v.duration)}catch(e){}},40);
+    rc.onstop=()=>{clearInterval(iv);try{ac&&ac.close()}catch(e){}try{URL.revokeObjectURL(v.src)}catch(e){}const type=(rc.mimeType||mt||"video/webm").split(";")[0];ok(new File(ch,"episode."+(type.includes("mp4")?"mp4":"webm"),{type}))};
+    v.onended=()=>{if(rc.state==="recording")rc.stop()};
+    rc.start(1000);v.play().catch(e=>no(e));
+   }catch(e){no(e)}
+  };
+ });
+}
+async function serBig(f,back){
+ const m=await serMeta(f),mb=Math.round(f.size/1048576),min=m.d?Math.max(1,Math.round(m.d/60)):0;
+ const vbps=m.d?17e6*8/m.d-48000:0,can=m.d&&vbps>=100000&&!!window.MediaRecorder;
+ open(`<h2>This video is ${mb} MB${min?" (about "+min+" min)":""}</h2>${can?`<p>WorldLink can shrink it to fit 20 MB for you. It takes about as long as the video, so keep this screen open and keep your phone charged.${vbps<250000?" The picture will look soft because the video is long.":""}</p><button class="btn" id="sk">Shrink it automatically</button>`:`<p class="mute">This video is too long to shrink to 20 MB and still look good. Cut it shorter, or post it as several episodes.</p>`}<button class="btn ${can?"ghost":""}" id="ct">Cut it shorter instead</button><button class="btn ghost" id="cn">Cancel</button>`);
+ $("#cn").onclick=()=>back(null,"");
+ $("#ct").onclick=()=>serTrim(f,back);
+ const sk=$("#sk");if(!sk)return;
+ sk.onclick=async()=>{
+  secFull=true;open(`<h2 style="text-align:center">Shrinking your video…</h2><p id="trp" class="mute" style="text-align:center">Starting…</p><p class="note" style="text-align:center">Keep this screen open. Do not leave the app.</p>`);
+  let wl=null;try{wl=await navigator.wakeLock.request("screen")}catch(e){}
+  let c=null;
+  try{c=await serShrink(f,vbps,(t,d)=>{const p=$("#trp");if(p&&d)p.textContent="Shrinking… "+Math.round(t/d*100)+"%. About "+Math.max(1,Math.ceil((d-t)/60))+" min left."})}catch(e){c=null}
+  try{wl&&wl.release()}catch(e){}
+  if(!c||!c.size){back(null,"Could not shrink this video on this phone. Try cutting it shorter.");return}
+  if(c.size>20*1048576){back(null,"It is still "+(c.size/1048576).toFixed(0)+" MB after shrinking. Cut it shorter.");return}
+  back(c,"Shrunk to "+(c.size/1048576).toFixed(1)+" MB. Tap Post.");
  };
 }
 function serTrim(f,back){
