@@ -13,7 +13,7 @@ service cloud.firestore {
     // Other people may only change likes, comments, member lists and report counts on a post.
     function onlySocialChange() {
       return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['l', 'cm', 'sc', 'm', 'mem', 'rep']);
+        .hasOnly(['l', 'cm', 'sc', 'm', 'mem', 'rep', 'v']);
     }
 
     // Private area of each person
