@@ -39,7 +39,7 @@ jobs:
           cd - 
           mkdir -p site/ffmpeg/core
           cp /tmp/ff/a/package/dist/umd/*.js site/ffmpeg/
-          cp /tmp/ff/b/package/dist/umd/ffmpeg-core.js /tmp/ff/b/package/dist/umd/ffmpeg-core.wasm site/ffmpeg/core/
+          cp /tmp/ff/b/package/dist/esm/ffmpeg-core.js /tmp/ff/b/package/dist/esm/ffmpeg-core.wasm site/ffmpeg/core/
           W=$(ls site/ffmpeg | grep -v '^ffmpeg.js$' | grep 'ffmpeg.js$' | head -1)
           echo "{\"worker\":\"$W\"}" > site/ffmpeg/files.json
           cat site/ffmpeg/files.json; ls -la site/ffmpeg site/ffmpeg/core

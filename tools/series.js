@@ -1,4 +1,4 @@
-/*wlSeries1*//*wlSeries2*//*wlSeries3*/
+/*wlSeries1*//*wlSeries2*//*wlSeries3*//*wlSeries4*/
 var SER=[],EPS=[],SERL=false;
 async function loadSeries(){try{const D=await claude.use("db");if(!D)return;const a=await D.collection("series").get(),b=await D.collection("episodes").get();SER=a.docs.map(d=>d.data()).filter(x=>x&&x.id&&!x.del).sort((p,q)=>q.ts-p.ts);EPS=b.docs.map(d=>d.data()).filter(x=>x&&x.id&&x.url&&!x.del).sort((p,q)=>(p.n||0)-(q.n||0));SERL=true}catch(e){}}
 const serEps=id=>EPS.filter(e=>e.sid===id).sort((a,b)=>(a.n||0)-(b.n||0));
@@ -34,7 +34,7 @@ function epForm(title,withMeta,s,go,pre){
  $("#epf").onchange=()=>{const f=$("#epf").files[0];if(f)$("#st").textContent=(f.size/1048576).toFixed(1)+" MB"+(f.size>20*1048576?". That is over 20 MB. Tap Post and you can cut it shorter.":"")};
  $("#epp").onclick=()=>{
   const f=$("#epf").files[0],v={t:withMeta?$("#stt").value.trim():"",d:withMeta?$("#std").value.trim():"",e:$("#ept").value.trim()};
-  if(f&&f.type.startsWith("video")&&f.size>20*1048576){serBig(f,(f2,msg)=>epForm(title,withMeta,s,go,Object.assign({},v,{f:f2||f,msg:msg})));return}
+  if(f&&f.type.startsWith("video")&&f.size>20*1048576){serBig(f,(f2,msg)=>epForm(title,withMeta,s,go,Object.assign({},v,{f:f2||f,msg:msg})),{s,withMeta,v});return}
   go(f,v.e,v.t,v.d,$("#st"),$("#epp"));
  };
 }
@@ -61,10 +61,52 @@ function serShrink(f,vbps,prog){
   };
  });
 }
-async function serBig(f,back){
+async function serSplit(f,ctx,back){
+ if(!me.uid){back(null,"Please sign in first.");return}
+ if(!ctx.s&&ctx.withMeta&&!(ctx.v&&ctx.v.t)){back(null,"Give your series a title first, then choose the video again.");return}
+ const m=await serMeta(f);
+ if(!m.d){back(null,"Could not read this video.");return}
+ const bps=f.size/m.d,seg=Math.max(20,Math.min(Math.floor(17e6/bps),300)),N=Math.ceil(m.d/seg);
+ if(N>60){back(null,"That video would need more than 60 episodes. Cut it shorter first.");return}
+ open(`<h2>Split into episodes</h2><p>Your ${Math.round(m.d/60)}-minute video will become about <b>${N} episodes</b> of about ${seg>=60?Math.round(seg/60*10)/10+" min":seg+" sec"} each. Every episode keeps the original quality and fits in 20 MB.</p><p class="note">This takes a few minutes. Keep this screen open and your phone charged.</p><button class="btn" id="go2">Start splitting</button><button class="btn ghost" id="bk2">Back</button>`);
+ $("#bk2").onclick=()=>back(null,"");
+ $("#go2").onclick=async()=>{
+  secFull=true;open(`<h2 style="text-align:center">Making your episodes…</h2><p id="trp" class="mute" style="text-align:center">Getting ready…</p><p class="note" style="text-align:center">Keep this screen open. Do not leave the app.</p>`);
+  const say=t=>{const p=$("#trp");if(p)p.textContent=t};
+  let wl=null;try{wl=await navigator.wakeLock.request("screen")}catch(x){}
+  let s=ctx.s,made=0,err="";
+  try{
+   const ff=await ffLoad(),webm=/webm/.test(f.type||"")||/\.webm$/i.test(f.name||""),ext=webm?"webm":"mp4",a="in."+ext,b="out."+ext;
+   say("Loading the video…");await ff.writeFile(a,new Uint8Array(await f.arrayBuffer()));
+   const A=await claude.use("assets"),D=await claude.use("db");
+   const base=s?serEps(s.id).reduce((q,x)=>Math.max(q,x.n||0),0):0;
+   for(let i=0;i<N;i++){
+    say("Episode "+(i+1)+" of "+N+": cutting…");
+    const rc=await ff.exec(["-ss",String(i*seg),"-i",a,"-t",String(seg),"-c","copy","-avoid_negative_ts","make_zero","-y",b]);
+    if(rc!==0)throw new Error("cut");
+    const d=await ff.readFile(b);try{await ff.deleteFile(b)}catch(x){}
+    if(!d||d.length<2000)break;
+    const ef=new File([d],"ep."+ext,{type:webm?"video/webm":"video/mp4"});
+    if(ef.size>20*1048576)throw new Error("big");
+    say("Episode "+(i+1)+" of "+N+": uploading…");
+    let url=null;for(let t=0;t<2&&!url;t++){try{const r=await A.upload(ef);url=r&&r.url}catch(x){}}
+    if(!url)throw new Error("upload");
+    if(!s){s={id:"sr"+Date.now(),t:ctx.v.t,d:ctx.v.d||"",u:me.name,o:me.uid,ts:Date.now()};await D.collection("series").doc(s.id).set(s);SER.unshift(s)}
+    const e={id:"ep"+Date.now()+i,sid:s.id,n:base+i+1,t:"Part "+(i+1),url,u:me.name,o:me.uid,ts:Date.now()};
+    await D.collection("episodes").doc(e.id).set(e);EPS.push(e);made++;
+   }
+   try{await ff.deleteFile(a)}catch(x){}
+  }catch(x){err=x&&x.message||"error"}
+  try{wl&&wl.release()}catch(x){}
+  if(s){seriesPage(s.id);if(err){const p=document.querySelector("#panel");if(p)p.insertAdjacentHTML("afterbegin",`<p class="note" style="color:#c2410c">Posted ${made} of ${N} episodes. Something stopped the rest. You can add the remaining parts with + Add episode.</p>`)}}
+  else back(null,"Could not split this video on this phone. Try cutting it shorter.");
+ };
+}
+async function serBig(f,back,ctx){
  const m=await serMeta(f),mb=Math.round(f.size/1048576),min=m.d?Math.max(1,Math.round(m.d/60)):0;
  const vbps=m.d?17e6*8/m.d-48000:0,can=m.d&&vbps>=100000&&!!window.MediaRecorder;
- open(`<h2>This video is ${mb} MB${min?" (about "+min+" min)":""}</h2>${can?`<p>WorldLink can shrink it to fit 20 MB for you. It takes about as long as the video, so keep this screen open and keep your phone charged.${vbps<250000?" The picture will look soft because the video is long.":""}</p><button class="btn" id="sk">Shrink it automatically</button>`:`<p class="mute">This video is too long to shrink to 20 MB and still look good. Cut it shorter, or post it as several episodes.</p>`}<button class="btn ${can?"ghost":""}" id="ct">Cut it shorter instead</button><button class="btn ghost" id="cn">Cancel</button>`);
+ open(`<h2>This video is ${mb} MB${min?" (about "+min+" min)":""}</h2>${can?`<p>WorldLink can shrink it to fit 20 MB for you. It takes about as long as the video, so keep this screen open and keep your phone charged.${vbps<250000?" The picture will look soft because the video is long.":""}</p><button class="btn" id="sk">Shrink it automatically</button>`:`<p class="mute">This video is too long to shrink to 20 MB and still look good. Cut it shorter, or post it as several episodes.</p>`}${f.size<=600*1048576?`<button class="btn ${can?"ghost":""}" id="spl">✂️ Split into episodes automatically (best for movies)</button>`:""}<button class="btn ghost" id="ct">Cut one part instead</button><button class="btn ghost" id="cn">Cancel</button>`);
+ const sp=$("#spl");if(sp)sp.onclick=()=>serSplit(f,ctx||{},back);
  $("#cn").onclick=()=>back(null,"");
  $("#ct").onclick=()=>serTrim(f,back);
  const sk=$("#sk");if(!sk)return;
