@@ -33,6 +33,20 @@ jobs:
       - name: App name and icon
         run: |
           sed -i 's|android:label="[^"]*"|android:label="WorldLink"|' android/app/src/main/AndroidManifest.xml
+          pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image
+          im=Image.open("assets/pwa/icon-512.png").convert("RGBA")
+          for n,z in [("mdpi",48),("hdpi",72),("xhdpi",96),("xxhdpi",144),("xxxhdpi",192)]:
+              im.resize((z,z),Image.LANCZOS).save(f"android/app/src/main/res/mipmap-{n}/ic_launcher.png")
+          PY
+      - name: Use the fixed signing key so the app fingerprint never changes
+        run: |
+          mkdir -p ~/.android
+          cp tools/debug.keystore ~/.android/debug.keystore
+      - name: App name and icon
+        run: |
+          sed -i 's|android:label="[^"]*"|android:label="WorldLink"|' android/app/src/main/AndroidManifest.xml
           for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             n=${d%%:*}; z=${d##*:}
             convert assets/pwa/icon-512.png -resize ${z}x${z} android/app/src/main/res/mipmap-$n/ic_launcher.png
