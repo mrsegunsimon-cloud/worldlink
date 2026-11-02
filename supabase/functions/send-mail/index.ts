@@ -94,6 +94,13 @@ Deno.serve(async (req) => {
       if (!old) { try { await sendBatch([{ from: FROM, to: [email], subject: "Welcome to WorldLink 🌍", html: WELCOME(name) }]) } catch (e) { console.error(String(e)) } }
       return json({ ok: true, welcome: !old });
     }
+    if (b.a === "wipe") {
+      // account deletion: forget the saved email and the phone-alert subscription of the caller
+      await fetch(`${DOC}/mails/${encodeURIComponent(uid)}`, { method: "DELETE", headers: { Authorization: "Bearer " + tok } });
+      const SBK = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+      if (SBK) await fetch(Deno.env.get("SUPABASE_URL") + "/rest/v1/push_subs?uid=eq." + encodeURIComponent(uid), { method: "DELETE", headers: { apikey: SBK, Authorization: "Bearer " + SBK } });
+      return json({ ok: true });
+    }
     if (b.a === "test" || b.a === "broadcast") {
       if (!(await isMod(tok, uid))) return json({ ok: false, why: "moderators only" }, 403);
       const subject = String(b.subject || "").trim().slice(0, 150), text = String(b.text || "").trim().slice(0, 5000);

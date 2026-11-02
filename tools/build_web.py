@@ -53,7 +53,8 @@ rep('   st.textContent=up?"Looks good. In the app we would now email you a link 
    st.textContent=up?"Looks good. In the app we would now email you a link to confirm this address.":"Looks good. In the app you would now be logged in."}''')
 rep('function editProfile(){', '''function authSheet(mode,how){
  if(window.__wlUser){
-  open(`<h2>Signed in</h2><p class="mute">${esc(window.__wlUser.email||"")}</p><p class="note">Your account is stored securely online.</p><button class="btn" id="lo">Log out</button><button class="btn ghost" id="x">Close</button>`);
+  open(`<h2>Signed in</h2><p class="mute">${esc(window.__wlUser.email||"")}</p><p class="note">Your account is stored securely online.</p><button class="btn" id="lo">Log out</button><button class="btn ghost" id="dl" style="color:#d62828">Delete my account</button><button class="btn ghost" id="x">Close</button>`);
+  $("#dl").onclick=wlDeleteAccount;
   $("#lo").onclick=()=>{WLN("logout").then(()=>{window.__wlUser=null;me.uid=null;me.name="you";close();profile()})};
   return}
  authSheet0(mode,how)}
@@ -94,8 +95,9 @@ CLOUD='<script>'+open(__file__.replace('build_web.py','cloud.js'),encoding='utf8
 GUARD='<script>'+open(__file__.replace('build_web.py','guard.js'),encoding='utf8').read()+'</script>'
 TRACK='<script>'+open(__file__.replace('build_web.py','track.js'),encoding='utf8').read()+'</script>'
 GATE='<script>'+open(__file__.replace('build_web.py','gate.js'),encoding='utf8').read()+'</script>'
+ACCT='<script>'+open(__file__.replace('build_web.py','acct.js'),encoding='utf8').read()+'</script>'
 i=s.rfind('</body>')
-s=s[:i]+CLOUD+RESTORE+GATE+GUARD+TRACK+s[i:]
+s=s[:i]+CLOUD+RESTORE+GATE+GUARD+TRACK+ACCT+s[i:]
 
 # Flutter's SafeArea already keeps the page clear of the status and navigation bars,
 # so the page must not add its own safe-area padding on top (that doubled the gaps).

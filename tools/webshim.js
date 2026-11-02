@@ -26,6 +26,8 @@
    case"login":{if(Date.now()<lockUntil)return{error:"Too many wrong tries. Wait a minute and try again."};var l=await lib();try{var c=await l.A.signInWithEmailAndPassword(l.auth,String(m.email).trim(),m.password);fails=0;return{user:usr(c.user)}}catch(e){if(++fails>=5){lockUntil=Date.now()+60000;fails=0}throw e}}
    case"reset":{var l=await lib();await l.A.sendPasswordResetEmail(l.auth,String(m.email).trim());return{ok:true}}
    case"token":{var l=await lib();await l.auth.authStateReady();return{token:l.auth.currentUser?await l.auth.currentUser.getIdToken():null}}
+   case"reauth":{var l=await lib();var u=l.auth.currentUser;if(!u)return{error:"Please log in first."};if(u.email&&m.password){try{await l.A.reauthenticateWithCredential(u,l.A.EmailAuthProvider.credential(u.email,m.password))}catch(e){return{error:human(e)}}}return{ok:true}}
+   case"delete":{var l=await lib();var u=l.auth.currentUser;if(!u)return{ok:true};try{await l.A.deleteUser(u)}catch(e){if(e&&e.code==="auth/requires-recent-login")return{error:"For your safety, log out, log in again, then delete your account right away."};throw e}return{ok:true}}
    case"logout":{var l=await lib();await l.A.signOut(l.auth);return{ok:true}}
    case"phone_send":case"phone_verify":return{error:"Phone sign-in is only in the Android app for now. Please use your email."};
    case"location":return new Promise(function(ok){if(!navigator.geolocation)return ok({error:"Location is not available here."});navigator.geolocation.getCurrentPosition(function(p){ok({lat:p.coords.latitude,lng:p.coords.longitude})},function(){ok({error:"Location was not allowed."})},{timeout:15000})});

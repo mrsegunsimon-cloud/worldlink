@@ -245,6 +245,31 @@ class _WorldLinkShellState extends State<WorldLinkShell> {
         return _user(cr.user);
       case 'token':
         return {'token': await a.currentUser?.getIdToken()};
+      case 'reauth':
+        final cu = a.currentUser;
+        if (cu == null) return {'error': 'Please log in first.'};
+        final em = cu.email;
+        final pwd = j['password'];
+        if (em != null && pwd is String && pwd.isNotEmpty) {
+          try {
+            await cu.reauthenticateWithCredential(EmailAuthProvider.credential(email: em, password: pwd));
+          } on FirebaseAuthException {
+            return {'error': 'Wrong password.'};
+          }
+        }
+        return {'ok': true};
+      case 'delete':
+        final du = a.currentUser;
+        if (du == null) return {'ok': true};
+        try {
+          await du.delete();
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'requires-recent-login') {
+            return {'error': 'For your safety, log out, log in again, then delete your account right away.'};
+          }
+          rethrow;
+        }
+        return {'ok': true};
       case 'logout':
         await a.signOut();
         return {'ok': true};

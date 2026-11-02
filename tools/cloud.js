@@ -78,6 +78,8 @@
     if(!j)break;(j.documents||[]).forEach(function(d){out.push({id:idOf(d),data:decDoc(d)})});
     if(!j.nextPageToken)break;pt=j.nextPageToken}
    return out},
+  del:function(path){return call("DELETE",path,null,true)},
+  sub:async function(path){var j=await call("GET",path+"?pageSize=100",null,true);return(j&&j.documents||[]).map(idOf)},
   get:async function(col,id){var j=await call("GET",col+"/"+encodeURIComponent(id),null,!!window.__wlUser);return j?decDoc(j):null},
   set:async function(col,id,v){try{localStorage.removeItem("wlc_"+col)}catch(e){}var f={};for(var k in v)if(v[k]!==undefined)f[k]=enc(v[k]);await call("PATCH",col+"/"+encodeURIComponent(id),{fields:f},true)},
   upload:async function(file,onp){
