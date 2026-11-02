@@ -40,6 +40,8 @@ jobs:
           for n,z in [("mdpi",48),("hdpi",72),("xhdpi",96),("xxhdpi",144),("xxxhdpi",192)]:
               im.resize((z,z),Image.LANCZOS).save(f"android/app/src/main/res/mipmap-{n}/ic_launcher.png")
           PY
+      - run: flutter pub get
+      - name: Build the APK (and show the first errors if it fails)
         shell: bash
         run: |
           set +e
