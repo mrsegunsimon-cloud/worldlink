@@ -73,7 +73,7 @@ jobs:
         run: |
           if [ -z "$KS_B64" ]; then echo "No upload key secret yet - skipping the Play bundle."; exit 0; fi
           flutter build appbundle --release --build-name=1.0.${{ github.run_number }} --build-number=${{ github.run_number }} --obfuscate --split-debug-info=build/symbols2
-          printf '%s\n' "$KS_B64" | grep -o '/u3+7Q[A-Za-z0-9+/=]*' | head -1 | tr -d '\n' > /tmp/up.b64
+          printf '%s\n' "$KS_B64" | grep -o 'MIIK[A-Za-z0-9+/=]*' | head -1 | tr -d '\n' > /tmp/up.b64
           echo "Key secret length: $(wc -c < /tmp/up.b64) (should be 3560)"
           base64 -d /tmp/up.b64 > /tmp/up.jks || { echo "::error::UPLOAD_KEYSTORE_B64 was pasted incompletely. Length is $(wc -c < /tmp/up.b64), it should be 3560."; exit 1; }
           jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore /tmp/up.jks -storepass "$KS_PASS" -keypass "$KS_PASS" build/app/outputs/bundle/release/app-release.aab worldlink-upload
