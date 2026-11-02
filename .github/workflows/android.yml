@@ -30,12 +30,19 @@ jobs:
         run: |
           mkdir -p ~/.android
           cp tools/debug.keystore ~/.android/debug.keystore
+      - name: App name and icon
+        run: |
+          sed -i 's|android:label="[^"]*"|android:label="WorldLink"|' android/app/src/main/AndroidManifest.xml
+          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            n=${d%%:*}; z=${d##*:}
+            convert assets/pwa/icon-512.png -resize ${z}x${z} android/app/src/main/res/mipmap-$n/ic_launcher.png
+          done
       - run: flutter pub get
       - name: Build the APK (and show the first errors if it fails)
         shell: bash
         run: |
           set +e
-          flutter build apk --release --obfuscate --split-debug-info=build/symbols > build.log 2>&1
+          flutter build apk --release --build-name=1.0.${{ github.run_number }} --build-number=${{ github.run_number }} --obfuscate --split-debug-info=build/symbols > build.log 2>&1
           code=$?
           if [ $code -ne 0 ]; then
             grep -nE "Error:|error:|rror:|What went wrong|FAILURE|Could not|not found|isn't defined|undefined" build.log | head -12 | while IFS= read -r l; do echo "::error::${l:0:300}"; done
@@ -54,3 +61,23 @@ jobs:
           cp build/app/outputs/flutter-apk/app-release.apk WorldLink.apk
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest WorldLink.apk --title "WorldLink app (latest build)" --notes "Newest Android build, made $(date -u +%Y-%m-%d' '%H:%M) UTC from commit ${GITHUB_SHA::7}."
+
+      - name: Play Store bundle (AAB), signed with the upload key
+        if: github.ref == 'refs/heads/main'
+        env:
+          KS_B64: ${{ secrets.UPLOAD_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.UPLOAD_KEYSTORE_PASS }}
+        run: |
+          if [ -z "$KS_B64" ]; then echo "No upload key secret yet - skipping the Play bundle."; exit 0; fi
+          flutter build appbundle --release --build-name=1.0.${{ github.run_number }} --build-number=${{ github.run_number }} --obfuscate --split-debug-info=build/symbols2
+          echo "$KS_B64" | base64 -d > /tmp/up.jks
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore /tmp/up.jks -storepass "$KS_PASS" -keypass "$KS_PASS" build/app/outputs/bundle/release/app-release.aab worldlink-upload
+          cp build/app/outputs/bundle/release/app-release.aab WorldLink-play.aab
+          rm -f /tmp/up.jks
+      - name: Keep the Play bundle
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: worldlink-play-aab
+          path: WorldLink-play.aab
+          if-no-files-found: ignore
