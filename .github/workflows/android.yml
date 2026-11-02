@@ -76,7 +76,7 @@ jobs:
           printf '%s\n' "$KS_B64" | grep -o 'MIIK[A-Za-z0-9+/=]*' | head -1 | tr -d '\n' > /tmp/up.b64
           echo "Key secret length: $(wc -c < /tmp/up.b64) (should be 3560)"
           base64 -d /tmp/up.b64 > /tmp/up.jks || { echo "::error::UPLOAD_KEYSTORE_B64 was pasted incompletely. Length is $(wc -c < /tmp/up.b64), it should be 3560."; exit 1; }
-          KS_PASS=$(printf %s "$KS_PASS" | tr -d ' \r\n\t"')
+          KS_PASS=$(printf '%s\n' "$KS_PASS" | tr -s ' \r\n\t' '\n\n\n\n' | grep -E '^[A-Za-z0-9]{24}$' | head -1)
           echo "Password length: ${#KS_PASS} (should be 24)"
           keytool -list -keystore /tmp/up.jks -storepass "$KS_PASS" 2>&1 | head -5 || true
           jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore /tmp/up.jks -storepass "$KS_PASS" -keypass "$KS_PASS" build/app/outputs/bundle/release/app-release.aab worldlink-upload
